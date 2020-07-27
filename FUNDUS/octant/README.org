@@ -1,0 +1,9 @@
+* OCTANT
+
+** SOURCE
+https://github.com/vmware-tanzu/octant/  
+** INSTALLATION
+Download with browser https://github.com/vmware-tanzu/octant/releases
+tar -xzvf ~/Downloads/octant_0.X.Y_Linux-64bit.tar.gz
+octant_0.X.Y_Linux-64bit/README.md
+octant_0.X.Y_Linux-64bit/octant 
