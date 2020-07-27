@@ -1,12 +1,19 @@
 #!/usr/bin/env zsh 
 
-##k3d create --volume /home/frank/k3s/k3d/MOUNTS/manifests:/var/lib/rancher/k3s/server/manifests/:ro &&
+if [[ $# -eq 0 ]];then
+	NAME_ARG=""
+else
+	NAME_ARG="--name=$1"
+fi
+
 k3d create \
-	-x --tls-san="84.133.249.75" \
+	-x --tls-san="${KUBE_HOST_EXTERNAL_IP}" \
 	-x --tls-san="thesym.site" \
+        -x --no-deploy="traefik" \
 	--publish 80:80 \
 	--publish 433:433 \
-##docker cp ../traefik/traefik.yaml k3d-k3s-default-server:/var/lib/rancher/k3s/server/manifests/traefik.yaml
+        ${NAME_ARG} 
 
-	# -p 80:80@loadbalancer \
-	# -p 443:443@loadbalancer
+
+# 	# -p 80:80@loadbalancer \
+# 	# -p 443:443@loadbalancer
