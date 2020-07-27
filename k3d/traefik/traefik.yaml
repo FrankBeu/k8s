@@ -12,3 +12,5 @@ spec:
     kubernetes.ingressEndpoint.useDefaultPublishedService: "true"
     dashboard.enabled: "true"
     dashboard.domain: "traefik.thesym.site"
+    basicAuth:
+      secret: basicauthsecret
