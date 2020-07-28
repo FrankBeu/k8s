@@ -45,21 +45,42 @@ spec:
   sessionAffinity: None
   type: ClusterIP
 ---
-apiVersion: extensions/v1beta1
-kind: Ingress
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
 metadata:
   name: nginx
   namespace: dev-nginx
-  annotations:
-    ingress.kubernetes.io/ssl-redirect: "false"
-    kubernetes.io/ingress.class: traefik
 spec:
-  rules:
-  - host: thesym.site 
-    http:
-  #- http:
-      paths:
-      - path: /
-        backend:
-          serviceName: nginx
-          servicePort: 80
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`thesym.site`)
+      kind: Rule
+      services:
+        - name: nginx
+          port: 80
+      middlewares:
+        - name: basicauth
+          namespace: traefik
+# ---
+# apiVersion: extensions/v1beta1
+# kind: Ingress
+# metadata:
+#   name: nginx
+#   namespace: dev-nginx
+#   annotations:
+#     ingress.kubernetes.io/ssl-redirect: "false"
+#     kubernetes.io/ingress.class: traefik
+#     ingress.kubernetes.io/auth-type: "basic"
+#     ingress.kubernetes.io/auth-secret: "test"
+#     ingress.kubernetes.io/auth-remove-header: "true"
+# spec:
+#   rules:
+#   - host: thesym.site 
+#     http:
+#   #- http:
+#       paths:
+#       - path: /
+#         backend:
+#           serviceName: nginx
+#           servicePort: 80
