@@ -1,0 +1,105 @@
+###
+##
+# * whoami
+##
+###
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-whoami
+  labels:
+    name: test-whoami
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: whoami
+  namespace: test-whoami
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: whoami
+  template:
+    metadata:
+      labels:
+        app: whoami
+    spec:
+      containers:
+        - name: whoami
+          image: containous/whoami:v1.5.0
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: whoami
+  namespace: test-whoami
+  labels:
+    app: whoami
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      name: whoami
+  selector:
+    app: whoami
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: whoami
+  namespace: test-whoami
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`whoami.thesym.site`)
+      services:
+        - name: whoami
+          port: 80
+      middlewares:
+        - name: basicauth
+          namespace: traefik
+#---
+#apiVersion: networking.k8s.io/v1beta1
+#kind: Ingress
+#metadata:
+#  name: whoami
+#  namespace: test-whoami
+#  annotations:
+#    kubernetes.io/ingress.class: traefik
+#    traefik.ingress.kubernetes.io/router.entrypoints: web
+#spec:
+#  rules:
+#    - host: whoami.thesym.site
+#      http:
+#        paths:
+#          - backend:
+#               serviceName: whoami
+#               servicePort: 80
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: whoami-tls
+  namespace: test-whoami
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`whoami.thesym.site`)
+      services:
+        - name: whoami
+          port: 80
+      middlewares:
+        - name: basicauth
+          namespace: traefik
+  tls:
+    certResolver: le
+    domains:
+      - main: "whoami.thesym.site"
+        # sans:
+          # - "*.thesym.site"

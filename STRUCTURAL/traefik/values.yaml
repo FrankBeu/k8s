@@ -1,0 +1,34 @@
+additionalArguments:
+  - --certificatesresolvers.le.acme.email=fbeutelschiess@gmail.com
+  - --certificatesresolvers.le.acme.storage=/data/acme/acme.json
+
+    ###WORKING
+    #- --certificatesresolvers.le.acme.httpchallenge=true
+    #- --certificatesresolvers.le.acme.httpchallenge.entrypoint=web
+
+  - --certificatesresolvers.le.acme.tlschallenge=true
+
+    #- --certificatesresolvers.le.acme.dnschallenge=true
+    #- --certificatesresolvers.le.acme.dnschallenge.provider=manual
+    #- --certificatesresolvers.le.acme.dnschallenge.delaybeforecheck=120
+
+
+    ### staging - comment the next line for production usage
+    #- --certificatesresolvers.le.acme.caserver="https://acme-staging.api.letsencrypt.org/directory"
+  - --certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+
+  - --entrypoints.web.http.redirections.entryPoint.to=:443
+  - --entrypoints.web.http.redirections.entryPoint.scheme=https
+
+
+    #- --certificatesresolvers.le.acme.keytype="RSA4096"
+    #- --certificatesresolvers.le.acme.keytype="EC384"
+    #- --certificatesresolvers.le.acme.acmelogging="true"
+    
+  - --log.level=DEBUG
+
+    #- --log.filePath=/data/logs/traefik.log
+    #- --log.format=json
+persistence:
+  enabled: true
+  path: /data/acme
