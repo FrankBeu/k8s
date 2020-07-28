@@ -20,6 +20,9 @@ metadata:
   name: basicauthsecret
   namespace: traefik
 
+# data:
+  # users: |2
+  # ZnJhbms6JGFwcjEkOERhc1NGTGQkck5QblhVNEpKZXlrVS9mRzIvbzNnLgoK
 data:
   users: |2
-    ZnJhbms6JGFwcjEkOERhc1NGTGQkck5QblhVNEpKZXlrVS9mRzIvbzNnLgoK
+    ZnJhbms6JGFwcjEkRFN5RnFRNDckWE5TRDlLWG9EYnVIbWZvUmtwV1FDLwoK
