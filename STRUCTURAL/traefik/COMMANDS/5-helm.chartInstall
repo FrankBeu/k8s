@@ -4,10 +4,6 @@
 # * APPLICATION
 ##
 ###
-kubectl create namespace traefik
 helm install \
 	--namespace traefik \
 	traefik ../CHART/traefik
-#kubectl apply -f ../metallb/metallb-config.yaml
-
-	#--create-namespace \

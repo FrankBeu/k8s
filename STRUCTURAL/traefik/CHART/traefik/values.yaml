@@ -79,9 +79,39 @@ globalArguments:
 # Additional arguments to be passed at Traefik's binary
 # All available options available on https://docs.traefik.io/reference/static-configuration/cli/
 ## Use curly braces to pass values: `helm install --set="additionalArguments={--providers.kubernetesingress.ingressclass=traefik-internal,--log.level=DEBUG}"`
-additionalArguments: []
+#additionalArguments: []
 #  - "--providers.kubernetesingress.ingressclass=traefik-internal"
 #  - "--log.level=DEBUG"
+additionalArguments:
+ #- "--log.level=DEBUG"
+ #- "--log.level=WARN"
+  - "--log.level=ERROR"
+
+  - "--entrypoints.web.http.redirections.entryPoint.to=:443"
+  - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+
+
+  - "--certificatesresolvers.le.acme.email=fbeutelschiess@gmail.com"
+    #- "--certificatesresolvers.le.acme.storage=/data/acme/acme.json"
+  - "--certificatesresolvers.le.acme.storage=/data/acme.json"
+  - "--certificatesresolvers.le.acme.tlschallenge=true"
+   ### staging - comment the next line for production usage
+  - "--certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+
+  ### FUNDUS
+  ### WORKING
+  #- "--certificatesresolvers.le.acme.httpchallenge=true"
+  #- "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
+
+  ### NOT WORKING with domain.com / nonInteractive traefikDeploy"
+  #- "--certificatesresolvers.le.acme.dnschallenge=true"
+  #- "--certificatesresolvers.le.acme.dnschallenge.provider=manual"
+  #- "--certificatesresolvers.le.acme.dnschallenge.delaybeforecheck=120"
+
+  #- "--certificatesresolvers.le.acme.keytype=RSA4096"
+  #- "--certificatesresolvers.le.acme.keytype=EC384"
+  #- "--certificatesresolvers.le.acme.acmelogging=true"
+
 
 # Environment variables to be passed to Traefik's binary
 env: []
@@ -184,15 +214,60 @@ autoscaling:
 # additionalArguments:
 # - "--certificatesresolvers.le.acme.storage=/data/acme.json"
 # It will persist TLS certificates.
+#########################################################################
+###
+##
+# *** ORIG
+##
+###
+# persistence:
+#   enabled: false
+# #  existingClaim: ""
+#   accessMode: ReadWriteOnce
+#   size: 128Mi
+#   # storageClass: ""
+#   path: /data
+#   annotations: {}
+#   # subPath: "" # only mount a subpath of the Volume into the pod
+
+#########################################################################
+###
+##
+# *** WITHOUT PV
+##    WORKING
+###
 persistence:
-  enabled: false
-#  existingClaim: ""
+  enabled: true
+  path: /data
   accessMode: ReadWriteOnce
   size: 128Mi
-  # storageClass: ""
-  path: /data
   annotations: {}
-  # subPath: "" # only mount a subpath of the Volume into the pod
+# persistence:
+#   enabled: false
+# #  existingClaim: ""
+#   accessMode: ReadWriteOnce
+#   size: 128Mi
+#   # storageClass: ""
+#   path: /data
+#   annotations: {}
+#   # subPath: "" # only mount a subpath of the Volume into the pod
+
+#########################################################################
+###
+##
+# *** WITH PV
+##    NOT WORKING - PERMISSION DENIED
+###
+# persistence:
+#   enabled: true
+#   existingClaim: "traefik-pv-claim"
+#   accessMode: ReadWriteOnce
+#   size: 128Mi
+#   path: /data
+#   annotations: {
+#     "pv.beta.kubernetes.io/gid": "65532"
+#   }
+#########################################################################
 
 # If hostNetwork is true, runs traefik in the host network namespace
 # To prevent unschedulabel pods due to port collisions, if hostNetwork=true
