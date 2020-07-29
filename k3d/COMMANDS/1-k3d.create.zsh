@@ -7,14 +7,11 @@ else
 fi
 
 k3d create \
+	--api-port 64433 \
+	--publish 80:80 \
+	--publish 443:443 \
 	-x --tls-san="${KUBE_HOST_EXTERNAL_IP}" \
 	-x --tls-san="thesym.site" \
 	-x --no-deploy="traefik" \
-	--publish 80:80 \
-	--publish 443:443 \
 	--volume /home/frank/k3s/PERSISTENCE:/PERSISTENCE \
         ${NAME_ARG} 
-
-
-# 	# -p 80:80@loadbalancer \
-# 	# -p 443:443@loadbalancer
