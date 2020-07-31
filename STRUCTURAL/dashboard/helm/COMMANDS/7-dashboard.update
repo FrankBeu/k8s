@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+###
+##
+# * UPGRADE
+##
+###
+helm upgrade \
+	--namespace kubernetes-dashboard \
+	kubernetes-dashboard ../CHART/kubernetes-dashboard \

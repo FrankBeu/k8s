@@ -1,0 +1,8 @@
+#!/usr/bin/env zsh
+###
+##
+# * REPOSITORY
+##
+###
+helm repo add dashboard https://kubernetes.github.io/dashboard
+helm repo update

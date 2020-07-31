@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+###
+##
+# * UPGRADE
+##
+###
+  export POD_NAME=$(kubectl get pods -n kubernetes-dashboard -l "app.kubernetes.io/name=kubernetes-dashboard,app.kubernetes.io/instance=kubernetes-dashboard" -o jsonpath="{.items[0].metadata.name}")
+  kubectl -n kubernetes-dashboard port-forward $POD_NAME 33333:8443
+
