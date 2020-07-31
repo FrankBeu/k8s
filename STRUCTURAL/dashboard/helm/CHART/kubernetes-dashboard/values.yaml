@@ -198,7 +198,7 @@ ingressRoute:
 
   tls: {}
   tls:
-    certResolver: le
+    certResolver: LetsEncrypt
     mainDomain: *domainName
    #sans: *wildcardSubdomainName
 

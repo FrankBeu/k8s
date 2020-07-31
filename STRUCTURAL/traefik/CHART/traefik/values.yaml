@@ -91,26 +91,30 @@ additionalArguments:
   - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
 
 
-  - "--certificatesresolvers.le.acme.email=fbeutelschiess@gmail.com"
-    #- "--certificatesresolvers.le.acme.storage=/data/acme/acme.json"
-  - "--certificatesresolvers.le.acme.storage=/data/acme.json"
-  - "--certificatesresolvers.le.acme.tlschallenge=true"
-   ### staging - comment the next line for production usage
-  - "--certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+  - "--certificatesresolvers.LetsEncryptStaging.acme.email=fbeutelschiess@gmail.com"
+  - "--certificatesresolvers.LetsEncryptStaging.acme.storage=/data/acme.json"
+  - "--certificatesresolvers.LetsEncryptStaging.acme.tlschallenge=true"
+  - "--certificatesresolvers.LetsEncryptStaging.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
 
+
+  - "--certificatesresolvers.LetsEncrypt.acme.email=fbeutelschiess@gmail.com"
+  - "--certificatesresolvers.LetsEncrypt.acme.storage=/data/acme.json"
+  - "--certificatesresolvers.LetsEncrypt.acme.tlschallenge=true"
+  - "--certificatesresolvers.LetsEncrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory"
+    
   ### FUNDUS
   ### WORKING
-  #- "--certificatesresolvers.le.acme.httpchallenge=true"
-  #- "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
+  #- "--certificatesresolvers.LetsEncrypt.acme.httpchallenge=true"
+  #- "--certificatesresolvers.LetsEncrypt.acme.httpchallenge.entrypoint=web"
 
   ### NOT WORKING with domain.com / nonInteractive traefikDeploy"
-  #- "--certificatesresolvers.le.acme.dnschallenge=true"
-  #- "--certificatesresolvers.le.acme.dnschallenge.provider=manual"
-  #- "--certificatesresolvers.le.acme.dnschallenge.delaybeforecheck=120"
+  #- "--certificatesresolvers.LetsEncrypt.acme.dnschallenge=true"
+  #- "--certificatesresolvers.LetsEncrypt.acme.dnschallenge.provider=manual"
+  #- "--certificatesresolvers.LetsEncrypt.acme.dnschallenge.delaybeforecheck=120"
 
-  #- "--certificatesresolvers.le.acme.keytype=RSA4096"
-  #- "--certificatesresolvers.le.acme.keytype=EC384"
-  #- "--certificatesresolvers.le.acme.acmelogging=true"
+  #- "--certificatesresolvers.LetsEncrypt.acme.keytype=RSA4096"
+  #- "--certificatesresolvers.LetsEncrypt.acme.keytype=EC384"
+  #- "--certificatesresolvers.LetsEncrypt.acme.acmelogging=true"
 
 
 # Environment variables to be passed to Traefik's binary

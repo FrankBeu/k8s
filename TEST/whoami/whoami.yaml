@@ -98,7 +98,7 @@ spec:
         - name: basicauth
           namespace: traefik
   tls:
-    certResolver: le
+    certResolver: LetsEncryptStaging
     domains:
       - main: "whoami.thesym.site"
         # sans:

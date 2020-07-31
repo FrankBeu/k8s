@@ -34,6 +34,6 @@ spec:
       middlewares:
         - name: basicauth
   tls:
-    certResolver: le
+    certResolver: LetsEncrypt
     domains:
       - main: "traefik.thesym.site"
