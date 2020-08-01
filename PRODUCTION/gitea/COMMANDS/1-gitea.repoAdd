@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+###
+##
+# * REPOSITORY
+#   
+##
+###
+helm repo add k8s-land https://charts.k8s.land
+helm repo update
