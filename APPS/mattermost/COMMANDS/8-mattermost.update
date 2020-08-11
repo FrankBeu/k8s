@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+###
+##
+# * UPGRADE
+##
+###
+helm upgrade \
+	--namespace mattermost \
+	mattermost ../CHART/mattermost-team-edition \

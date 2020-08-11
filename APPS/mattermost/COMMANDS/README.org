@@ -1,0 +1,17 @@
+* SOURCES
+https://github.com/mattermost/mattermost-helm
+** TODOS
+*** TODO Passwords
+**** mysql
+*** TODO Persistence
+*** TODO Keys
+    Every `helm upgrade` will generate a new set of keys unless it is set manually like this:
+    #+begin_src yaml
+    configJSON:
+      EmailSettings:
+        InviteSalt: vcvS4ih7AEUwdrFCCvyFOCWxk32wK2YY
+      FileSettings:
+        PublicLinkSalt: BY17tl6SaIBR7Rmr3f3Gtp3nWogQQlwT
+      SqlSettings:
+        AtRestEncryptKey: N7XqTN7pWj2orQQn8G6Znobf8EdmkJQf
+    #+end_src
