@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+###
+##
+# * UPGRADE
+##
+###
+helm upgrade \
+	--namespace grafana \
+	grafana ../CHART/grafana \

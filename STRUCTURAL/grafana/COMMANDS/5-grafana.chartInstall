@@ -1,0 +1,11 @@
+#!/usr/bin/env zsh
+###
+##
+# * APPLICATION
+##
+###
+helm install \
+	--namespace grafana \
+        grafana \
+	../CHART/grafana
+
