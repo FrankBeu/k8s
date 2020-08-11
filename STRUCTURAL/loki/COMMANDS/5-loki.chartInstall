@@ -1,0 +1,11 @@
+#!/usr/bin/env zsh
+###
+##
+# * APPLICATION
+##
+###
+helm install \
+	--namespace loki \
+        loki \
+	../CHART/loki-stack
+
