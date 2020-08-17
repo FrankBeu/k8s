@@ -1,0 +1,11 @@
+#!/usr/bin/env zsh
+###
+##
+# * PATCH
+##
+###
+kubectl --namespace harbor patch ingress harbor-harbor-ingress --patch "$(cat ../ingressPatch.yaml)"
+kubectl --namespace harbor patch ingress harbor-harbor-ingress-notary --patch "$(cat ../ingressPatch.yaml)"
+### get ingress
+# kg ingress -o yaml >! ingressBAK.yaml
+# kg ingress -o yaml > ingressBAK.yaml
