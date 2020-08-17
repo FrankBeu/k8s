@@ -80,26 +80,45 @@ spec:
 #               serviceName: whoami
 #               servicePort: 80
 ---
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
+# apiVersion: traefik.containo.us/v1alpha1
+# kind: IngressRoute
+# metadata:
+#   name: whoami-tls
+#   namespace: test-whoami
+# spec:
+#   entryPoints:
+#     - websecure
+#   routes:
+#     - kind: Rule
+#       match: Host(`whoami.thesym.site`)
+#       services:
+#         - name: whoami
+#           port: 80
+#       middlewares:
+#         - name: basicauth
+#           namespace: traefik
+#   tls:
+#     certResolver: LetsEncryptStaging
+#     domains:
+#       - main: "whoami.thesym.site"
+#         # sans:
+#           # - "*.thesym.site"
+# ---
+apiVersion: extensions/v1beta1
+kind: Ingress
 metadata:
-  name: whoami-tls
+  name: whoami-2
   namespace: test-whoami
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.middlewares: traefik-basicauth@kubernetescrd
+    traefik.ingress.kubernetes.io/router.tls.certresolver: LetsEncryptStaging
+    traefik.ingress.kubernetes.io/router.tls.domains.0.main: ingress.thesym.site
 spec:
-  entryPoints:
-    - websecure
-  routes:
-    - kind: Rule
-      match: Host(`whoami.thesym.site`)
-      services:
-        - name: whoami
-          port: 80
-      middlewares:
-        - name: basicauth
-          namespace: traefik
-  tls:
-    certResolver: LetsEncryptStaging
-    domains:
-      - main: "whoami.thesym.site"
-        # sans:
-          # - "*.thesym.site"
+  rules:
+  - host: ingress.thesym.site
+    http:
+      paths:
+      - backend:
+          serviceName: whoami
+          servicePort: 80
