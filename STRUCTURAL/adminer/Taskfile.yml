@@ -6,6 +6,8 @@
 version: '3'
 
 vars:
+  domainName:        adminer.thesym.site
+
   repoUrl:           https://cetic.github.io/helm-charts
   repoName:          cetic
   chartName:         adminer
@@ -14,7 +16,6 @@ vars:
   pvRelativePath:    adminer
   pvStorageSize:     128Mi
   # pvStorageSize:     1Gi
-  domainName:        adminer.thesym.site
   certResolver:      LetsEncryptStaging
   # certResolver:      LetsEncrypt
   traefikMiddleware: traefik-basicauth@kubernetescrd
