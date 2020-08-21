@@ -1,0 +1,195 @@
+###
+##
+# * TASKFILE
+##  https://taskfile.dev
+###
+version: '3'
+
+vars:
+  repoUrl:           https://cetic.github.io/helm-charts
+  repoName:          cetic
+  chartName:         adminer
+  message:           Tasks for {{.chartName}}-helm
+  labelTier:         database
+  pvRelativePath:    adminer
+  pvStorageSize:     128Mi
+  # pvStorageSize:     1Gi
+  domainName:        adminer.thesym.site
+  certResolver:      LetsEncryptStaging
+  # certResolver:      LetsEncrypt
+  traefikMiddleware: traefik-basicauth@kubernetescrd
+
+
+tasks:
+
+  default:
+    desc: display info
+    cmds:
+      - |
+        echo -e \
+        "\n{{.message}}\n"
+      - |
+        task -l
+    silent: true
+
+###
+##
+# ** HELM
+##
+###
+  1-repoAdd:
+    desc: add the repository
+    cmds:
+      - |
+        helm repo add \
+        {{.repoName}} \
+        {{.repoUrl}}
+      - |
+        helm repo update
+    silent: true
+
+  2-chartGet:
+    desc: download the chart
+    cmds:
+      - |
+        helm pull \
+        {{.repoName}}/{{.chartName}} \
+        -d CHART \
+        --untar
+    silent: true
+
+  3-namespaceCreate:
+    desc: create the namespace
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1 
+        kind: Namespace 
+        metadata: 
+          name: {{.chartName}}
+          labels: 
+            name: {{.chartName}}
+            tier: {{.labelTier}}
+        EOF
+    silent: true
+
+  4-persistenceCreate:
+    desc: "TODO: create a persistent volume"
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: PersistentVolume
+        metadata:
+          name: {{.chartName}}-pv
+          labels:
+            type: local
+        spec:
+          storageClassName: manual
+          capacity:
+            storage: {{.pvStorageSize}}
+          accessModes:
+            - ReadWriteOnce
+          hostPath:
+            path: "/PERSISTENCE/{{.pvRelativePath}}"
+        ---
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          name: {{.chartName}}-pv-claim
+          namespace: {{.chartName}}
+        spec:
+          storageClassName: manual
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: {{.pvStorageSize}}
+        EOF
+    silent: true
+
+  5-templateDebug:
+    desc: debug template
+    cmds:
+      - |
+        helm template \
+        --namespace {{.chartName}} \
+        {{.chartName}} CHART/{{.chartName}} \
+        --debug \
+        -s templates/ingress.yaml
+    silent: true
+
+  6-chartDebug:
+    desc: debug chart
+    cmds:
+      - |
+        helm install \
+        --namespace {{.chartName}} \
+        --dry-run \
+        --debug \
+        {{.chartName}} CHART/{{.chartName}}
+    silent: true
+
+  7-chartInstall:
+    desc: install chart
+    cmds:
+      - |
+        helm install \
+        --namespace {{.chartName}} \
+        {{.chartName}} CHART/{{.chartName}} \
+        --set ingress.enabled=True \
+        --set ingress.annotations."kubernetes\.io\/ingress\.class"=traefik \
+        --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.middlewares"={{.traefikMiddleware}} \
+        --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.tls\.certresolver"={{.certResolver}} \
+        --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.tls\.domains\.0\.main"={{.domainName}} \
+        --set ingress.hosts.0={{.domainName}}
+    silent: true
+
+  8-chartUpdate:
+    desc: update chart
+    cmds:
+      #- |
+      #  helm upgrade \
+      #  --namespace {{.chartName}} \
+      #  {{.chartName}} CHART/{{.chartName}}
+      - |
+        helm upgrade \
+        --namespace {{.chartName}} \
+        {{.chartName}} CHART/{{.chartName}} \
+        --set ingress.enabled=True \
+        --set ingress.annotations."kubernetes\.io\/ingress\.class"=traefik \
+        --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.middlewares"={{.traefikMiddleware}} \
+        --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.tls\.certresolver"={{.certResolver}} \
+        --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.tls\.domains\.0\.main"={{.domainName}} \
+        --set ingress.hosts.0={{.domainName}}
+    silent: true
+
+  9-chartRemove:
+    desc: (chartUninstall + namespaceDelete + persistVolumeDelete)
+    cmds:
+      - task: chartUninstall
+      - task: namespaceDelete
+      - task: persistVolumeDelete
+    silent: true
+
+
+  chartUninstall:
+    desc: uninstall the {{.chartName}}-chart
+    cmds:
+      - |
+        helm uninstall {{.chartName}}
+    silent: true
+  
+  namespaceDelete:
+    desc: delete the namespace {{.chartName}}
+    cmds:
+      - |
+        kubectl delete namespace {{.chartName}}
+    silent: true
+
+  persistentVolumeDelete:
+    desc: delete the persistent volume {{.chartName}}-pv
+    cmds:
+      - |
+        kubectl delete pv {{.chartName}}-pv
+    silent: true
