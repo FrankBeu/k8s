@@ -1,0 +1,401 @@
+###
+##
+# * TASKFILE
+##  https://taskfile.dev
+###
+version: '3'
+
+vars:
+
+  name:                     NAME
+
+  nameSpace:                "{{.name}}"
+
+  domainName:               "{{.name}}.thesym.site"
+
+  chartRepoUrl:             https://URL
+  chartRepoName:            CHART_REPO_NAME
+  chartName:                CHART_NAME
+  
+  labelTier:                LABEL_TIER
+
+  
+  # hostCertStaging:          ""                                                 ### letsencrypt
+  hostCertStaging:          true                                               ### letsencryptStaging
+  hostAcmeEmail:            "fbeutelschiess@gmail.com"
+
+  mappingPort:              80
+
+  portforwardingPortSource: ""
+  portforwardingPortTarget: ""
+
+  # pvCreate:                 true
+  # pvCreate:                 ""
+  # pvRelativePath:           ambassador
+  # pvStorageSize:            128Mi
+  # pvStorageSize:            1Gi
+
+  # traefikCertResolver:      LetsEncryptStaging
+  # traefikCertResolver:      LetsEncrypt
+  # traefikMiddleware:        traefik-basicauth@kubernetescrd
+
+
+  templateDebugTarget:       "templates/ingress.yaml"
+
+  message:                   Tasks for {{.name}}{{if .chartName}}-helm{{end}}
+
+
+tasks:
+
+  debugTaskfile:
+    desc: show all variables in Taskfile
+    cmds:
+      - |
+        echo -e \
+        "\n name:                     {{.name}}                     \n" \
+        "\n nameSpace:                {{.nameSpace}}                \n" \
+        "\n domainName:               {{.domainName}}               \n" \
+        "\n chartRepoUrl:             {{.chartRepoUrl}}             \n" \
+        "\n chartRepoName:            {{.chartRepoName}}            \n" \
+        "\n chartName:                {{.chartName}}                \n" \
+        "\n labelTier:                {{.labelTier}}                \n" \
+        "\n message:                  {{.message}}                  \n" \
+        "\n hostCertStaging:          {{.hostCertStaging}}          \n" \
+        "\n mappingPort:              {{.mappingPort}}              \n" \
+        "\n portforwardingPortSource: {{.portforwardingPortSource}} \n" \
+        "\n portforwardingPortTarget: {{.portforwardingPortTarget}} \n" \
+    silent: true
+
+
+  default:
+    desc: display info
+    cmds:
+      - |
+        echo -e \
+        "\n{{.message}}\n"
+      - |
+        task -l
+    silent: true
+
+
+###
+###
+##
+# ** SEQUENCE
+##
+###
+  # 1:
+  #   desc: ()
+  #   cmds:
+  #     - task:
+  #   silent: true
+
+  # 2:
+  #   desc: ()
+  #   cmds:
+  #     - task:
+  #   silent: true
+
+  # 3:
+  #   desc: ()
+  #   cmds:
+  #     - task:
+  #   silent: true
+
+  # 5:
+  #   desc: ()
+  #   cmds:
+  #     - task:
+  #   silent: true
+
+  # 6:
+  #   desc: ()
+  #   cmds:
+  #     - task:
+  #   silent: true
+
+  # 7:
+  #   desc: ()
+  #   cmds:
+  #     - task:
+  #   silent: true
+
+  # 8:
+  #   desc: ()
+  #   cmds:
+  #     - task:
+  #   silent: true
+
+  # 9:
+  #   desc: ()
+  #   cmds:
+  #     - task:
+  #   silent: true
+
+  # 10:
+  #   desc: ()
+  #   cmds:
+  #     - task:
+  #   silent: true
+
+  # 11:
+  #   desc: ()
+  #   cmds:
+  #     - task:
+  #   silent: true
+
+  # 12:
+  #   desc: ()
+  #   cmds:
+  #     - task:
+  #   silent: true
+
+
+###
+##
+# ** ALPHABETICAL
+##
+###
+  chartDebug:
+    desc: debug chart
+    cmds:
+      - |
+        helm install \
+        --namespace {{.nameSpace}} \
+        --dry-run \
+        --debug \
+        {{.chartName}} CHART/{{.chartName}}
+    silent: true
+
+
+  chartGet:
+    desc: download the chart
+    cmds:
+      - |
+        helm pull \
+        {{.repoName}}/{{.chartName}} \
+        -d CHART \
+        --untar
+    silent: true
+
+
+  chartInstall:
+    desc: install chart
+    cmds:
+      - |
+        helm install \
+        --namespace {{.nameSpace}} \
+        {{.chartName}} CHART/{{.chartName}} \
+      ### traefik-START
+      # - |
+      #   helm install \
+      #   --namespace {{.nameSpace}} \
+      #   {{.chartName}} CHART/{{.chartName}} \
+      #   --set ingress.enabled=True \
+      #   --set ingress.annotations."kubernetes\.io\/ingress\.class"=traefik \
+      #   --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.middlewares"={{.traefikMiddleware}} \
+      #   --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.tls\.certresolver"={{.traefikCertResolver}} \
+      #   --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.tls\.domains\.0\.main"={{.domainName}} \
+      #   --set ingress.hosts.0={{.domainName}}
+      ### traefik-END
+    silent: true
+
+
+  chartUpdate:
+    desc: update chart
+    cmds:
+      - |
+        helm upgrade \
+        --namespace {{.nameSpace}} \
+        {{.chartName}} CHART/{{.chartName}} \
+      ### traefik-START
+      # - |
+      #   helm upgrade \
+      #   --namespace {{.nameSpace}} \
+      #   {{.chartName}} CHART/{{.chartName}} \
+      #   --set ingress.enabled=True \
+      #   --set ingress.annotations."kubernetes\.io\/ingress\.class"=traefik \
+      #   --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.middlewares"={{.traefikMiddleware}} \
+      #   --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.tls\.certresolver"={{.traefikCertResolver}} \
+      #   --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.tls\.domains\.0\.main"={{.domainName}} \
+      #   --set ingress.hosts.0={{.domainName}}
+      ### traefik-END
+    silent: true
+
+
+  chartRemove:
+    desc: (chartUninstall + namespaceDelete + persistVolumeDelete)
+    cmds:
+      - task: chartUninstall
+      - task: namespaceDelete
+      - task: persistVolumeDelete
+    silent: true
+
+
+  chartUninstall:
+    desc: uninstall the {{.chartName}}-chart
+    cmds:
+      - |
+        helm uninstall {{.chartName}}
+    silent: true
+  
+
+  cliInstall:
+    desc: get the binary
+    cmds:
+      - |
+        sudo curl -fL https://metriton.datawire.io/downloads/linux/edgectl -o ~/PATH/dist/edgectl \
+        && sudo chmod a+x ~/PATH/dist/edgectl
+    silent: true
+
+
+  filterCreate:
+    desc: create Filter and FilterPolicies
+    cmds:
+      - |
+        kubectl apply -f filter/
+    silent: true
+
+
+  hostCreate:
+    desc: create the host for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: Host
+        metadata:
+          name: {{.name}}-host
+          # namespace: {{.nameSpace}}
+          namespace: ambassador-hosts
+        spec:
+          hostname: {{.domainName}}
+          acmeProvider:
+            authority: >-
+              {{if .hostCertStaging}} https://acme-staging-v02.api.letsencrypt.org/directory
+              {{else}} https://acme-v02.api.letsencrypt.org/directory
+              {{end}}
+            email: {{.hostAcmeEmail}}
+        EOF
+    silent: true
+
+
+  mappingCreate:
+    desc: create the mapping for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: Mapping
+        metadata:
+          name: {{.name}}-mapping
+          namespace: {{.nameSpace}}
+        spec:
+          prefix: /
+          #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
+          service: {{.name}}.{{.nameSpace}}:{{.mappingPort}}
+          host: {{.domainName}}
+        EOF
+    silent: true
+
+
+  namespaceCreate:
+    desc: create the namespace {{.nameSpace}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1 
+        kind: Namespace 
+        metadata: 
+          name: {{.nameSpace}}
+          labels: 
+            name: {{.nameSpace}}
+            tier: {{.labelTier}}
+        EOF
+    silent: true
+
+
+  namespaceDelete:
+    desc: delete the namespace {{.nameSpace}}
+    cmds:
+      - |
+        kubectl delete namespace {{.nameSpace}}
+    silent: true
+
+
+  portforward:
+    desc: portforwarding for {{.name}}
+    cmds:
+      - |
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -o name) {{.portforwardingPortTarget}}:{{.portforwardingPortSource}}
+    silent: true
+
+
+  persistenceCreate:
+    desc: "TODO: create a persistent volume"
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: PersistentVolume
+        metadata:
+          name: {{.name}}-pv
+          labels:
+            type: local
+        spec:
+          storageClassName: manual
+          capacity:
+            storage: {{.pvStorageSize}}
+          accessModes:
+            - ReadWriteOnce
+          hostPath:
+            path: "/PERSISTENCE/{{.pvRelativePath}}"
+        ---
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          name: {{.name}}-pv-claim
+          namespace: {{.nameSpace}}
+        spec:
+          storageClassName: manual
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: {{.pvStorageSize}}
+        EOF
+    silent: true
+
+
+  persistentVolumeDelete:
+    desc: delete the persistent volume {{.name}}-pv
+    cmds:
+      - |
+        kubectl delete pv {{.name}}-pv
+    silent: true
+
+
+  repoAdd:
+    desc: add the repository
+    cmds:
+      - |
+        helm repo add \
+        {{.chartRepoName}} \
+        {{.chartRepoUrl}}
+      - |
+        helm repo update
+    silent: true
+
+
+  templateDebug:
+    desc: debug template
+    cmds:
+      - |
+        helm template \
+        --namespace {{.nameSpace}} \
+        {{.chartName}} CHART/{{.chartName}} \
+        --debug \
+        -s {{.templateDebugTarget}}
+    silent: true
+
+
