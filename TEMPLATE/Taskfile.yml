@@ -25,6 +25,7 @@ vars:
   hostAcmeEmail:            "fbeutelschiess@gmail.com"
 
   mappingPort:              80
+  mappingServiceName:       "{{.chartName}}"
 
   portforwardingPortSource: ""
   portforwardingPortTarget: ""
@@ -42,28 +43,19 @@ vars:
 
   templateDebugTarget:       "templates/ingress.yaml"
 
+  # servicePort:               5432
+
   message:                   Tasks for {{.name}}{{if .chartName}}-helm{{end}}
 
 
 tasks:
 
-  debugTaskfile:
+  taskDebug:
     desc: show all variables in Taskfile
     cmds:
       - |
         echo -e \
-        "\n name:                     {{.name}}                     \n" \
-        "\n nameSpace:                {{.nameSpace}}                \n" \
-        "\n domainName:               {{.domainName}}               \n" \
-        "\n chartRepoUrl:             {{.chartRepoUrl}}             \n" \
-        "\n chartRepoName:            {{.chartRepoName}}            \n" \
-        "\n chartName:                {{.chartName}}                \n" \
-        "\n labelTier:                {{.labelTier}}                \n" \
-        "\n message:                  {{.message}}                  \n" \
-        "\n hostCertStaging:          {{.hostCertStaging}}          \n" \
-        "\n mappingPort:              {{.mappingPort}}              \n" \
-        "\n portforwardingPortSource: {{.portforwardingPortSource}} \n" \
-        "\n portforwardingPortTarget: {{.portforwardingPortTarget}} \n" \
+        "\n{{range $key, $value := .}} {{$key }}:  \e[92m{{$value}}\e[0m\n {{end}}\n"
     silent: true
 
 
@@ -79,75 +71,91 @@ tasks:
 
 
 ###
-###
 ##
 # ** SEQUENCE
 ##
 ###
   # 1:
-  #   desc: ()
+  #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
+
 
   # 2:
-  #   desc: ()
+  #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
+
 
   # 3:
-  #   desc: ()
+  #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
+
+
+  # 4:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
 
   # 5:
-  #   desc: ()
+  #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
+
 
   # 6:
-  #   desc: ()
+  #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
+
 
   # 7:
-  #   desc: ()
+  #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
+
 
   # 8:
-  #   desc: ()
+  #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
+
 
   # 9:
-  #   desc: ()
+  #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
+
 
   # 10:
-  #   desc: ()
+  #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
+
 
   # 11:
-  #   desc: ()
+  #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
 
+
   # 12:
-  #   desc: ()
+  #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
 
 
@@ -173,7 +181,7 @@ tasks:
     cmds:
       - |
         helm pull \
-        {{.repoName}}/{{.chartName}} \
+        {{.chartRepoName}}/{{.chartName}} \
         -d CHART \
         --untar
     silent: true
@@ -224,11 +232,11 @@ tasks:
 
 
   chartRemove:
-    desc: (chartUninstall + namespaceDelete + persistVolumeDelete)
+    desc: (chartUninstall + namespaceDelete + persistentVolumeDelete)
     cmds:
       - task: chartUninstall
       - task: namespaceDelete
-      - task: persistVolumeDelete
+      - task: persistentVolumeDelete
     silent: true
 
 
@@ -240,42 +248,59 @@ tasks:
     silent: true
   
 
-  cliInstall:
-    desc: get the binary
-    cmds:
-      - |
-        sudo curl -fL https://metriton.datawire.io/downloads/linux/edgectl -o ~/PATH/dist/edgectl \
-        && sudo chmod a+x ~/PATH/dist/edgectl
-    silent: true
-
-
-  filterCreate:
-    desc: create Filter and FilterPolicies
-    cmds:
-      - |
-        kubectl apply -f filter/
-    silent: true
-
-
-  hostCreate:
-    desc: create the host for {{.name}}
+  configMapCreate:
+    desc: create the configMap for {{.name}}
     cmds:
       - |
         cat <<EOF | kubectl apply -f -
-        apiVersion: getambassador.io/v2
-        kind: Host
+        apiVersion: v1
+        kind: ConfigMap
         metadata:
-          name: {{.name}}-host
-          # namespace: {{.nameSpace}}
-          namespace: ambassador-hosts
+          name: {{.name}}-config
+          namespace: {{.nameSpace}}
+          labels:
+            app: {{.name}}
+        data: {{ .configMapData | nindent 2}}
+        EOF
+    silent: true
+
+
+  deploymentCreate:
+    desc: create the deployment for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: {{.name}}
+          namespace: {{.nameSpace}}
         spec:
-          hostname: {{.domainName}}
-          acmeProvider:
-            authority: >-
-              {{if .hostCertStaging}} https://acme-staging-v02.api.letsencrypt.org/directory
-              {{else}} https://acme-v02.api.letsencrypt.org/directory
-              {{end}}
-            email: {{.hostAcmeEmail}}
+          replicas: 1
+          selector:
+            matchLabels:
+              app: {{.name}}
+          template:
+            metadata:
+              labels:
+                app: {{.name}}
+            spec:
+              containers:
+                - name: {{.name}}
+                  image: postgres:10.4
+                  imagePullPolicy: "IfNotPresent"
+                  ports:
+                    - containerPort: 5432
+                  envFrom:
+                    - configMapRef:
+                        name: {{.name}}-config
+                  volumeMounts:
+                    - mountPath: /var/lib/postgresql/data
+                      name: {{.name}}db
+              volumes:
+                - name: {{.name}}db
+                  persistentVolumeClaim:
+                    claimName: {{.name}}-pv-claim
         EOF
     silent: true
 
@@ -293,7 +318,7 @@ tasks:
         spec:
           prefix: /
           #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
-          service: {{.name}}.{{.nameSpace}}:{{.mappingPort}}
+          service: {{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPort}}
           host: {{.domainName}}
         EOF
     silent: true
@@ -387,6 +412,62 @@ tasks:
     silent: true
 
 
+  resourcesRemove:
+    desc: (namespaceDelete + persistVolumeDelete)
+    cmds:
+      - task: namespaceDelete
+      - task: persistentVolumeDelete
+    silent: true
+
+
+  serviceCreate:
+    desc: create the service for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: {{.name}}
+          namespace: {{.nameSpace}}
+          labels:
+            app: {{.name}}
+        spec:
+          type: NodePort
+          ports:
+           - port: {{.servicePort}}
+          selector:
+            app: {{.name}}
+        EOF
+    silent: true
+  hostCreate:
+    desc: create the host for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: Host
+        metadata:
+          name: {{.name}}-host
+          # namespace: {{.nameSpace}}
+          namespace: ambassador-hosts
+        spec:
+          hostname: {{.domainName}}
+          acmeProvider:
+            authority: >-
+              {{if .hostCertStaging}} https://acme-staging-v02.api.letsencrypt.org/directory
+              {{else}} https://acme-v02.api.letsencrypt.org/directory
+              {{end}}
+            email: {{.hostAcmeEmail}}
+            privateKeySecret:
+              name: {{.name}}-secret
+          requestPolicy:
+            insecure:
+              action: Redirect
+        EOF
+    silent: true
+
+
   templateDebug:
     desc: debug template
     cmds:
@@ -398,4 +479,10 @@ tasks:
         -s {{.templateDebugTarget}}
     silent: true
 
+
+###
+##
+# ** CUSTOM
+##
+###
 
