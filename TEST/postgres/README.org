@@ -1,0 +1,10 @@
+* SOURCES
+  https://severalnines.com/database-blog/using-kubernetes-deploy-postgresql
+** INFO
+*** adminer
+https://adminer.thesym.site/?pgsql=postgres.test-postgres&username=postgresadmin&db=postgresdb&ns=public
+*** cli
+**** forward
+     kubectl port-forward --namespace test-postgres service/postgres  5432:5432   
+**** connect
+     pgcli -h localhost -U postgresadmin --password -p 5432 postgresdb
