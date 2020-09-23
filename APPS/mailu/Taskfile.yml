@@ -73,10 +73,22 @@ vars:
     --set persistence.size={{.pvStorageSize}} \
     --set persistence.storageClass=manual \
     --set secretKey={{.secretKey}} \
+    --set front.resources.requests.cpu="10m" \
+    --set admin.resources.requests.cpu="10m" \
+    --set redis.resources.requests.cpu="10m" \
+    --set postfix.resources.requests.cpu="10m" \
+    --set dovecot.resources.requests.cpu="10m" \
+    --set rspamd.resources.requests.cpu="10m" \
+    --set clamav.resources.requests.cpu="10m" \
+    --set roundcube.resources.requests.cpu="10m" \
+    --set webdav.resources.requests.cpu="10m" \
+    --set mysql.resources.requests.cpu="10m" \
+    --set ingress.annotations."kubernetes\.io\/ingress\.class"=ambassador \
 
 
 tasks:
 
+  
   taskDebug:
     desc: show all variables in Taskfile
     cmds:
@@ -130,38 +142,38 @@ tasks:
 
 
   5:
+    desc: ( templateDebug )
+    cmds:
+      - task: templateDebug
+    silent: true
+
+
+  6:
     desc: ( chartInstall )
     cmds:
       - task: chartInstall
     silent: true
 
 
-  6:
+  7:
     desc: ( chartUpdate )
     cmds:
       - task: chartUpdate
     silent: true
 
 
-  # 7:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
+  8:
+    desc: ( pvcPatch )
+    cmds:
+      - task: pvcPatch
+    silent: true
 
 
-  # 8:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
-
-
-  # 9:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
+  9:
+    desc: ( certChallengeUtilsCreate )
+    cmds:
+      - task: certChallengeUtilsCreate
+    silent: true
 
 
   # 10:
@@ -492,6 +504,37 @@ tasks:
 # ** CUSTOM
 ##
 ###
+  certChallengeUtilsCreate:
+    desc: "for certificate-issuing-purposes create a redirection service"
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        ---
+        apiVersion: getambassador.io/v2
+        kind: Mapping
+        metadata:
+          name: acme-challenge-mapping
+          namespace: {{.nameSpace}}
+        spec:
+          prefix: /.well-known/acme-challenge/
+          rewrite: ""
+          service: acme-challenge-service
+        ---
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: acme-challenge-service
+          namespace: {{.nameSpace}}
+        spec:
+          ports:
+          - port: 80
+            targetPort: 8089
+          selector:
+            acme.cert-manager.io/http01-solver: "true"
+        EOF
+    silent: true
+
+
   pvcPatch:
     desc: "fix storageClassName on pvc"
     cmds:
