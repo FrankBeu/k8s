@@ -1,0 +1,10 @@
+---
+apiVersion: getambassador.io/v2
+kind: Host
+metadata:
+  name: api-host
+  namespace: ambassador-hosts
+spec:
+  hostname: api.thesym.site
+  acmeProvider:
+    email: fbeutelschiess@gmail.com

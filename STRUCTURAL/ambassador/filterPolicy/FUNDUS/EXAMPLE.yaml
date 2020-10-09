@@ -1,0 +1,27 @@
+---
+apiVersion: getambassador.io/v2
+kind: FilterPolicy
+metadata:
+  name: "filter-policy-deny.thesym.site"
+  namespace: "ambassador"
+spec:
+  rules:
+   - host: "*"
+     path: "*"
+     filters:                                                             ### optional; omit or set to `null` or `[]` to apply no filters to this request
+     - name: "basic-deny"                                                 ### required
+       namespace: "ambassador"                                            ### optional; default is the same namespace as the FilterPolicy
+       #ifRequestHeader:                                                  ### optional; default to apply this filter to all requests matching the host & path
+       #  name: "string"                                                  ### required
+       #  negate: bool                                                    ### optional; default is false
+       ### It is invalid to specify both "value" and "valueRegex".
+       #  value: "string"                                                 ### optional; default is any non-empty string
+       #  valueRegex: "regex-string"                                      ### optional; default is any non-empty string
+       #onDeny: "enum-string"                                             ### optional; default is "break"
+       #onAllow: "enum-string"                                            ### optional; default is "continue"
+       #arguments: DEPENDS                                                ### optional
+  - host: "ambassador.thesym.site"
+    path: "*"
+    filters:                                                              ### optional; omit or set to `null` or `[]` to apply no filters to this request
+    - name: "basic-deny"                                                  ### required
+      namespace: "ambassador"                                             ### optional; default is the same namespace as the FilterPolicy

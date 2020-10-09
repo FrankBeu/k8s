@@ -1,0 +1,11 @@
+---
+apiVersion: getambassador.io/v2
+kind: Host
+#namespace: ambassador
+metadata:
+  name: dogs-host
+  namespace: test-dogpic
+spec:
+  hostname: dogs.thesym.site
+  acmeProvider:
+    email: fbeutelschiess@gmail.com

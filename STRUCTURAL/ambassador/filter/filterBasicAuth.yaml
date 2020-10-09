@@ -1,0 +1,12 @@
+---
+apiVersion: getambassador.io/v2
+kind: Filter
+metadata:
+  name: "basic-auth"
+  namespace: "ambassador"
+spec:
+  External:
+    #auth_service: "basic-auth.basic-auth:80"
+    auth_service: "access.access:80"
+    path_prefix:  "/extauth"
+    #path_prefix:  "/auth"

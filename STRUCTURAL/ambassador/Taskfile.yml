@@ -1,0 +1,469 @@
+###
+##
+# * TASKFILE
+##  https://taskfile.dev
+###
+version: '3'
+
+vars:
+
+  name:                     ambassador
+  nameSpace:                "{{.name}}"
+  domainName:               "{{.name}}.thesym.site"
+
+  chartRepoUrl:             https://www.getambassador.io
+  chartRepoName:            datawire
+  chartName:                "{{.name}}"
+  
+  labelTier:                edge
+  
+  # hostCertStaging:          ""                                                 ### letsencrypt
+  hostCertStaging:          true                                               ### letsencryptStaging
+  hostAcmeEmail:            "fbeutelschiess@gmail.com"
+
+  templateDebugTarget:       "templates/ingress.yaml"
+
+  message:                   Tasks for {{.name}}{{if .chartName}}-helm{{end}}
+
+
+tasks:
+
+  taskDebug:
+    desc: show all variables in Taskfile
+    cmds:
+      - |
+        echo -e \
+        "\n{{range $key, $value := .}} {{$key }}:  \e[92m{{$value}}\e[0m\n {{end}}\n"
+    silent: true
+
+
+  default:
+    desc: display info
+    cmds:
+      - |
+        echo -e \
+        "\n{{.message}}\n"
+      - |
+        task -l
+    silent: true
+
+
+###
+##
+# ** SEQUENCE
+##
+###
+  1:
+    desc: ( repoAdd )
+    cmds:
+      - task: repoAdd
+    silent: true
+
+
+  2:
+    desc: ( chartGet )
+    cmds:
+      - task: chartGet
+    silent: true
+
+
+  3:
+    desc: ( namespaceApply )
+    cmds:
+      - task: namespaceApply
+    silent: true
+
+
+  4:
+    desc: ( namespaceHostsApply )
+    cmds:
+      - task: namespaceHostsApply
+    silent: true
+
+
+  5:
+    desc: ( edgectlInstall )
+    cmds:
+      - task: edgectlInstall
+    silent: true
+
+
+  6:
+    desc: ( filterApply )
+    cmds:
+      - task: filterApply
+    silent: true
+
+
+  7:
+    desc: ( filterPolicyApply )
+    cmds:
+      - task: filterPolicyApply
+    silent: true
+
+
+  8:
+    desc: ( hostApply )
+    cmds:
+      - task: hostApply
+    silent: true
+#                                                               #
+##                                                             ## 
+###                                                           ###
+############################## DONE #############################
+
+  9:
+    desc: ( chartInstall )
+    cmds:
+      - task: chartInstall
+    silent: true
+
+
+  # 10:
+  #   desc: ()
+  #   cmds:
+  #     - task:
+  #   silent: true
+
+
+  # 11:
+  #   desc: ()
+  #   cmds:
+  #     - task:
+  #   silent: true
+
+
+  # 12:
+  #   desc: ()
+  #   cmds:
+  #     - task:
+  #   silent: true
+
+
+###
+##
+# ** ALPHABETICAL
+##
+###
+  chartDebug:
+    desc: debug chart
+    cmds:
+      - |
+        helm install \
+        --namespace {{.nameSpace}} \
+        --dry-run \
+        --debug \
+        {{.chartName}} CHART/{{.chartName}}
+    silent: true
+
+
+  chartGet:
+    desc: download the chart
+    cmds:
+      - |
+        helm pull \
+        {{.chartRepoName}}/{{.chartName}} \
+        -d CHART \
+        --untar
+    silent: true
+
+
+  chartInstall:
+    desc: install chart
+    cmds:
+      - |
+        helm install \
+        --namespace {{.nameSpace}} \
+        {{.chartName}} CHART/{{.chartName}} \
+      ### traefik-START
+      # - |
+      #   helm install \
+      #   --namespace {{.nameSpace}} \
+      #   {{.chartName}} CHART/{{.chartName}} \
+      #   --set ingress.enabled=True \
+      #   --set ingress.annotations."kubernetes\.io\/ingress\.class"=traefik \
+      #   --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.middlewares"={{.traefikMiddleware}} \
+      #   --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.tls\.certresolver"={{.traefikCertResolver}} \
+      #   --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.tls\.domains\.0\.main"={{.domainName}} \
+      #   --set ingress.hosts.0={{.domainName}}
+      ### traefik-END
+    silent: true
+
+
+  chartUpdate:
+    desc: update chart
+    cmds:
+      - |
+        helm upgrade \
+        --namespace {{.nameSpace}} \
+        {{.chartName}} CHART/{{.chartName}} \
+      ### traefik-START
+      # - |
+      #   helm upgrade \
+      #   --namespace {{.nameSpace}} \
+      #   {{.chartName}} CHART/{{.chartName}} \
+      #   --set ingress.enabled=True \
+      #   --set ingress.annotations."kubernetes\.io\/ingress\.class"=traefik \
+      #   --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.middlewares"={{.traefikMiddleware}} \
+      #   --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.tls\.certresolver"={{.traefikCertResolver}} \
+      #   --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.tls\.domains\.0\.main"={{.domainName}} \
+      #   --set ingress.hosts.0={{.domainName}}
+      ### traefik-END
+    silent: true
+
+
+  chartRemove:
+    desc: (chartUninstall + namespaceDelete + persistVolumeDelete)
+    cmds:
+      - task: chartUninstall
+      - task: namespaceDelete
+      - task: persistVolumeDelete
+    silent: true
+
+
+  chartUninstall:
+    desc: uninstall the {{.chartName}}-chart
+    cmds:
+      - |
+        helm uninstall {{.chartName}}
+    silent: true
+  
+
+  hostApply:
+    desc: apply Hosts
+    cmds:
+      - |
+        kubectl apply -f host/
+    silent: true
+
+
+  mappingApply:
+    desc: apply the mapping for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: Mapping
+        metadata:
+          name: {{.name}}-mapping
+          namespace: {{.nameSpace}}
+        spec:
+          prefix: /
+          #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
+          service: {{.name}}.{{.nameSpace}}:{{.mappingPort}}
+          host: {{.domainName}}
+        EOF
+    silent: true
+
+
+  namespaceApply:
+    desc: apply the namespace {{.nameSpace}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1 
+        kind: Namespace 
+        metadata: 
+          name: {{.nameSpace}}
+          labels: 
+            name: {{.nameSpace}}
+            tier: {{.labelTier}}
+        EOF
+    silent: true
+
+
+  namespaceDelete:
+    desc: delete the namespace {{.nameSpace}}
+    cmds:
+      - |
+        kubectl delete namespace {{.nameSpace}}
+    silent: true
+
+
+  portforward:
+    desc: portforwarding for {{.name}}
+    cmds:
+      - |
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -o name) {{.portforwardingPortTarget}}:{{.portforwardingPortSource}}
+    silent: true
+
+
+  persistenceApply:
+    desc: "TODO: apply a persistent volume"
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: PersistentVolume
+        metadata:
+          name: {{.name}}-pv
+          labels:
+            type: local
+        spec:
+          storageClassName: manual
+          capacity:
+            storage: {{.pvStorageSize}}
+          accessModes:
+            - ReadWriteOnce
+          hostPath:
+            path: "/PERSISTENCE/{{.pvRelativePath}}"
+        ---
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          name: {{.name}}-pv-claim
+          namespace: {{.nameSpace}}
+        spec:
+          storageClassName: manual
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: {{.pvStorageSize}}
+        EOF
+    silent: true
+
+
+  persistentVolumeDelete:
+    desc: delete the persistent volume {{.name}}-pv
+    cmds:
+      - |
+        kubectl delete pv {{.name}}-pv
+    silent: true
+
+
+  repoAdd:
+    desc: add the repository
+    cmds:
+      - |
+        helm repo add \
+        {{.chartRepoName}} \
+        {{.chartRepoUrl}}
+      - |
+        helm repo update
+    silent: true
+
+
+  templateDebug:
+    desc: debug template
+    cmds:
+      - |
+        helm template \
+        --namespace {{.nameSpace}} \
+        {{.chartName}} CHART/{{.chartName}} \
+        --debug \
+        -s {{.templateDebugTarget}}
+    silent: true
+
+
+###
+##
+# ** CUSTOM
+##
+###
+  chartUpdate2Edge:
+    desc: update chart to edgeStack
+    cmds:
+      - |
+        helm upgrade \
+        --namespace {{.chartName}} \
+        {{.chartName}} CHART/{{.chartName}} \
+    silent: true
+
+
+  chartUpdate2Gateway:
+    desc: update chart to gateway
+    cmds:
+      - |
+        helm upgrade \
+        --namespace {{.chartName}} \
+        {{.chartName}} CHART/{{.chartName}} \
+        --set image.repository=docker.io/datawire/ambassador 
+        --set image.tag=1.7.0
+        --set enableAES=false
+    silent: true
+
+
+  edgectlInstall:
+    desc: get the edgectl-binary
+    cmds:
+      - |
+        sudo curl -fL https://metriton.datawire.io/downloads/linux/edgectl -o ~/PATH/dist/edgectl \
+        && sudo chmod a+x ~/PATH/dist/edgectl
+
+
+  filterApply:
+    desc: apply Filters
+    cmds:
+      - |
+        kubectl apply -f filter/
+    silent: true
+
+
+  filterPolicyApply:
+    desc: apply FilterPolicies
+    cmds:
+      - |
+        kubectl apply -f filterPolicy/
+    silent: true
+
+
+  filterPolicyDelete:
+    desc: make all host and routes available
+    cmds:
+      - |
+        kubectl delete -n {{.nameSpace}} filterpolicy.getambassador.io/basic-filter-policy
+    silent: true
+
+
+  httpsOnly:
+    desc: do not allow http for all {{.nameSpace}}-hosts
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind:  Module
+        metadata:
+          name:  ambassador
+          namespace: {{.nameSpace}}
+        spec:
+          config:
+            x_forwarded_proto_redirect: true
+            use_remote_address: false
+        EOF
+    silent: true
+     
+     
+  mappingDefaultApply:
+    desc: do not allow http for all {{.nameSpace}}-hosts
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind:  Mapping
+        metadata:
+          name:  catch-all-mapping
+          namespace: {{.nameSpace}}
+        spec:
+          prefix: /
+          service: https://thesym.site
+        EOF
+    silent: true
+
+
+  namespaceHostsApply:
+    desc: apply the namespace {{.nameSpace}}-hosts
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1 
+        kind: Namespace 
+        metadata: 
+          name: {{.nameSpace}}-hosts
+          labels: 
+            name: {{.nameSpace}}-hosts
+            tier: {{.labelTier}}
+        EOF
+    silent: true
+
+

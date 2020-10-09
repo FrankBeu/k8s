@@ -1,0 +1,13 @@
+---
+apiVersion: getambassador.io/v2
+kind: FilterPolicy
+metadata:
+  name: "ambassador"
+  namespace: "ambassador"
+spec:
+  rules:
+  - host: "ambassador.thesym.site"
+    path: "*"
+    filters:
+    - name: "basic-deny"
+      namespace: "ambassador"
