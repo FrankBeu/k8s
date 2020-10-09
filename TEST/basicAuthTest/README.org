@@ -1,0 +1,4 @@
+* basic-auth-test
+** INFO
+*** SOURCES
+    https://github.com/datawire/ambassador-auth-httpbasic

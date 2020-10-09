@@ -1,0 +1,195 @@
+###
+##
+# * TASKFILE
+##  https://taskfile.dev
+###
+version: '3'
+
+vars:
+
+  name:       basic-auth-test
+
+  nameSpace:  "{{.name}}"
+
+  domainName: "{{.name}}.thesym.site"
+
+  #filter:     "basic-allow"
+  #filter:     "basic-auth"
+  filter:     "basic-deny"
+  ### filter:     "ory"
+
+  labelTier:  test
+
+  message:    Tasks for {{.name}}{{if .chartName}}-helm{{end}}
+
+
+tasks:
+
+  taskDebug:
+    desc: show all variables in Taskfile
+    cmds:
+      - |
+        echo -e \
+        "\n{{range $key, $value := .}} {{$key }}:  \e[92m{{$value}}\e[0m\n {{end}}\n"
+    silent: true
+
+
+  default:
+    desc: display info
+    cmds:
+      - |
+        echo -e \
+        "\n{{.message}}\n"
+      - |
+        task -l
+    silent: true
+
+
+###
+##
+# ** SEQUENCE
+##
+###
+  1:
+    desc: ( namespaceCreate )
+    cmds:
+      - task: namespaceCreate
+    silent: true
+
+
+  2:
+    desc: ( hostCreate )
+    cmds:
+      - task: hostCreate
+    silent: true
+
+
+  3:
+    desc: ( filterPolicyApply )
+    cmds:
+      - task: filterPolicyApply
+    silent: true
+
+
+  4:
+    desc: ( serviceCreate )
+    cmds:
+      - task: serviceCreate
+    silent: true
+
+
+  5:
+    desc: ( namespaceDelete )
+    cmds:
+      - task: namespaceDelete
+    silent: true
+
+
+###
+##
+# ** ALPHABETICAL
+##
+###
+  filterPolicyApply:
+    desc: create the host for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: FilterPolicy
+        metadata:
+          name: {{.name}}
+          namespace: {{.nameSpace}}
+        spec:
+          rules:
+          - host: {{.domainName}}
+            path: "*"
+            filters: 
+            #- name: {{.filter}}
+            - name: {{if eq .filter "basic-allow"}}"basic-auth"{{else}}{{.filter}}{{end}}
+              namespace: "ambassador"
+              {{- if eq .filter "basic-allow"}}
+              onDeny:  "continue"
+              onAllow: "continue"
+              {{- end}}
+        EOF
+    silent: true
+
+
+  hostCreate:
+    desc: create the host for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: Host
+        metadata:
+          name: {{.name}}
+          namespace: ambassador-hosts
+        spec:
+          hostname: {{.domainName}}
+          acmeProvider:
+            authority: none
+          requestPolicy:
+            insecure:
+              action: Route
+        EOF
+    silent: true
+
+
+  namespaceCreate:
+    desc: create the namespace {{.nameSpace}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1 
+        kind: Namespace 
+        metadata: 
+          name: {{.nameSpace}}
+          labels: 
+            name: {{.nameSpace}}
+            tier: {{.labelTier}}
+        EOF
+    silent: true
+
+
+  namespaceDelete:
+    desc: delete the namespace {{.nameSpace}}
+    cmds:
+      - |
+        kubectl delete namespace {{.nameSpace}}
+    silent: true
+
+
+  serviceCreate:
+    desc: create the service for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: Service
+        metadata:
+          labels:
+            service: {{.name}}
+          name: {{.name}}
+          namespace: {{.nameSpace}}
+          annotations:
+            getambassador.io/config: |
+              ---
+              apiVersion: ambassador/v0
+              kind:  Mapping
+              name:  httpbin
+              prefix: /
+              service: httpbin.org:80
+              host: {{.domainName}}
+              # host_rewrite: httpbin.org
+        spec:
+          type: LoadBalancer
+          ports:
+            - name: {{.name}}
+              port: 80
+              targetPort: 80
+          selector:
+            service: {{.name}}
+        EOF
+    silent: true
