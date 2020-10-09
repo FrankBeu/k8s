@@ -1,0 +1,7 @@
+* basicAuth
+** INFO
+*** SOURCES
+    https://github.com/datawire/ambassador-auth-httpbasic
+**** DEPRECATED
+    https://github.com/datawire/ambassador-auth-service#run-using-kubernetes
+** TODO TODOS

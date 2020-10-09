@@ -1,0 +1,344 @@
+###
+##
+# * TASKFILE
+##  https://taskfile.dev
+###
+version: '3'
+
+vars:
+
+  name:                     access
+
+  nameSpace:                "{{.name}}"
+
+  domainName:               "{{.name}}.thesym.site"
+
+  chartRepoUrl:             https://URL
+  chartRepoName:            CHART_REPO_NAME
+  chartName:                CHART_NAME
+  
+  labelTier:                LABEL_TIER
+
+  
+  # hostCertStaging:          ""                                                 ### letsencrypt
+  hostCertStaging:          true                                               ### letsencryptStaging
+  hostAcmeEmail:            "fbeutelschiess@gmail.com"
+
+  mappingPort:              80
+  mappingServiceName:       "{{.chartName}}"
+
+  portforwardingPortSource: ""
+  portforwardingPortTarget: ""
+
+  # pvCreate:                 true
+  # pvCreate:                 ""
+  # pvRelativePath:           ambassador
+  # pvStorageSize:            128Mi
+  # pvStorageSize:            1Gi
+
+  # traefikCertResolver:      LetsEncryptStaging
+  # traefikCertResolver:      LetsEncrypt
+  # traefikMiddleware:        traefik-basicauth@kubernetescrd
+
+
+  templateDebugTarget:       "ingress"
+
+  # servicePort:               5432
+
+  message:                   Tasks for {{.name}}{{if .chartName}}-helm{{end}}
+
+  # chartVariablesSet: |- 
+  #   --set hostnames="{"{{.domainName}}"}" \
+  #   --set domain="{{.superDomainName}}" \
+  #   --set initialAccout.username=mailadmin \
+
+tasks:
+
+  taskDebug:
+    desc: show all variables in Taskfile
+    cmds:
+      - |
+        echo -e \
+        "\n{{range $key, $value := .}} {{$key }}:  \e[92m{{$value}}\e[0m\n {{end}}\n"
+    silent: true
+
+
+  default:
+    desc: display info
+    cmds:
+      - |
+        echo -e \
+        "\n{{.message}}\n"
+      - |
+        task -l
+    silent: true
+
+
+###
+##
+# ** SEQUENCE
+##
+###
+  1:
+    desc: ( namespaceCreate )
+    cmds:
+      - task: namespaceCreate
+    silent: true
+
+
+  2:
+    desc: ( appCreate )
+    cmds:
+      - task: appCreate
+    silent: true
+
+
+  3:
+    desc: ( namespaceDelete )
+    cmds:
+      - task: namespaceDelete
+    silent: true
+
+
+  # 4:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
+
+  # 5:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
+
+  # 6:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
+
+  # 7:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
+
+  # 8:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
+
+  # 9:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
+
+  # 10:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
+
+  # 11:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
+
+  # 12:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
+
+###
+##
+# ** ALPHABETICAL
+##
+###
+  configMapApply:
+    desc: apply the configMap for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: {{.name}}-config
+          namespace: {{.nameSpace}}
+          labels:
+            app: {{.name}}
+        data: {{ .configMapData | nindent 2}}
+        EOF
+    silent: true
+
+  namespaceApply:
+    desc: apply the namespace {{.nameSpace}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1 
+        kind: Namespace 
+        metadata: 
+          name: {{.nameSpace}}
+          labels: 
+            name: {{.nameSpace}}
+            tier: {{.labelTier}}
+        EOF
+    silent: true
+
+
+  namespaceDelete:
+    desc: delete the namespace {{.nameSpace}}
+    cmds:
+      - |
+        kubectl delete namespace {{.nameSpace}}
+    silent: true
+
+
+  portforward:
+    desc: portforwarding for {{.name}}
+    cmds:
+      - |
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -o name) {{.portforwardingPortTarget}}:{{.portforwardingPortSource}}
+    silent: true
+
+
+  persistenceApply:
+    desc: "TODO: apply a persistent volume"
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: PersistentVolume
+        metadata:
+          name: {{.name}}-pv
+          labels:
+            type: local
+        spec:
+          storageClassName: manual
+          capacity:
+            storage: {{.pvStorageSize}}
+          accessModes:
+            - ReadWriteOnce
+          hostPath:
+            path: "/PERSISTENCE/{{.pvRelativePath}}"
+        ---
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          name: {{.name}}-pv-claim
+          namespace: {{.nameSpace}}
+        spec:
+          storageClassName: manual
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: {{.pvStorageSize}}
+        EOF
+    silent: true
+
+
+  persistentVolumeDelete:
+    desc: delete the persistent volume {{.name}}-pv
+    cmds:
+      - |
+        kubectl delete pv {{.name}}-pv
+    silent: true
+
+
+  resourcesRemove:
+    desc: (namespaceDelete + persistVolumeDelete)
+    cmds:
+      - task: namespaceDelete
+      - task: persistentVolumeDelete
+    silent: true
+
+
+###
+##
+# ** CUSTOM
+##
+###
+
+  appApply:
+    desc: "apply the ambassador-basic-auth app"
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        ---
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: {{.name}}
+          namespace: {{.nameSpace}}
+        spec:
+          type: ClusterIP
+          ports:
+            - name: http-api
+              port: 80
+              targetPort: http-api
+          selector:
+            app: {{.name}}
+        
+        ---
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: {{.name}}
+          namespace: {{.nameSpace}}
+        type: Opaque
+        data:
+          users.yaml: "YWRtaW46CiAgaGFzaGVkX3Bhc3N3b3JkOiAiJDJiJDEyJG1XcXZVT1pRb3d2aks4WFBtT3VPdk9XUFBnVVYyZDY0TWw0OXJPRXpmQWw4TUpYWjNaUFJLIgo="
+        
+        ---
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: {{.name}}
+          namespace: {{.nameSpace}}
+        spec:
+          replicas: 1
+          strategy:
+            type: RollingUpdate
+          selector:
+            matchLabels:
+              app: {{.name}}
+              app: {{.name}}
+          template:
+            metadata:
+              labels:
+                app: {{.name}}
+            spec:
+              containers:
+                - name: {{.name}}
+                  image: quay.io/datawire/ambassador-auth-httpbasic:0.1.1
+                  ports:
+                    - name: http-api
+                      containerPort: 5000
+                  volumeMounts:
+                    - name: {{.name}}
+                      mountPath: /var/lib/ambassador/auth-httpbasic
+                      readOnly: true
+              volumes:
+                - name: {{.name}}
+                  secret:
+                    secretName: {{.name}}
+                    items:
+                      - key: users.yaml
+                        path: users.yaml
+        EOF
+    silent: true
