@@ -3,5 +3,12 @@
 *** SOURCES
     https://github.com/datawire/ambassador-auth-httpbasic
 **** DEPRECATED
-    https://github.com/datawire/ambassador-auth-service#run-using-kubernetes
+     https://github.com/datawire/ambassador-auth-service#run-using-kubernetes
 ** TODO TODOS
+*** create basicAuthService in go
+** ERLEDIGTES
+*** DONE credentialsCreate.go
+**** due to differences between the bcrypt implementation in go and python
+     credentials have to be created with the zsh script.
+**** cf. https://github.com/golang/go/issues/26301
+         https://github.com/golang/go/issues/26301#issuecomment-404097179

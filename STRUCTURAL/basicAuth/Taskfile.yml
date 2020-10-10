@@ -13,44 +13,16 @@ vars:
 
   domainName:               "{{.name}}.thesym.site"
 
-  chartRepoUrl:             https://URL
-  chartRepoName:            CHART_REPO_NAME
-  chartName:                CHART_NAME
-  
-  labelTier:                LABEL_TIER
-
-  
-  # hostCertStaging:          ""                                                 ### letsencrypt
-  hostCertStaging:          true                                               ### letsencryptStaging
-  hostAcmeEmail:            "fbeutelschiess@gmail.com"
+  labelTier:                auth
 
   mappingPort:              80
   mappingServiceName:       "{{.chartName}}"
 
-  portforwardingPortSource: ""
-  portforwardingPortTarget: ""
-
-  # pvCreate:                 true
-  # pvCreate:                 ""
-  # pvRelativePath:           ambassador
-  # pvStorageSize:            128Mi
-  # pvStorageSize:            1Gi
-
-  # traefikCertResolver:      LetsEncryptStaging
-  # traefikCertResolver:      LetsEncrypt
-  # traefikMiddleware:        traefik-basicauth@kubernetescrd
-
-
-  templateDebugTarget:       "ingress"
-
-  # servicePort:               5432
+  portforwardingPortSource: "3333"
+  portforwardingPortTarget: "5000"
 
   message:                   Tasks for {{.name}}{{if .chartName}}-helm{{end}}
 
-  # chartVariablesSet: |- 
-  #   --set hostnames="{"{{.domainName}}"}" \
-  #   --set domain="{{.superDomainName}}" \
-  #   --set initialAccout.username=mailadmin \
 
 tasks:
 
@@ -80,87 +52,52 @@ tasks:
 ##
 ###
   1:
-    desc: ( namespaceCreate )
+    desc: ( namespaceApply )
     cmds:
-      - task: namespaceCreate
+      - task: namespaceApply
     silent: true
 
 
   2:
-    desc: ( appCreate )
+    desc: ( credentialsCreate )
     cmds:
-      - task: appCreate
+      - task: credentialsCreate
     silent: true
 
 
   3:
+    desc: ( usersFileUpdate )
+    cmds:
+      - task: usersFileUpdate 
+    silent: true
+
+
+  4:
+    desc: ( secretApply )
+    cmds:
+      - task: secretApply
+    silent: true
+
+
+  5:
+    desc: ( appApply )
+    cmds:
+      - task: appApply
+    silent: true
+
+
+  6:
+    desc: ( userNewAdd )
+    cmds:
+      - task: userNewAdd
+    silent: true
+
+
+  7:
     desc: ( namespaceDelete )
     cmds:
       - task: namespaceDelete
     silent: true
-
-
-  # 4:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
-
-
-  # 5:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
-
-
-  # 6:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
-
-
-  # 7:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
-
-
-  # 8:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
-
-
-  # 9:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
-
-
-  # 10:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
-
-
-  # 11:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
-
-
-  # 12:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
 
 
 ###
@@ -212,59 +149,12 @@ tasks:
     desc: portforwarding for {{.name}}
     cmds:
       - |
-        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -o name) {{.portforwardingPortTarget}}:{{.portforwardingPortSource}}
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
     silent: true
-
-
-  persistenceApply:
-    desc: "TODO: apply a persistent volume"
-    cmds:
-      - |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: v1
-        kind: PersistentVolume
-        metadata:
-          name: {{.name}}-pv
-          labels:
-            type: local
-        spec:
-          storageClassName: manual
-          capacity:
-            storage: {{.pvStorageSize}}
-          accessModes:
-            - ReadWriteOnce
-          hostPath:
-            path: "/PERSISTENCE/{{.pvRelativePath}}"
-        ---
-        apiVersion: v1
-        kind: PersistentVolumeClaim
-        metadata:
-          name: {{.name}}-pv-claim
-          namespace: {{.nameSpace}}
-        spec:
-          storageClassName: manual
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: {{.pvStorageSize}}
-        EOF
-    silent: true
-
-
-  persistentVolumeDelete:
-    desc: delete the persistent volume {{.name}}-pv
-    cmds:
-      - |
-        kubectl delete pv {{.name}}-pv
-    silent: true
-
-
   resourcesRemove:
-    desc: (namespaceDelete + persistVolumeDelete)
+    desc: ( namespaceDelete )
     cmds:
       - task: namespaceDelete
-      - task: persistentVolumeDelete
     silent: true
 
 
@@ -273,7 +163,6 @@ tasks:
 # ** CUSTOM
 ##
 ###
-
   appApply:
     desc: "apply the ambassador-basic-auth app"
     cmds:
@@ -293,17 +182,6 @@ tasks:
               targetPort: http-api
           selector:
             app: {{.name}}
-        
-        ---
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: {{.name}}
-          namespace: {{.nameSpace}}
-        type: Opaque
-        data:
-          users.yaml: "YWRtaW46CiAgaGFzaGVkX3Bhc3N3b3JkOiAiJDJiJDEyJG1XcXZVT1pRb3d2aks4WFBtT3VPdk9XUFBnVVYyZDY0TWw0OXJPRXpmQWw4TUpYWjNaUFJLIgo="
-        
         ---
         apiVersion: apps/v1
         kind: Deployment
@@ -341,4 +219,87 @@ tasks:
                       - key: users.yaml
                         path: users.yaml
         EOF
+    silent: true
+
+
+  credentialsCreate:
+    desc: "create credentials interactively"
+    cmds:
+      - |
+        cd user
+        ./credentialsCreate
+    silent: true
+
+
+  credentialsCreateBuild:
+    desc: "build credentialsCreate for linux"
+    cmds:
+      - |
+        cd user/credentialsCreateDir
+        go build -o dist/credentialsCreate credentialsCreate.go
+    silent: true
+
+
+  credentialsCreateBuild4Windows:
+    desc: "build credentialsCreate for windows"
+    cmds:
+      - |
+        cd user/credentialsCreateDir
+        GOOS=windows \
+        go build -o dist/credentialsCreate.exe credentialsCreate.go
+    silent: true
+
+
+  credentialsCreateBuild4Windows386:
+    desc: "build credentialsCreate for windows386"
+    cmds:
+      - |
+        cd user/credentialsCreateDir
+        GOOS=windows GOARCH=386 \
+        go build -o dist/credentialsCreate386.exe credentialsCreate.go
+    silent: true
+
+
+  secretApply:
+    desc: "apply secret from users.yaml"
+    cmds:
+      - |
+        kubectl create secret \
+        generic {{.name}} \
+        --namespace={{.nameSpace}} \
+        --from-file=user/users.yaml \
+        --dry-run=client \
+        -o yaml | \
+        kubectl apply -f -
+    silent: true
+
+
+  secretDebug:
+    desc: "get decoded secret content"
+    cmds:
+      - |
+        kubectl get secret \
+        --namespace {{.nameSpace}} \
+        {{.name}} \
+        -o jsonpath='{.data.users\.yaml}' | \
+        base64 --decode
+    silent: true
+
+
+  userNewAdd:
+    desc: "usersFileUpdate + secretApply"
+    cmds:
+      - task: usersFileUpdate
+      - task: secretApply
+    silent: true
+
+
+  usersFileUpdate:
+    desc: "commit users.yaml and create new file by concatenating all user-files"
+    cmds:
+      - |
+        # mv user/users.yaml user/BAK/users$(date +%s).yaml
+        git index add user/users.yaml
+        git commit user/users.yaml -m"basicAuth: BAK users.yaml"
+        cat user/credentials/*.yaml > user/users.yaml
     silent: true
