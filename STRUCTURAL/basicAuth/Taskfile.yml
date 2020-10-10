@@ -298,8 +298,7 @@ tasks:
     desc: "commit users.yaml and create new file by concatenating all user-files"
     cmds:
       - |
-        # mv user/users.yaml user/BAK/users$(date +%s).yaml
-        git index add user/users.yaml
-        git commit user/users.yaml -m"basicAuth: BAK users.yaml"
+        git add user/users.yaml user/credentials
+        git commit user/users.yaml user/credentials -m"basicAuth: BAK users.yaml"
         cat user/credentials/*.yaml > user/users.yaml
     silent: true

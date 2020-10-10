@@ -1,4 +1,2 @@
 frank:
   hashed_password: "$2a$10$AHNQMTlVvMl01g/V8xdUb.CCWqEhKYbmTrYEWP0xrjLfSN2ikSw.K"
-windows:
-  hashed_password: "$2a$10$ZwEemEr9J/KljwCxZMn4v.SEse3juMBoHvYJS69jV7ThVWwSOlC2G"
