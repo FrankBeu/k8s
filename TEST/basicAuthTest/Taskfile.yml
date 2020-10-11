@@ -14,8 +14,8 @@ vars:
   domainName: "{{.name}}.thesym.site"
 
   #filter:     "basic-allow"
-  #filter:     "basic-auth"
-  filter:     "basic-deny"
+  filter:     "basic-auth"
+  #filter:     "basic-deny"
   ### filter:     "ory"
 
   labelTier:  test
