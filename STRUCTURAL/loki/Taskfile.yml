@@ -1,0 +1,424 @@
+###
+##
+# * TASKFILE
+##  https://taskfile.dev
+###
+version: '3'
+
+vars:
+
+  name:                     loki
+
+  nameSpace:                "{{.name}}"
+
+  domainName:               "{{.name}}.thesym.site"
+
+
+  chartRepoUrl:             https://grafana.github.io/loki/charts
+  chartRepoName:            "{{.name}}"
+  chartName:                loki-stack
+  
+  filter:     "basic-allow"                                                    ### NOT WORKING; NOT implemented yet
+  # filter:     "basic-auth"
+  # filter:     "basic-deny"                                                     ###     WORKING; NOT implemented properly -> redirect to thesym.site
+  ### filter:     "ory"                                                          ### NOT WORKING; NOT implemented yet
+
+  labelTier:                logging
+
+  hostCertStaging:          ""                                                 ### letsencrypt
+  # hostCertStaging:          true                                               ### letsencryptStaging
+  hostAcmeEmail:            "fbeutelschiess@gmail.com"
+
+  mappingPort:              80                                                 ### uses servicePort
+  mappingServiceName:       "{{.chartName}}-grafana"
+
+  portforwardingPortSource: "8080"
+  portforwardingPortTarget: "3000"                                             ### uses podPort
+
+  # pvCreate:                 true
+  # pvCreate:                 ""
+  # pvRelativePath:           ambassador
+  # pvStorageSize:            128Mi
+  # pvStorageSize:            1Gi
+
+  # traefikCertResolver:      LetsEncryptStaging
+  # traefikCertResolver:      LetsEncrypt
+  # traefikMiddleware:        traefik-basicauth@kubernetescrd
+
+
+  templateDebugTarget:       "templates/ingress.yaml"
+
+  message:                   Tasks for {{.name}}{{if .chartName}}-helm{{end}}
+
+
+tasks:
+
+  taskDebug:
+    desc: show all variables in Taskfile
+    cmds:
+      - |
+        echo -e \
+        "\n{{range $key, $value := .}} {{$key }}:  \e[92m{{$value}}\e[0m\n {{end}}\n"
+    silent: true
+
+
+  default:
+    desc: display info
+    cmds:
+      - |
+        echo -e \
+        "\n{{.message}}\n"
+      - |
+        task -l
+    silent: true
+
+
+###
+##
+# ** SEQUENCE
+##
+###
+  1:
+    desc: ( repoAdd )
+    cmds:
+      - task: repoAdd
+    silent: true
+
+
+  2:
+    desc: ( chartGet )
+    cmds:
+      - task: chartGet
+    silent: true
+
+
+  3:
+    desc: ( namespaceApply )
+    cmds:
+      - task: namespaceApply
+    silent: true
+
+
+  4:
+    desc: ( chartInstall )
+    cmds:
+      - task: chartInstall 
+    silent: true
+
+
+  5:
+    desc: ( chartUpdate )
+    cmds:
+      - task: chartUpdate
+    silent: true
+
+
+  6:
+    desc: ( hostApply )
+    cmds:
+      - task: hostApply
+    silent: true
+
+
+  7:
+    desc: ( mappingApply )
+    cmds:
+      - task: mappingApply 
+    silent: true
+
+
+  8:
+    desc: ( filterPolicyApply )
+    cmds:
+      - task: filterPolicyApply
+    silent: true
+
+
+  9:
+    desc: ( restart )
+    cmds:
+      - task: restart
+    silent: true
+
+
+###
+##
+# ** ALPHABETICAL
+##
+###
+  chartDebug:
+    desc: debug chart
+    cmds:
+      - |
+        helm install \
+        --namespace {{.nameSpace}} \
+        --dry-run \
+        --debug \
+        {{.chartName}} CHART/{{.chartName}}
+    silent: true
+
+
+  chartGet:
+    desc: download the chart
+    cmds:
+      - |
+        helm pull \
+        {{.chartRepoName}}/{{.chartName}} \
+        -d CHART \
+        --untar
+    silent: true
+
+
+  chartInstall:
+    desc: install chart
+    cmds:
+      - |
+        helm install \
+        --namespace {{.nameSpace}} \
+        {{.chartName}} CHART/{{.chartName}} \
+        --set grafana.enabled=true \
+        --set grafana.ini.domain.0={{.domainName}}
+    silent: true
+
+
+  chartUpdate:
+    desc: update chart
+    cmds:
+      - |
+        helm upgrade \
+        --namespace {{.nameSpace}} \
+        {{.chartName}} CHART/{{.chartName}} \
+        --set grafana.enabled=true \
+        --set grafana.ini.domain.0={{.domainName}}
+        # grafana.ini:
+        #   domain:
+        #     - loki.thesym.site
+    silent: true
+
+
+  chartRemove:
+    desc: (chartUninstall + namespaceDelete + persistVolumeDelete)
+    cmds:
+      - task: chartUninstall
+      - task: namespaceDelete
+      - task: persistVolumeDelete
+    silent: true
+
+
+  chartUninstall:
+    desc: uninstall the {{.chartName}}-chart
+    cmds:
+      - |
+        helm uninstall {{.chartName}}
+    silent: true
+  
+
+  cliInstall:
+    desc: get the binary
+    cmds:
+      - |
+        sudo curl -fL https://metriton.datawire.io/downloads/linux/edgectl -o ~/PATH/dist/edgectl \
+        && sudo chmod a+x ~/PATH/dist/edgectl
+    silent: true
+
+
+  filterPolicyApply:
+    desc: create the host for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: FilterPolicy
+        metadata:
+          name: {{.name}}
+          namespace: {{.nameSpace}}
+        spec:
+          rules:
+          - host: {{.domainName}}
+            path: "*"
+            filters: 
+            #- name: {{.filter}}
+            - name: {{if eq .filter "basic-allow"}}"basic-auth"{{else}}{{.filter}}{{end}}
+              namespace: "ambassador"
+              {{- if eq .filter "basic-allow"}}
+              onDeny:  "continue"
+              onAllow: "continue"
+              {{- end}}
+        EOF
+    silent: true
+
+
+  hostApply:
+    desc: apply the host for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: Host
+        metadata:
+          name: {{.name}}-host
+          # namespace: {{.nameSpace}}
+          namespace: ambassador-hosts
+        spec:
+          hostname: {{.domainName}}
+          acmeProvider:
+            {{- if .hostCertStaging }}
+            authority: https://acme-staging-v02.api.letsencrypt.org/directory
+            {{- else}}
+            authority: https://acme-v02.api.letsencrypt.org/directory
+            {{- end}}
+            email: {{.hostAcmeEmail}}
+            privateKeySecret:
+              name: {{.name}}-secret
+          requestPolicy:
+            insecure:
+              action: Redirect
+        EOF
+    silent: true
+
+
+  mappingApply:
+    desc: apply the mapping for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: Mapping
+        metadata:
+          name: {{.name}}-mapping
+          namespace: {{.nameSpace}}
+        spec:
+          prefix: /
+          #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
+          service: {{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPort}}
+          host: {{.domainName}}
+        EOF
+    silent: true
+
+
+  namespaceApply:
+    desc: apply the namespace {{.nameSpace}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1 
+        kind: Namespace 
+        metadata: 
+          name: {{.nameSpace}}
+          labels: 
+            name: {{.nameSpace}}
+            tier: {{.labelTier}}
+        EOF
+    silent: true
+
+
+  namespaceDelete:
+    desc: delete the namespace {{.nameSpace}}
+    cmds:
+      - |
+        kubectl delete namespace {{.nameSpace}}
+    silent: true
+
+
+  portforward:
+    desc: portforwarding for {{.name}}
+    cmds:
+      - |
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod --selector=app=grafana,release=loki-stack -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
+    silent: true
+
+
+    # persistenceApply:
+    #   desc: "TODO: apply a persistent volume"
+    #   cmds:
+    #     - |
+    #       cat <<EOF | kubectl apply -f -
+    #       apiVersion: v1
+    #       kind: PersistentVolume
+    #       metadata:
+    #         name: {{.name}}-pv
+    #         labels:
+    #           type: local
+    #       spec:
+    #         storageClassName: manual
+    #         capacity:
+    #           storage: {{.pvStorageSize}}
+    #         accessModes:
+    #           - ReadWriteOnce
+    #         hostPath:
+    #           path: "/PERSISTENCE/{{.pvRelativePath}}"
+    #       ---
+    #       apiVersion: v1
+    #       kind: PersistentVolumeClaim
+    #       metadata:
+    #         name: {{.name}}-pv-claim
+    #         namespace: {{.nameSpace}}
+    #       spec:
+    #         storageClassName: manual
+    #         accessModes:
+    #           - ReadWriteOnce
+    #         resources:
+    #           requests:
+    #             storage: {{.pvStorageSize}}
+    #       EOF
+    #   silent: true
+
+
+    # persistentVolumeDelete:
+    #   desc: delete the persistent volume {{.name}}-pv
+    #   cmds:
+    #     - |
+    #       kubectl delete pv {{.name}}-pv
+    #   silent: true
+
+    
+  repoAdd:
+    desc: add the repository
+    cmds:
+      - |
+        helm repo add \
+        {{.chartRepoName}} \
+        {{.chartRepoUrl}}
+      - |
+        helm repo update
+    silent: true
+
+
+  templateDebug:
+    desc: debug template
+    cmds:
+      - |
+        helm template \
+        --namespace {{.nameSpace}} \
+        {{.chartName}} CHART/{{.chartName}} \
+        --debug \
+        -s {{.templateDebugTarget}}
+    silent: true
+
+###
+##
+# ** CUSTOM
+##
+###
+  adminPwGet:
+    desc: get the admin-password for {{.domainName}}
+    cmds:
+      - |
+        kubectl get secret \
+        --namespace {{.nameSpace}} \
+        {{.chartName}}-grafana \
+        -o jsonpath="{.data.admin-password}" |\
+        base64 --decode
+    silent: true
+
+
+  restart:
+    desc: restart {{.name}}
+    cmds:
+      - |
+        kubectl \
+        --namespace {{.nameSpace}} \
+        rollout \
+        restart deployment \
+        {{.chartName}}-grafana
+    silent: true

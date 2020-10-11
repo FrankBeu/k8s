@@ -1,0 +1,7 @@
+#!/usr/bin/env zsh
+###
+##
+# * NAMESPACE
+##
+###
+kubectl apply -f ../namespace.yaml
