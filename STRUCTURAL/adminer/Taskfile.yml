@@ -6,22 +6,50 @@
 version: '3'
 
 vars:
-  domainName:        adminer.thesym.site
 
-  repoUrl:           https://cetic.github.io/helm-charts
-  repoName:          cetic
-  chartName:         adminer
-  message:           Tasks for {{.chartName}}-helm
-  labelTier:         database
-  pvRelativePath:    adminer
-  pvStorageSize:     128Mi
-  # pvStorageSize:     1Gi
-  certResolver:      LetsEncryptStaging
-  # certResolver:      LetsEncrypt
-  traefikMiddleware: traefik-basicauth@kubernetescrd
+  name:                     adminer
+
+  nameSpace:                "{{.name}}"
+
+  domainName:               "{{.name}}.thesym.site"
+
+  chartRepoUrl:             https://cetic.github.io/helm-charts
+  chartRepoName:            cetic
+  chartName:                adminer
+
+  # filter:     "basic-allow"                                                    ### NOT WORKING; NOT implemented yet
+  filter:     "basic-auth"
+  # filter:     "basic-deny"                                                     ###     WORKING; NOT implemented properly -> redirect to thesym.site
+  ### filter:     "ory"                                                          ### NOT WORKING; NOT implemented yet
+  
+  labelTier:                database
+  
+  hostCertStaging:          ""                                                 ### letsencrypt
+  # hostCertStaging:          true                                               ### letsencryptStaging
+  hostAcmeEmail:            "fbeutelschiess@gmail.com"
+
+  mappingPort:              80
+  mappingServiceName:       "{{.chartName}}"
+
+  portforwardingPortSource: ""
+  portforwardingPortTarget: ""
+
+
+  templateDebugTarget:       "ingress"
+
+  message:                   Tasks for {{.name}}{{if .chartName}}-helm{{end}}
 
 
 tasks:
+
+  taskDebug:
+    desc: show all variables in Taskfile
+    cmds:
+      - |
+        echo -e \
+        "\n{{range $key, $value := .}} {{$key }}:  \e[92m{{$value}}\e[0m\n {{end}}\n"
+    silent: true
+
 
   default:
     desc: display info
@@ -33,144 +61,125 @@ tasks:
         task -l
     silent: true
 
+
 ###
 ##
-# ** HELM
+# ** SEQUENCE
 ##
 ###
-  1-repoAdd:
-    desc: add the repository
+  1:
+    desc: ( repoAdd )
     cmds:
-      - |
-        helm repo add \
-        {{.repoName}} \
-        {{.repoUrl}}
-      - |
-        helm repo update
+      - task: repoAdd 
     silent: true
 
-  2-chartGet:
-    desc: download the chart
+
+  2:
+    desc: ( chartGet )
     cmds:
-      - |
-        helm pull \
-        {{.repoName}}/{{.chartName}} \
-        -d CHART \
-        --untar
+      - task: chartGet
     silent: true
 
-  3-namespaceCreate:
-    desc: create the namespace
+
+  3:
+    desc: ( namespaceApply )
     cmds:
-      - |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: v1 
-        kind: Namespace 
-        metadata: 
-          name: {{.chartName}}
-          labels: 
-            name: {{.chartName}}
-            tier: {{.labelTier}}
-        EOF
+      - task: namespaceApply 
     silent: true
 
-  4-persistenceCreate:
-    desc: "TODO: create a persistent volume"
+
+  4:
+    desc: ( hostApply )
     cmds:
-      - |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: v1
-        kind: PersistentVolume
-        metadata:
-          name: {{.chartName}}-pv
-          labels:
-            type: local
-        spec:
-          storageClassName: manual
-          capacity:
-            storage: {{.pvStorageSize}}
-          accessModes:
-            - ReadWriteOnce
-          hostPath:
-            path: "/PERSISTENCE/{{.pvRelativePath}}"
-        ---
-        apiVersion: v1
-        kind: PersistentVolumeClaim
-        metadata:
-          name: {{.chartName}}-pv-claim
-          namespace: {{.chartName}}
-        spec:
-          storageClassName: manual
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: {{.pvStorageSize}}
-        EOF
+      - task: hostApply
     silent: true
 
-  5-templateDebug:
-    desc: debug template
+
+  5:
+    desc: ( mappingApply )
     cmds:
-      - |
-        helm template \
-        --namespace {{.chartName}} \
-        {{.chartName}} CHART/{{.chartName}} \
-        --debug \
-        -s templates/ingress.yaml
+      - task: mappingApply
     silent: true
 
-  6-chartDebug:
+
+  6:
+    desc: ( filterPolicyApply )
+    cmds:
+      - task: filterPolicyApply
+    silent: true
+
+
+  7:
+    desc: ( chartInstall )
+    cmds:
+      - task: chartInstall 
+    silent: true
+
+
+  8:
+    desc: ( namespaceDelete )
+    cmds:
+      - task: namespaceDelete
+    silent: true
+
+
+###
+##
+# ** ALPHABETICAL
+##
+###
+  chartDebug:
     desc: debug chart
     cmds:
       - |
         helm install \
-        --namespace {{.chartName}} \
+        --namespace {{.nameSpace}} \
         --dry-run \
         --debug \
-        {{.chartName}} CHART/{{.chartName}}
+        {{.chartName}} CHART/{{.chartName}} \
+        {{.chartVariablesSet}}
     silent: true
 
-  7-chartInstall:
+
+  chartGet:
+    desc: download the chart
+    cmds:
+      - |
+        helm pull \
+        {{.chartRepoName}}/{{.chartName}} \
+        -d CHART \
+        --untar
+    silent: true
+
+
+  chartInstall:
     desc: install chart
     cmds:
       - |
         helm install \
-        --namespace {{.chartName}} \
+        --namespace {{.nameSpace}} \
         {{.chartName}} CHART/{{.chartName}} \
-        --set ingress.enabled=True \
-        --set ingress.annotations."kubernetes\.io\/ingress\.class"=traefik \
-        --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.middlewares"={{.traefikMiddleware}} \
-        --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.tls\.certresolver"={{.certResolver}} \
-        --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.tls\.domains\.0\.main"={{.domainName}} \
-        --set ingress.hosts.0={{.domainName}}
+        {{.chartVariablesSet}}
     silent: true
 
-  8-chartUpdate:
+
+  chartUpdate:
     desc: update chart
     cmds:
-      #- |
-      #  helm upgrade \
-      #  --namespace {{.chartName}} \
-      #  {{.chartName}} CHART/{{.chartName}}
       - |
         helm upgrade \
-        --namespace {{.chartName}} \
+        --namespace {{.nameSpace}} \
         {{.chartName}} CHART/{{.chartName}} \
-        --set ingress.enabled=True \
-        --set ingress.annotations."kubernetes\.io\/ingress\.class"=traefik \
-        --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.middlewares"={{.traefikMiddleware}} \
-        --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.tls\.certresolver"={{.certResolver}} \
-        --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.tls\.domains\.0\.main"={{.domainName}} \
-        --set ingress.hosts.0={{.domainName}}
+        {{.chartVariablesSet}}
     silent: true
 
-  9-chartRemove:
-    desc: (chartUninstall + namespaceDelete + persistVolumeDelete)
+
+  chartRemove:
+    desc: (chartUninstall + namespaceDelete + persistentVolumeDelete)
     cmds:
       - task: chartUninstall
       - task: namespaceDelete
-      - task: persistVolumeDelete
+      - task: persistentVolumeDelete
     silent: true
 
 
@@ -178,19 +187,147 @@ tasks:
     desc: uninstall the {{.chartName}}-chart
     cmds:
       - |
-        helm uninstall {{.chartName}}
+        helm --namespace {{.nameSpace}} uninstall {{.chartName}}
     silent: true
   
-  namespaceDelete:
-    desc: delete the namespace {{.chartName}}
+
+  filterPolicyApply:
+    desc: create the host for {{.name}}
     cmds:
       - |
-        kubectl delete namespace {{.chartName}}
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: FilterPolicy
+        metadata:
+          name: {{.name}}
+          namespace: {{.nameSpace}}
+        spec:
+          rules:
+          - host: {{.domainName}}
+            path: "*"
+            filters: 
+            #- name: {{.filter}}
+            - name: {{if eq .filter "basic-allow"}}"basic-auth"{{else}}{{.filter}}{{end}}
+              namespace: "ambassador"
+              {{- if eq .filter "basic-allow"}}
+              onDeny:  "continue"
+              onAllow: "continue"
+              {{- end}}
+        EOF
     silent: true
 
-  persistentVolumeDelete:
-    desc: delete the persistent volume {{.chartName}}-pv
+
+  hostApply:
+    desc: apply the host for {{.name}}
     cmds:
       - |
-        kubectl delete pv {{.chartName}}-pv
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: Host
+        metadata:
+          name: {{.name}}
+          namespace: ambassador-hosts
+        spec:
+          hostname: {{.domainName}}
+          acmeProvider:
+            {{- if .hostCertStaging }}
+            authority: https://acme-staging-v02.api.letsencrypt.org/directory
+            {{- else}}
+            authority: https://acme-v02.api.letsencrypt.org/directory
+            {{- end}}
+            email: {{.hostAcmeEmail}}
+            privateKeySecret:
+              name: {{.name}}-secret
+          requestPolicy:
+            insecure:
+              action: Redirect
+        EOF
     silent: true
+
+            #authority: >-
+            #  {{if .hostCertStaging}} https://acme-staging-v02.api.letsencrypt.org/directory
+            #  {{else}} https://acme-v02.api.letsencrypt.org/directory
+            #  {{end}}
+
+  mappingApply:
+    desc: apply the mapping for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: Mapping
+        metadata:
+          name: {{.name}}-mapping
+          namespace: {{.nameSpace}}
+        spec:
+          prefix: /
+          #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
+          service: {{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPort}}
+          host: {{.domainName}}
+        EOF
+    silent: true
+
+
+  namespaceApply:
+    desc: apply the namespace {{.nameSpace}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1 
+        kind: Namespace 
+        metadata: 
+          name: {{.nameSpace}}
+          labels: 
+            name: {{.nameSpace}}
+            tier: {{.labelTier}}
+        EOF
+    silent: true
+
+
+  namespaceDelete:
+    desc: delete the namespace {{.nameSpace}}
+    cmds:
+      - |
+        kubectl delete namespace {{.nameSpace}}
+    silent: true
+
+
+  portforward:
+    desc: portforwarding for {{.name}}
+    cmds:
+      - |
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
+    silent: true
+
+
+  repoAdd:
+    desc: add the repository
+    cmds:
+      - |
+        helm repo add \
+        {{.chartRepoName}} \
+        {{.chartRepoUrl}}
+      - |
+        helm repo update
+    silent: true
+
+
+  templateDebug:
+    desc: "debug template; USAGE: `task templateDebug templateDebugTarget=admin`; DEFAULT: ingress"
+    cmds:
+      - |
+        helm template \
+        --namespace {{.nameSpace}} \
+        ./CHART/{{.chartName}} \
+        --debug \
+        -s templates/{{.templateDebugTarget}}.yaml \
+        {{.chartVariablesSet}}
+    silent: true
+
+
+###
+##
+# ** CUSTOM
+##
+###
+
