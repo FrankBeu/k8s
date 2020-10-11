@@ -87,9 +87,9 @@ tasks:
 
 
   6:
-    desc: ( userNewAdd )
+    desc: ( accessUpdate )
     cmds:
-      - task: userNewAdd
+      - task: accessUpdate
     silent: true
 
 
@@ -163,6 +163,14 @@ tasks:
 # ** CUSTOM
 ##
 ###
+  accessUpdate:
+    desc: "usersFileUpdate + secretApply"
+    cmds:
+      - task: usersFileUpdate
+      - task: secretApply
+    silent: true
+
+
   appApply:
     desc: "apply the ambassador-basic-auth app"
     cmds:
@@ -286,19 +294,13 @@ tasks:
     silent: true
 
 
-  userNewAdd:
-    desc: "usersFileUpdate + secretApply"
-    cmds:
-      - task: usersFileUpdate
-      - task: secretApply
-    silent: true
-
-
   usersFileUpdate:
     desc: "commit users.yaml and create new file by concatenating all user-files"
     cmds:
       - |
         git add user/users.yaml user/credentials
-        git commit user/users.yaml user/credentials -m"basicAuth: BAK users.yaml"
+        git commit user/users.yaml user/credentials -m"basicAuth: BAK users.yaml and credentials"
         cat user/credentials/*.yaml > user/users.yaml
+        git add user/users.yaml
+        git commit user/users.yaml -m"basicAuth: new users.yaml"
     silent: true
