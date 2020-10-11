@@ -1,7 +1,0 @@
-#!/usr/bin/env zsh
-###
-##
-# * CHART
-##
-###
-helm pull loki/loki-stack -d ../CHART --untar
