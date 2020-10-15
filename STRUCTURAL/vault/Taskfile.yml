@@ -1,0 +1,447 @@
+###
+##
+# * TASKFILE
+##  https://taskfile.dev
+###
+version: '3'
+
+vars:
+
+  name:                     vault
+
+  nameSpace:                "{{.name}}"
+
+  domainName:               "{{.name}}.thesym.site"
+
+  chartRepoUrl:             https://helm.releases.hashicorp.com
+  chartRepoName:            hashicorp
+  chartName:                "{{.name}}"
+
+  # filter:     "basic-allow"                                                    ### NOT WORKING; NOT implemented yet
+  filter:     "basic-auth"
+  # filter:     "basic-deny"                                                     ###     WORKING; NOT implemented properly -> redirect to thesym.site
+  ### filter:     "ory"                                                          ### NOT WORKING; NOT implemented yet
+  
+  labelTier:                security
+  
+  hostCertStaging:          ""                                                 ### letsencrypt
+  # hostCertStaging:          true                                               ### letsencryptStaging
+  hostAcmeEmail:            "fbeutelschiess@gmail.com"
+
+  mappingPort:              "8200"
+  mappingServiceName:       "{{.chartName}}"
+
+  portforwardingPortSource: "8200"
+  portforwardingPortTarget: "8200"
+
+  pvCreate:                 true
+  # pvCreate:                 ""
+  pvRelativePath:           vault
+  pvStorageSize:            10Gi
+  # pvStorageSize:            1Gi
+  pvClaimRefName:           "data-vault-0" ### for each statefull set there has to be a own pv cf. https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/preexisting-pd
+
+  gopassSecretName:         k8s/vault/cluster-keys
+
+  templateDebugTarget:       "ingress"
+
+  message:                   Tasks for {{.name}}{{if .chartName}}-helm{{end}}
+
+  # chartVariablesSet: |- 
+  #   --set hostnames="{"{{.domainName}}"}" \
+  #   --set domain="{{.superDomainName}}" \
+  #   --set initialAccout.username=mailadmin \
+
+tasks:
+
+  taskDebug:
+    desc: show all variables in Taskfile
+    cmds:
+      - |
+        echo -e \
+        "\n{{range $key, $value := .}} {{$key }}:  \e[92m{{$value}}\e[0m\n {{end}}\n"
+    silent: true
+
+
+  default:
+    desc: display info
+    cmds:
+      - |
+        echo -e \
+        "\n{{.message}}\n"
+      - |
+        task -l
+    silent: true
+
+
+###
+##
+# ** SEQUENCE
+##
+###
+  1:
+    desc: ( repoAdd )
+    cmds:
+      - task: repoAdd
+    silent: true
+
+
+  2:
+    desc: ( chartGet )
+    cmds:
+      - task: chartGet 
+    silent: true
+
+
+  3:
+    desc: ( namespaceApply )
+    cmds:
+      - task: namespaceApply
+    silent: true
+
+
+  4:
+    desc: ( filterPolicyApply )
+    cmds:
+      - task: filterPolicyApply 
+    silent: true
+
+
+  5:
+    desc: ( hostApply )
+    cmds:
+      - task: hostApply
+    silent: true
+
+
+  6:
+    desc: ( mappingApply )
+    cmds:
+      - task: mappingApply
+    silent: true
+
+
+  7:
+    desc: ( persistenceApply )
+    cmds:
+      - task: persistenceApply
+    silent: true
+
+
+  8:
+    desc: ( chartInstall )
+    cmds:
+      - task: chartInstall 
+    silent: true
+
+
+  9:
+    desc: ( vaultInit )
+    cmds:
+      - task: vaultInit
+    silent: true
+
+
+  10:
+    desc: ( vaultUnseal )
+    cmds:
+      - task: vaultUnseal
+    silent: true
+
+
+  11:
+    desc: ( resourcesRemove )
+    cmds:
+      - task: resourcesRemove
+    silent: true
+
+
+###
+##
+# ** ALPHABETICAL
+##
+###
+  chartDebug:
+    desc: debug chart
+    cmds:
+      - |
+        helm install \
+        --namespace {{.nameSpace}} \
+        --dry-run \
+        --debug \
+        {{.chartName}} CHART/{{.chartName}} \
+        {{.chartVariablesSet}}
+    silent: true
+
+
+  chartGet:
+    desc: download the chart
+    cmds:
+      - |
+        helm pull \
+        {{.chartRepoName}}/{{.chartName}} \
+        -d CHART \
+        --untar
+    silent: true
+
+
+  chartInstall:
+    desc: install chart
+    cmds:
+      - |
+        helm install \
+        --namespace {{.nameSpace}} \
+        {{.chartName}} CHART/{{.chartName}} \
+        {{.chartVariablesSet}}
+    silent: true
+
+
+  chartUpdate:
+    desc: update chart
+    cmds:
+      - |
+        helm upgrade \
+        --namespace {{.nameSpace}} \
+        {{.chartName}} CHART/{{.chartName}} \
+        {{.chartVariablesSet}}
+    silent: true
+
+
+  chartRemove:
+    desc: (chartUninstall + namespaceDelete + persistentVolumeDelete)
+    cmds:
+      - task: chartUninstall
+      - task: namespaceDelete
+      - task: persistentVolumeDelete
+    silent: true
+
+
+  chartUninstall:
+    desc: uninstall the {{.chartName}}-chart
+    cmds:
+      - |
+        helm --namespace {{.nameSpace}} uninstall {{.chartName}}
+    silent: true
+  
+
+  filterPolicyApply:
+    desc: create the host for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: FilterPolicy
+        metadata:
+          name: {{.name}}
+          namespace: {{.nameSpace}}
+        spec:
+          rules:
+          - host: {{.domainName}}
+            path: "*"
+            filters: 
+            #- name: {{.filter}}
+            - name: {{if eq .filter "basic-allow"}}"basic-auth"{{else}}{{.filter}}{{end}}
+              namespace: "ambassador"
+              {{- if eq .filter "basic-allow"}}
+              onDeny:  "continue"
+              onAllow: "continue"
+              {{- end}}
+        EOF
+    silent: true
+
+
+  hostApply:
+    desc: apply the host for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: Host
+        metadata:
+          name: {{.name}}
+          namespace: ambassador-hosts
+        spec:
+          hostname: {{.domainName}}
+          acmeProvider:
+            {{- if .hostCertStaging }}
+            authority: https://acme-staging-v02.api.letsencrypt.org/directory
+            {{- else}}
+            authority: https://acme-v02.api.letsencrypt.org/directory
+            {{- end}}
+            email: {{.hostAcmeEmail}}
+            privateKeySecret:
+              name: {{.name}}
+          requestPolicy:
+            insecure:
+              action: Redirect
+        EOF
+    silent: true
+
+
+  mappingApply:
+    desc: apply the mapping for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: Mapping
+        metadata:
+          name: {{.name}}
+          namespace: {{.nameSpace}}
+        spec:
+          prefix: /
+          #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
+          service: {{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPort}}
+          host: {{.domainName}}
+        EOF
+    silent: true
+
+
+  namespaceApply:
+    desc: apply the namespace {{.nameSpace}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1 
+        kind: Namespace 
+        metadata: 
+          name: {{.nameSpace}}
+          labels: 
+            name: {{.nameSpace}}
+            tier: {{.labelTier}}
+        EOF
+    silent: true
+
+
+  namespaceDelete:
+    desc: delete the namespace {{.nameSpace}}
+    cmds:
+      - |
+        kubectl delete namespace {{.nameSpace}}
+    silent: true
+
+
+  portforward:
+    desc: portforwarding for {{.name}}
+    cmds:
+      - |
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -l app.kubernetes.io/name={{.name}} -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
+    silent: true
+
+
+  persistenceApply:
+    desc: "TODO: apply a persistent volume"
+    cmds:
+      - |
+        sudo mkdir ~/k3s/PERSISTENCE/{{.pvRelativePath}}
+        sudo chmod -R 757 ~/k3s/PERSISTENCE/{{.pvRelativePath}}
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: PersistentVolume
+        metadata:
+          name: {{.name}}
+          labels:
+            type: local
+        spec:
+          storageClassName: local-path
+          capacity:
+            storage: {{.pvStorageSize}}
+          accessModes:
+            - ReadWriteOnce
+          hostPath:
+            path: "/PERSISTENCE/{{.pvRelativePath}}"
+          claimRef:
+            name: {{.pvClaimRefName}}
+            namespace: {{.nameSpace}}
+        EOF
+    silent: true
+
+
+  persistentVolumeDelete:
+    desc: delete the persistent volume {{.name}}
+    cmds:
+      - |
+        kubectl delete pv {{.name}}
+    silent: true
+
+
+  repoAdd:
+    desc: add the repository
+    cmds:
+      - |
+        helm repo add \
+        {{.chartRepoName}} \
+        {{.chartRepoUrl}}
+      - |
+        helm repo update
+    silent: true
+
+
+  resourcesRemove:
+    desc: (namespaceDelete + persistVolumeDelete)
+    cmds:
+      - task: namespaceDelete
+      - task: persistentVolumeDelete
+      - |
+        gopass rm {{.gopassSecretName}}
+    silent: true
+
+
+  templateDebug:
+    desc: "debug template; USAGE: `task templateDebug templateDebugTarget=admin`; DEFAULT: ingress"
+    cmds:
+      - |
+        helm template \
+        --namespace {{.nameSpace}} \
+        ./CHART/{{.chartName}} \
+        --debug \
+        -s templates/{{.templateDebugTarget}}.yaml \
+        {{.chartVariablesSet}}
+    silent: true
+
+
+###
+##
+# ** CUSTOM
+##
+###
+
+  vaultInit:
+    desc: "initialize vault TODO where to store infos"
+    cmds:
+      - |
+        #kubectl exec -it {{.name}}-0 -- vault operator init -key-shares=1 -key-threshold=1 -format=json > cluster-keys.json
+        #    gopass insert k8s/keys $(cat cluster.yaml)
+        echo -e "\nAfter initialisation the keys will be inserted into gopass. \n
+        You have to edit the secret manually (convert arrays, firstline has to be empty...)\n
+        (Press ENTER to continue)"
+        read
+        kubectl exec -it {{.name}}-0 -- vault operator init -key-shares=1 -key-threshold=1 -format=yaml > cluster.yaml
+        gopass edit -c -e "vim -c \"o\" -c \":r cluster.yaml\"" "{{.gopassSecretName}}"
+        rm ./cluster.yaml
+    silent: true
+
+
+  vaultUnseal:
+    desc: "unseal vault TODO en~ and decrypt cluster-keys.json"
+    cmds:
+      - |
+        kubectl exec -it {{.name}}-0 -- vault operator unseal $(gopass show {{.gopassSecretName}} unseal_keys_b64)
+    silent: true
+
+
+  vaultLogin:
+    desc: "login to vault"
+    cmds:
+      - |
+        #gopass show {{.gopassSecretName}} root_token
+        kubectl exec -it {{.name}}-0 -- vault login $(gopass show {{.gopassSecretName}} root_token)
+    silent: true
+
+
+  vaultGet_root_token:
+    desc: "get the root_token from gopass"
+    cmds:
+      - |
+        gopass show {{.gopassSecretName}} root_token
+    silent: true
