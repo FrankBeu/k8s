@@ -1,0 +1,11 @@
+###
+##
+# * SOPS-CONFIG
+##  https://github.com/mozilla/sops#210using-sopsyaml-conf-to-select-kmspgp-for-new-files
+##  creation rules are evaluated sequentially, the first match wins
+###
+
+
+creation_rules:
+        - path_regex: sec\.yaml$
+          pgp: '1D84EE970AE7355C458D371CBA6C33BFC04ACC36'
