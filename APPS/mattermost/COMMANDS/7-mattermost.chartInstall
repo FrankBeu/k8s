@@ -1,9 +1,0 @@
-#!/usr/bin/env zsh
-###
-##
-# * APPLICATION
-##
-###
-helm install \
-	--namespace mattermost \
-	mattermost ../CHART/mattermost-team-edition

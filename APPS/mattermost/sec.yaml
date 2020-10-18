@@ -1,0 +1,35 @@
+mysql:
+    mysqlRootPassword: ENC[AES256_GCM,data:IfbDxBueSyIBuOtv1UeUPt3siyFycQs3,iv:pK6gVJlMTpO+Ncnm0zW1jKLZ+ieGlMojS9Pbo/mODBo=,tag:1zpNm2+Ri1ZsHZwu9l8YTw==,type:str]
+    mysqlUser: ENC[AES256_GCM,data:zuBtaA==,iv:r91kgA5RFHFHuSEASxrkjqekXKSYHpmRwFe/IWt62aE=,tag:thozWQqMoShcnxERJsOg0w==,type:str]
+    mysqlPassword: ENC[AES256_GCM,data:twqAc6yH1W+uP+omUSdOlbTiv8YAdz+h,iv:LoShYPAjsXkY5aPNxt4acL7pxxk1d3wp2fyLctyVOwk=,tag:gisyJXhA3CUVkjAUfgkaAw==,type:str]
+EmailSettings:
+    InviteSalt: ENC[AES256_GCM,data:6CpTtIzD68ouS1kdt71vaJGNBUTvo/lY7DQtNMo5omI=,iv:XfAdzyMbelq5Q0L3H979A4g+s9nrJu8KIOsiBsRDmng=,tag:sZdEGfn4Y3M8bobfF/6hxA==,type:str]
+FileSettings:
+    PublicLinkSalt: ENC[AES256_GCM,data:501x4mKPAALwXgnKhP/aWDsduYovYls+kh62CeIP6wo=,iv:++vITwtztoGfAPo9uH7nTAzaNpHAAC30cVmIBanaw08=,tag:Umho5ZMZ4gqNJIc3HJKF+Q==,type:str]
+SqlSettings:
+    AtRestEncryptKey: ENC[AES256_GCM,data:AqjTtkCFQZVNNXAc8swq/Ir+KndErtgQOD+xIVSaHUo=,iv:YXuaBnGg+t6SlhQ2O1mQhCDCpr6BJ9h01Vey+32hGZU=,tag:gXRz8patzk4LdLOvcV/aTg==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    lastmodified: '2020-10-18T01:36:43Z'
+    mac: ENC[AES256_GCM,data:ULnxw/jK8oGFPnMP7qFcJYjwe4lHvU7q0Ob/Rs62ICpaXzA+YS9b40YSgR+u+3FweNEYgDya+K3Oe+r13wXIIPE+Moo9VpBGtfv6o9Id+a+m7oBpjJGxkJ8SCZLnM0gzIIA/cyQXzF+GuMfzHqLKs8r31fzHpK0u556+t5KQTb8=,iv:f0MaMsQ9xx9NrWtvKIHQHQlwcPRUuaRT9WZrowalRj4=,tag:Rv2T726SP08QOIreTBD/0w==,type:str]
+    pgp:
+    -   created_at: '2020-10-18T01:36:42Z'
+        enc: |
+            -----BEGIN PGP MESSAGE-----
+
+            hQEMA5g1mpiqebPrAQgArke8HXrjT2oKfkW8ezVITKDl+JCNbNQUW+MxpRf+sV6d
+            EC3/KWWGPPFzic6eT2IGBmLutvB0MS16WPwTiluERmTehTMdaMUGrgyDqhB/sAh+
+            mLhP1lcs6s5uXecUjpPOZiUAYndTlL4YH4MLTXxP8Frw28E1rpbasTMcHMTjIbMq
+            xMJEnKBlBfBUexaUTM06NCdC30V2NWLqLlEDxIwmuTkoiM2NC4fPwsTPlTON/pfq
+            K4gI2O811w7zfMHQb0ytj3c4lP4BqvHEVbIsoKpjEwh1U6qTs2lqpNeEM5MKXIng
+            j200wB72dj6Mds1i8OpVgUd78pknC/648uaPXPl3ttJcARSe9lYxfJg9fSWGnvV/
+            t2JA/8br58rmXpyM6yQufauuwBkXHS7ezu2Mf/upYFfcQkyilCKcxX/nddlYRFh2
+            YKQr0pBwRVqqK4el59vuvGh4xrejSyeSfmDeeiE=
+            =BmHW
+            -----END PGP MESSAGE-----
+        fp: 1D84EE970AE7355C458D371CBA6C33BFC04ACC36
+    unencrypted_suffix: _unencrypted
+    version: 3.6.1
