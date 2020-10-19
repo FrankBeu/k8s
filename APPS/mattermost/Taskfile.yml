@@ -18,7 +18,7 @@ vars:
   chartName:                mattermost-team-edition
 
   # filter:                  "basic-allow"                                       ### NOT WORKING; NOT implemented yet
-  filter:                  "basic-auth"
+  filter:                   "basic-auth"
   # filter:                  "basic-deny"                                        ###     WORKING; NOT implemented properly -> redirect to thesym.site
   ### filter:     "ory"                                                          ### NOT WORKING; NOT implemented yet
 
@@ -31,8 +31,8 @@ vars:
   mappingPort:              8065
   mappingServiceName:       "{{.chartName}}"
 
-  portforwardingPortSource: ""
-  portforwardingPortTarget: ""
+  portforwardingPortSource: 8065
+  portforwardingPortTarget: 8065
 
   pvRelativePathData:       "{{.name}}/data"
   pvRelativePathDb:         "{{.name}}/db"
@@ -42,14 +42,9 @@ vars:
   pvStorageSizePlugins:     1Gi
   # pvStorageSize:            128Mi
 
-  # traefikCertResolver:      LetsEncryptStaging
-  # traefikCertResolver:      LetsEncrypt
-  # traefikMiddleware:        traefik-basicauth@kubernetescrd
-
-
-  templateDebugTarget:       "ingress"
-
-  # servicePort:               5432
+  templateDebugTarget:       "secret-config"
+  templateDebugOutput:       "stdout"
+  # templateDebugOutput:       "dir"
 
   message:                   Tasks for {{.name}}{{if .chartName}}-helm{{end}}
 
@@ -57,6 +52,9 @@ vars:
     --set persistence.data.existingClaim=mattermost-data \
     --set persistence.plugins.existingClaim=mattermost-plugins \
     --set mysql.persistence.existingClaim=mattermost-db \
+    --set configJSON.EmailSettings.SendEmailNotifications=true \
+    --set configJSON.ServiceSettings.SiteURL="https://{{.domainName}}" \
+
 tasks:
 
   taskDebug:
@@ -141,6 +139,13 @@ tasks:
 
 
   9:
+    desc: ( chartUpdate )
+    cmds:
+      - task: chartUpdate
+    silent: true
+
+
+  10:
     desc: ( resourcesRemove )
     cmds:
       - task: resourcesRemove
@@ -160,7 +165,7 @@ tasks:
         --namespace {{.nameSpace}} \
         --dry-run \
         --debug \
-        {{.chartName}} CHART/{{.chartName}} \
+        {{.name}} CHART/{{.chartName}} \
         {{.chartVariablesSet}}
     silent: true
 
@@ -182,7 +187,7 @@ tasks:
       - |
         helm secrets install \
         --namespace {{.nameSpace}} \
-        {{.chartName}} CHART/{{.chartName}} \
+        {{.name}} CHART/{{.chartName}} \
         {{.chartVariablesSet}}
         -f sec.yaml
     silent: true
@@ -194,7 +199,7 @@ tasks:
       - |
         helm secrets upgrade \
         --namespace {{.nameSpace}} \
-        {{.chartName}} CHART/{{.chartName}} \
+        {{.name}} CHART/{{.chartName}} \
         {{.chartVariablesSet}}
         -f sec.yaml
     silent: true
@@ -210,10 +215,10 @@ tasks:
 
 
   chartUninstall:
-    desc: uninstall the {{.chartName}}-chart
+    desc: uninstall the {{.name}}-chart
     cmds:
       - |
-        helm --namespace {{.nameSpace}} uninstall {{.chartName}}
+        helm --namespace {{.nameSpace}} uninstall {{.name}}
     silent: true
 
 
@@ -318,13 +323,15 @@ tasks:
     desc: portforwarding for {{.name}}
     cmds:
       - |
-        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -l app.kubernetes.io/name={{.name}} -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
     silent: true
 
 
   persistenceApply:
     desc: "TODO: apply a persistent volume"
     cmds:
+
+      ### data
       - |
         cat <<EOF | kubectl apply -f -
         apiVersion: v1
@@ -357,6 +364,8 @@ tasks:
               storage: {{.pvStorageSizeData}}
         EOF
 
+      ### plugins
+      - |
         cat <<EOF | kubectl apply -f -
         apiVersion: v1
         kind: PersistentVolume
@@ -388,6 +397,8 @@ tasks:
               storage: {{.pvStorageSizePlugins}}
         EOF
 
+      ### database
+      - |
         cat <<EOF | kubectl apply -f -
         apiVersion: v1
         kind: PersistentVolume
@@ -425,8 +436,9 @@ tasks:
     desc: delete the persistent volume {{.name}}
     cmds:
       - |
-        kubectl delete pv {{.name}}
+        kubectl delete pv {{.name}}-data
         kubectl delete pv {{.name}}-db
+        kubectl delete pv {{.name}}-plugins
     silent: true
 
 
@@ -451,13 +463,20 @@ tasks:
 
 
   templateDebug:
-    desc: "debug template; USAGE: `task templateDebug templateDebugTarget=admin`; DEFAULT: ingress"
+    desc: "debug template; USAGE: `task templateDebug templateDebugTarget=admin`; DEFAULT: ingress ::: `task templateDebugOutput=dir`; DEFAULT: stdout"
     cmds:
+      - |
+        {{- if eq .templateDebugOutput "dir"}}
+        mkdir -p DEBUG
+        {{end}}
       - |
         helm template \
         --namespace {{.nameSpace}} \
         ./CHART/{{.chartName}} \
         --debug \
+        {{- if eq .templateDebugOutput "dir" -}}
+        --output-dir DEBUG \
+        {{- end}}
         -s templates/{{.templateDebugTarget}}.yaml \
         {{.chartVariablesSet}}
     silent: true
@@ -468,3 +487,25 @@ tasks:
 # ** CUSTOM
 ##
 ###
+  configDisplay:
+    desc: "get /mattermost/config/config.json from container"
+    cmds:
+      - |
+        kubectl exec -it $(kubectl get pod -l app.kubernetes.io/name={{.name}} -o name) -- cat /mattermost/config/config.json | jq -C | less
+    silent: true
+
+
+  secretDebugTemplate:
+    desc: "debug secret (template+vars); you have to run `templateDebug templateDebugOutput=dir` first"
+    cmds:
+      - |
+        yq '.data."config.json"' DEBUG/{{.chartName}}/templates/secret-config.yaml| tr -d '"'  |base64 -d | jq -C . | less
+    silent: true
+
+
+  secretDebugCluster:
+    desc: "debug secret (cluster); you have to run `templateDebug templateDebugOutput=dir` first"
+    cmds:
+      - |
+        kubectl get -n {{.nameSpace}} $(kubectl get secret --field-selector type=Opaque -l=app!={{.name}}-mysql -o name) -o jsonpath='{.data.config\.json}' | base64 -d | jq -C | less
+    silent: true

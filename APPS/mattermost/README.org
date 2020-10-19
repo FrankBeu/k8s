@@ -3,11 +3,12 @@
 *** SOURCES
     https://github.com/mattermost/mattermost-helm
 ** TODO TODOS
-*** TODO Passwords
+** Erledigtes
+*** DONE Passwords
 **** mysql
-*** TODO Persistence
-**** 2x
-*** TODO Keys
+*** DONE Persistence
+**** 3x
+*** DONE Keys
 **** Every `helm upgrade` will generate a new set of keys unless it is set manually like this:
      #+begin_src yaml
      configJSON:

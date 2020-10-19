@@ -2,19 +2,20 @@ mysql:
     mysqlRootPassword: ENC[AES256_GCM,data:IfbDxBueSyIBuOtv1UeUPt3siyFycQs3,iv:pK6gVJlMTpO+Ncnm0zW1jKLZ+ieGlMojS9Pbo/mODBo=,tag:1zpNm2+Ri1ZsHZwu9l8YTw==,type:str]
     mysqlUser: ENC[AES256_GCM,data:zuBtaA==,iv:r91kgA5RFHFHuSEASxrkjqekXKSYHpmRwFe/IWt62aE=,tag:thozWQqMoShcnxERJsOg0w==,type:str]
     mysqlPassword: ENC[AES256_GCM,data:twqAc6yH1W+uP+omUSdOlbTiv8YAdz+h,iv:LoShYPAjsXkY5aPNxt4acL7pxxk1d3wp2fyLctyVOwk=,tag:gisyJXhA3CUVkjAUfgkaAw==,type:str]
-EmailSettings:
-    InviteSalt: ENC[AES256_GCM,data:6CpTtIzD68ouS1kdt71vaJGNBUTvo/lY7DQtNMo5omI=,iv:XfAdzyMbelq5Q0L3H979A4g+s9nrJu8KIOsiBsRDmng=,tag:sZdEGfn4Y3M8bobfF/6hxA==,type:str]
-FileSettings:
-    PublicLinkSalt: ENC[AES256_GCM,data:501x4mKPAALwXgnKhP/aWDsduYovYls+kh62CeIP6wo=,iv:++vITwtztoGfAPo9uH7nTAzaNpHAAC30cVmIBanaw08=,tag:Umho5ZMZ4gqNJIc3HJKF+Q==,type:str]
-SqlSettings:
-    AtRestEncryptKey: ENC[AES256_GCM,data:AqjTtkCFQZVNNXAc8swq/Ir+KndErtgQOD+xIVSaHUo=,iv:YXuaBnGg+t6SlhQ2O1mQhCDCpr6BJ9h01Vey+32hGZU=,tag:gXRz8patzk4LdLOvcV/aTg==,type:str]
+configJSON:
+    EmailSettings:
+        InviteSalt: ENC[AES256_GCM,data:C/8+RTHlfG/bID4rFzNP56Db3O6k5vHdHgV6Zj/aRv0=,iv:U1kLTO7q48SE5LU4XwWLsArkCNYkBCV80RSJNeRSpz0=,tag:f6LWcwZrqp4xPPjiAzyLFA==,type:str]
+    FileSettings:
+        PublicLinkSalt: ENC[AES256_GCM,data:nzKNth/FB8VnveTzXNG/VOvSq33r6cy+uQ6oKK1YA5I=,iv:QPBfLu/vUgr05J+JC9SIYWpk7WwfCt6ULbhZ4oubvJo=,tag:xZ592R8yZncWYLNK0bG0yA==,type:str]
+    SqlSettings:
+        AtRestEncryptKey: ENC[AES256_GCM,data:+F0uX1BAVkHvAsEcGT54TBYi/F9ZRAR/fekAkWA1keY=,iv:/XxVxDoEpu8DR1l7xI1Q6xe8p7Yg07Aqv6EGAwEuZz4=,tag:j5GnkNEuZA7vE1wDVupPQQ==,type:str]
 sops:
     kms: []
     gcp_kms: []
     azure_kv: []
     hc_vault: []
-    lastmodified: '2020-10-18T01:36:43Z'
-    mac: ENC[AES256_GCM,data:ULnxw/jK8oGFPnMP7qFcJYjwe4lHvU7q0Ob/Rs62ICpaXzA+YS9b40YSgR+u+3FweNEYgDya+K3Oe+r13wXIIPE+Moo9VpBGtfv6o9Id+a+m7oBpjJGxkJ8SCZLnM0gzIIA/cyQXzF+GuMfzHqLKs8r31fzHpK0u556+t5KQTb8=,iv:f0MaMsQ9xx9NrWtvKIHQHQlwcPRUuaRT9WZrowalRj4=,tag:Rv2T726SP08QOIreTBD/0w==,type:str]
+    lastmodified: '2020-10-18T21:05:09Z'
+    mac: ENC[AES256_GCM,data:qa+KgwlDbLhRKtvRutCxskqgppeAWRDJsVTIB9G0RMZpbMNG3jy32WNww39vL1yLxk4a4vPFf44kBp1+WuGjSFHJi2PZevd8/shogTxducGSEAZVBNEZMleA4MjWMFaJe2Zt2j8SwHr7/7f33JLEUIPflcqKrm46HGXlXInjEu0=,iv:H/3rgcbcOk7R08ClmqSKe9KqxIdIdpiwzoPPUZfwE80=,tag:J7hagdlHJU2FRUBFttnkHw==,type:str]
     pgp:
     -   created_at: '2020-10-18T01:36:42Z'
         enc: |
