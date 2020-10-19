@@ -291,6 +291,8 @@ tasks:
           #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
           service: {{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPort}}
           host: {{.domainName}}
+          allow_upgrade:
+            - websocket
         EOF
     silent: true
 
