@@ -1,0 +1,11 @@
+* gitea
+** INFO
+*** SOURCES
+    https://github.com/k8s-land/gitea-chart
+    https://hub.helm.sh/charts/k8s-land/gitea
+** TODO TODOS
+*** values config???
+*** mail
+**** create a dynamic config system
+***** reapply config-secret???
+***** use mattermost's???
