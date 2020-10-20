@@ -1,17 +1,20 @@
-mariadb:
-    db:
-        password: ENC[AES256_GCM,data:8QFVjxi9lTdLGY+sHpDLj9SWdzNzeNsd,iv:8nW7xz0mEKc1hn7LfJmtibnAsrSi2IKNmsTm2oR9Jxw=,tag:9gD+ORkO9gjf3NPvPqL0Kg==,type:str]
-    rootUser:
-        password: ENC[AES256_GCM,data:U6BLZE+qKzy6i4CBs+C31E7j59KQ5bSW,iv:tWzcqWZAbuSzliu5R6dExKN5weO9KmyriYc3om4SyFY=,tag:hPB0ziGi99By7z6K4/FhEg==,type:str]
-config:
-    secretKey: ENC[AES256_GCM,data:Dtwhk4QdFzm9oGmry6pApaGzao6pTzyZFlWzCWfYYAcb5bM6qSG1U46b/61dc8tPtsncucB7lLJajY3D5K3aHQ==,iv:9DIFoa7V7sMj6I1zLn0ZmZMod4diR0lRhXId3awsXAg=,tag:sOVuq7ZbsdzunFBNp4Ql7w==,type:str]
+gitea:
+    admin:
+        username: ENC[AES256_GCM,data:DdP11co=,iv:piRslMxoo/kE4VIAKbX7CECX6SKz2mZFYwRiFgd776M=,tag:8O3zMIWcwXCv4snB9od9ng==,type:str]
+        password: ENC[AES256_GCM,data:xCkaR7sfY9CDXhX2liUyOtvwZZ0SeiKI,iv:l1AXarFqDymgk739l3ylzsP3xyxyJEQqB0w+LIGp01Q=,tag:VnqKw5LaMAUlIu2QgkYYFw==,type:str]
+        email: ENC[AES256_GCM,data:FCqnAW2VpwOwE1ubAbxZMQ0=,iv:4+IHjyXvUMjw3R5QRVFe1qDKy761lLW0FE12Eh42i/s=,tag:p0lRTsJ/GB6R8t/ZYHIGNA==,type:str]
+postgresql:
+    global:
+        postgresql:
+            postgresqlUsername: ENC[AES256_GCM,data:qAuqs/0=,iv:k1OUJDjxHvtxYKw9SLdiigALW9Qh+rUf/5b5lG1k1Co=,tag:/pPdvym7hbFd68RFsmm5cg==,type:str]
+            postgresqlPassword: ENC[AES256_GCM,data:qUhUmekOAs6wSvbDjJG+q1gUahmWfiOS,iv:poN9h/AcxyQbAQyFM9OZYZZw3GdmInZ4/sfHOpjPDqE=,tag:GFx4yHT/nsvyT0pCpF9xKQ==,type:str]
 sops:
     kms: []
     gcp_kms: []
     azure_kv: []
     hc_vault: []
-    lastmodified: '2020-10-20T05:36:35Z'
-    mac: ENC[AES256_GCM,data:it6SgrNQ7xOKLHPu90ORkYUi7Fe65mXGkZnIu0gvCxJ+hja9MyVB/BlHLsDzKa6xZ1isXnpPzHeG/tbv5TBfsJ+f5t4/c6EIJg6j5FPhPKMJ9G/JbcqsJHByXCxy3CWHaQtguTc3u/8JgTBTCBDM+WK+2DqpXKvxGDGLK41BOHs=,iv:thYFfeVIK6ZrnQve2YcpF6XUNZrjQpaATXZwL3trix8=,tag:PefH0cac20Gb2xIm6AzxoQ==,type:str]
+    lastmodified: '2020-10-20T17:21:34Z'
+    mac: ENC[AES256_GCM,data:TlruC60KFsoBr3GC4poLfCqffTmc8IxJF5yKEmCKIk1K3R8CPP9tGpW6DVLZnD14Z6NVwq3AAIoUZ39bcPtqybFMSgcoWkzOU2iXrDmsf2iWGSCRa16vKubrbSy86gxLriTxG9fr6GrO52aVoeCY80ah3O6jtq2TYNxa9sChv50=,iv:yQXgs/KjcgnEP/jnGt2GCHhS1UWn0cbUf9sDh+BXmJU=,tag:v2cW6Dtlw1dVN9kS29Pn+g==,type:str]
     pgp:
     -   created_at: '2020-10-20T04:03:10Z'
         enc: |

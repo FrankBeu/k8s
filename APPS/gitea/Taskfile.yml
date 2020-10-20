@@ -12,9 +12,8 @@ vars:
   nameSpace:                "{{.name}}"
 
   domainName:               "{{.name}}.thesym.site"
-
-  chartRepoUrl:             https://charts.k8s.landhttps://URL
-  chartRepoName:            k8s-land
+  chartRepoUrl:             https://dl.gitea.io/charts/
+  chartRepoName:            gitea-charts
   chartName:                "{{.name}}"
 
   filter:     "basic-allow"                                                    ### NOT WORKING; NOT implemented yet
@@ -29,15 +28,19 @@ vars:
   hostAcmeEmail:            "fbeutelschiess@gmail.com"
 
   mappingPort:              3000
-  mappingServiceName:       gitea-gitea-http
+  mappingServiceName:       "{{.name}}-http"
 
   portforwardingPortSource: "3000"
   portforwardingPortTarget: "3000"
 
-  pvRelativePathData:       "{{.name}}/data"
-  pvRelativePathDb:         "{{.name}}/db"
-  pvStorageSizeData:        20Gi
-  pvStorageSizeDb:          8Gi
+  pvName0:                  "{{.name}}-data"
+  pvName1:                  "data-{{.name}}-postgresql-0"
+  pvRelativePath0:          "{{.name}}/data"
+  pvRelativePath1:          "{{.name}}/db"
+  pvStorageSize0:           10Gi
+  pvStorageSize1:           10Gi
+  pvStorageClass0:          local-path
+  pvStorageClass1:          local-path
 
 
   templateDebugTarget:       "ingress"
@@ -47,16 +50,10 @@ vars:
   chartSecretsExist:         true
   # chartSecretsExist:         false
   chartVariablesSet: |-
-    --set ingress.enabled=false \
-    --set resources.gitea.requests.cpu=10m \
-    --set resources.memcached.requests.cpu=10m \
-    --set persistence.enabled=true \
-    --set persistence.existingGiteaClaim={{.name}}-data \
-    --set persistence.giteaSize={{.pvStorageSize}} \
-    --set mariadb.master.persistence.enabled=true \
-    --set mariadb.master.persistence.storageClass=gitea \
-    --set mariadb.master.persistence.existingClaim={{.name}}-db \
-    --set config.disableInstaller=true \
+    --set resources.requests.cpu=10m \
+    --set persistence.existingClaim={{.pvName0}} \
+    --set gitea.config.APP_NAME=Gitea \
+
 
 tasks:
 
@@ -339,88 +336,93 @@ tasks:
     desc: portforwarding for {{.name}}
     cmds:
       - |
-        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -l app={{.name}}-{{.name}} -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -l app.kubernetes.io/name={{.name}} -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
     silent: true
 
 
   persistenceApply:
-    desc: "TODO: apply a persistent volume"
+    desc: apply persistence for {{.name}}
     cmds:
-
-      ### data
-      - |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: v1
-        kind: PersistentVolume
-        metadata:
-          name: {{.name}}-data
-          labels:
-            type: local
-        spec:
-          storageClassName: manual
-          capacity:
-            storage: {{.pvStorageSizeData}}
-          accessModes:
-            - ReadWriteOnce
-          hostPath:
-            path: "/PERSISTENCE/{{.pvRelativePathData}}"
-        ---
-        apiVersion: v1
-        kind: PersistentVolumeClaim
-        metadata:
-          name: {{.name}}-data
-          namespace: {{.nameSpace}}
-        spec:
-          volumeName: {{.name}}-data
-          storageClassName: manual
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: {{.pvStorageSizeData}}
-        EOF
-
-
       ### database
       - |
+        {{- if .pvName0 }}
         cat <<EOF | kubectl apply -f -
         apiVersion: v1
         kind: PersistentVolume
         metadata:
-          name: {{.name}}-db
+          name: {{.pvName0}}
           labels:
             type: local
         spec:
-          storageClassName: manual
+          storageClassName: {{.pvStorageClass0}}
           capacity:
-            storage: {{.pvStorageSizeDb}}
+            storage: {{.pvStorageSize0}}
           accessModes:
             - ReadWriteOnce
           hostPath:
-            path: "/PERSISTENCE/{{.pvRelativePathDb}}"
+            path: "/PERSISTENCE/{{.pvRelativePath0}}"
         ---
         apiVersion: v1
         kind: PersistentVolumeClaim
         metadata:
-          name: {{.name}}-db
+          name: {{.pvName0}}
           namespace: {{.nameSpace}}
         spec:
-          volumeName: {{.name}}-db
-          storageClassName: manual
+          volumeName: {{.pvName0}}
+          storageClassName: {{.pvStorageClass0}}
           accessModes:
             - ReadWriteOnce
           resources:
             requests:
-              storage: {{.pvStorageSizeDb}}
+              storage: {{.pvStorageSize0}}
         EOF
+        {{- end }}
+
+        {{- if .pvName1 }}
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: PersistentVolume
+        metadata:
+          name: {{.pvName1}}
+          labels:
+            type: local
+        spec:
+          storageClassName: {{.pvStorageClass1}}
+          capacity:
+            storage: {{.pvStorageSize1}}
+          accessModes:
+            - ReadWriteOnce
+          hostPath:
+            path: "/PERSISTENCE/{{.pvRelativePath1}}"
+        #---
+        #apiVersion: v1
+        #kind: PersistentVolumeClaim
+        #metadata:
+        #  name: {{.pvName1}}
+        #  namespace: {{.nameSpace}}
+        #spec:
+        #  volumeName: {{.pvName1}}
+        #  storageClassName: {{.pvStorageClass1}}
+        #  accessModes:
+        #    - ReadWriteOnce
+        #  resources:
+        #    requests:
+        #      storage: {{.pvStorageSize1}}
+        EOF
+        {{- end }}
     silent: true
 
 
   persistentVolumeDelete:
-    desc: delete the persistent volume {{.name}}
+    desc: delete the pv(s) for {{.name}}
     cmds:
       - |
-        kubectl delete pv {{.name}}
+        {{- if .pvName0 }}
+        kubectl delete pv {{.pvName0}}
+        {{- end }}
+        {{- if .pvName1 }}
+        kubectl delete pv {{.pvName1}}
+        {{- end }}
     silent: true
 
 
@@ -437,7 +439,7 @@ tasks:
 
 
   resourcesRemove:
-    desc: (namespaceDelete + persistVolumeDelete)
+    desc: (namespaceDelete + persistentVolumeDelete)
     cmds:
       - task: namespaceDelete
       - task: persistentVolumeDelete
