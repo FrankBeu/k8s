@@ -1,8 +1,0 @@
-#!/usr/bin/env zsh
-###
-##
-# * NAMESPACE
-##
-###
-#kubectl create namespace efk
-kubectl apply -f ../namespace.yaml

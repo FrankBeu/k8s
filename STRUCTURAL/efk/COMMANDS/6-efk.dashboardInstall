@@ -1,7 +1,0 @@
-#!/usr/bin/env zsh
-###
-##
-# * DASHBOARD
-##
-###
-kubectl --namespace traefik apply -f ../dashboard.yaml
