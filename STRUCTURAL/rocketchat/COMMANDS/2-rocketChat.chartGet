@@ -1,9 +1,0 @@
-#!/usr/bin/env zsh
-###
-##
-# * CHART
-##
-###
-helm pull stable/rocketchat -d ../CHART
-cd ../CHART
-tar -xzf rocketchat-*.tgz
