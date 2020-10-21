@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+###
+##
+# * REPOSITORY
+##
+###
+#
+helm repo add gitlab https://charts.gitlab.io/
+helm repo update

@@ -1,0 +1,7 @@
+#!/usr/bin/env zsh
+###
+##
+# * CHART
+##
+###
+helm pull gitlab gitlab/gitlab -d ../CHART --untar
