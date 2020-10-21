@@ -1,9 +1,0 @@
-#!/usr/bin/env zsh
-###
-##
-# * APPLICATION
-##
-###
-helm install \
-	--namespace gitea \
-	gitea ../CHART/gitea
