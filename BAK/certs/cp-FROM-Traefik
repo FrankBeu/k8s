@@ -1,8 +1,0 @@
-#!/usr/bin/env zsh
-
-kubectl cp \
-	$(kubectl get pods -n traefik -l app!=svclb-traefik \
-	--template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}'):data/acme.json \
-	./acme.json
-
-mv ./acme{,`date +%s`}.json
