@@ -1,11 +1,24 @@
 * gitea
 ** INFO
+   https://github.com/go-gitea/gitea
+   https://gitea.io/en-us/
 *** SOURCES
-    https://github.com/k8s-land/gitea-chart
-    https://hub.helm.sh/charts/k8s-land/gitea
+    https://gitea.com/gitea/helm-chart
+    https://www.edvpfau.de/offizielles-gitea-helm-chart/
+*** API
+     https://gitea.thesym.site/api/swagger
+     https://docs.gitea.io/en-us/api-usage/
+**** create user token
+      https://gitea.thesym.site/api/swagger#/user/userCreateToken
+***** login via Authorize-Button -> BasicAuth
+***** execute POST /users/{username}/tokens
+**** DEPRECATED
+     https://github.com/k8s-land/gitea-chart
+     https://hub.helm.sh/charts/k8s-land/gitea
 ** TODO TODOS
-*** values config???
 *** mail
-**** create a dynamic config system
-***** reapply config-secret???
-***** use mattermost's???
+*** create a dynamic config system
+**** reapply config-secret???
+**** helm can currently not be updated
+***** pod will fail crashLoop
+***** user exists error and password not according to security policy

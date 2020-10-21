@@ -53,6 +53,9 @@ vars:
     --set resources.requests.cpu=10m \
     --set persistence.existingClaim={{.pvName0}} \
     --set gitea.config.APP_NAME=Gitea \
+    --set gitea.config.server.DOMAIN={{.domainName}} \
+    --set gitea.config.server.ROOT_URL=https://{{.domainName}} \
+    --set gitea.config.server.SSH_DOMAIN={{.domainName}} \
 
 
 tasks:
