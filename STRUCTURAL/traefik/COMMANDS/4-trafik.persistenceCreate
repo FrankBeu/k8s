@@ -1,7 +1,0 @@
-#!/usr/bin/env zsh
-###
-##
-# * PERSISTENCE
-##
-###
-kubectl apply -f ../persistence.yaml

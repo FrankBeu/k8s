@@ -1,9 +1,0 @@
-#!/usr/bin/env zsh
-###
-##
-# * UPGRADE
-##
-###
-helm upgrade \
-	--namespace traefik \
-	traefik ../CHART/traefik \

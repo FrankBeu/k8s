@@ -1,8 +1,0 @@
-#!/usr/bin/env zsh
-###
-##
-# * BASIC-AUTH
-##
-###
-#kubectl --namespace traefik apply -f ../basicAuth.yaml
-kubectl apply -f ../basicAuth.yaml

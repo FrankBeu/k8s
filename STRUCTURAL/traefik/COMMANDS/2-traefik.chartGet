@@ -1,9 +1,0 @@
-#!/usr/bin/env zsh
-###
-##
-# * CHART
-##
-###
-helm pull traefik/traefik -d ../CHART
-cd ../CHART
-tar -xzf traefik-*.tgz
