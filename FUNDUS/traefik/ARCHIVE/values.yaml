@@ -1,0 +1,31 @@
+additionalArguments:
+  - --entrypoints.web.http.redirections.entryPoint.to=:443
+  - --entrypoints.web.http.redirections.entryPoint.scheme=https
+
+  - --log.level=DEBUG
+
+  - --certificatesresolvers.le.acme.email=fbeutelschiess@gmail.com
+  - --certificatesresolvers.le.acme.storage=/data/acme/acme.json
+  - --certificatesresolvers.le.acme.tlschallenge=true
+    ### staging - comment the next line for production usage
+  - --certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+persistence:
+  enabled: true
+  path: /data/acme
+
+### FUNDUS
+    ### WORKING
+    #- --certificatesresolvers.le.acme.httpchallenge=true
+    #- --certificatesresolvers.le.acme.httpchallenge.entrypoint=web
+
+    ### NOT WORKING with domain.com / nonInteractive traefikDeploy
+    #- --certificatesresolvers.le.acme.dnschallenge=true
+    #- --certificatesresolvers.le.acme.dnschallenge.provider=manual
+    #- --certificatesresolvers.le.acme.dnschallenge.delaybeforecheck=120
+
+    #- --certificatesresolvers.le.acme.keytype="RSA4096"
+    #- --certificatesresolvers.le.acme.keytype="EC384"
+    #- --certificatesresolvers.le.acme.acmelogging="true"
+
+    #- --log.filePath=/data/logs/traefik.log
+    #- --log.format=json

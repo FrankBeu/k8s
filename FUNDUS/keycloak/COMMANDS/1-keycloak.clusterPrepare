@@ -1,0 +1,8 @@
+#!/usr/bin/env zsh
+###
+##
+# * PREPARATION
+##
+###
+cd ../keycloak-operator
+make cluster/prepare

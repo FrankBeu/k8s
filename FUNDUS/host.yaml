@@ -1,0 +1,9 @@
+---
+apiVersion: getambassador.io/v2
+kind: Host
+metadata:
+  name: test-ambassador
+spec:
+  hostname: quote.thesym.site
+  acmeProvider:
+    email: fbeutelschiess@gmail.com

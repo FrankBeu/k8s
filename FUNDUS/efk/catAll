@@ -1,0 +1,71 @@
+#!/usr/bin/env zsh
+###
+##
+# * REPOSITORY
+##
+###
+helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+helm repo update
+#!/usr/bin/env zsh
+###
+##
+# * CHART
+##
+###
+helm pull stable/elastic-stack -d ../CHART
+cd ../CHART
+tar -xzf elastic-stack-*.tgz
+#!/usr/bin/env zsh
+###
+##
+# * NAMESPACE
+##
+###
+#kubectl create namespace efk
+kubectl apply -f ../namespace.yaml
+#!/usr/bin/env zsh
+###
+##
+# * APPLICATION
+##
+###
+helm install \
+	--namespace efk \
+	efk-stack ../CHART/elastic-stack
+
+	#--set logstash.enabled=false \
+	#--set fluentd.enabled=true \
+	#--set fluentd-elasticsearch.enabled=true \
+#!/usr/bin/env zsh
+###
+##
+# * DASHBOARD
+##
+###
+kubectl --namespace traefik apply -f ../dashboard.yaml
+#!/usr/bin/env zsh
+###
+##
+# * BASIC-AUTH
+##
+###
+#kubectl --namespace traefik apply -f ../basicAuth.yaml
+kubectl apply -f ../basicAuth.yaml
+#!/usr/bin/env zsh
+###
+##
+# * UPGRADE
+##
+###
+helm upgrade \
+	--namespace traefik \
+	traefik ../CHART/traefik \
+#!/usr/bin/env zsh
+###
+##
+# * REMOVAL
+##
+###
+helm uninstall traefik
+kubectl delete namespace traefik
+kubectl delete pv traefik-pv

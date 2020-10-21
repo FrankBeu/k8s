@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+###
+##
+# * REPOSITORY
+#   https://github.com/containous/traefik-helm-chart
+##
+###
+helm repo add traefik https://containous.github.io/traefik-helm-chart
+helm repo update

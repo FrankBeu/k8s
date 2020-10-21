@@ -1,0 +1,13 @@
+#!/usr/bin/env zsh
+###
+##
+# * APPLICATION
+##
+###
+helm install \
+	--namespace efk \
+	efk-stack ../CHART/elastic-stack
+
+	#--set logstash.enabled=false \
+	#--set fluentd.enabled=true \
+	#--set fluentd-elasticsearch.enabled=true \

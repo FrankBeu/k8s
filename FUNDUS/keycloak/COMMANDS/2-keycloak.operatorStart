@@ -1,0 +1,7 @@
+#!/usr/bin/env zsh
+###
+##
+# * CHART
+##
+###
+kubectl apply -f ../keycloak-operator/deploy/operator.yaml

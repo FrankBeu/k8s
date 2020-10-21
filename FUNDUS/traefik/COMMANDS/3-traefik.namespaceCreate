@@ -1,0 +1,8 @@
+#!/usr/bin/env zsh
+###
+##
+# * NAMESPACE
+##
+###
+#kubectl create namespace traefik
+kubectl apply -f ../namespace.yaml

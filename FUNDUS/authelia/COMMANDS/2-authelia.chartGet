@@ -1,0 +1,7 @@
+#!/usr/bin/env zsh
+###
+##
+# * CHART
+##
+###
+helm pull authelia/authelia -d ../CHART --untar

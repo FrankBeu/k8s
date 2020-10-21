@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+###
+##
+# * APPLICATION
+##
+###
+helm install \
+	--namespace traefik \
+	traefik ../CHART/traefik
