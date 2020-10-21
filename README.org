@@ -1,0 +1,4 @@
+* k8s
+** INFO
+*** code to bootstrap a k8s cluster on a single node
+** TODO TODOS
