@@ -19,11 +19,9 @@
 
 image:
   repository: kubernetesui/dashboard
-  tag: v2.0.3
+  tag: v2.0.4
   pullPolicy: IfNotPresent
   pullSecrets: []
-
-namespace: kubernetes-dashboard
 
 replicaCount: 1
 
@@ -44,6 +42,21 @@ labels: {}
 extraEnv: []
 # - name: SOME_VAR
 #   value: 'some value'
+
+## Additional volumes to be added to kubernetes dashboard pods
+##
+extraVolumes: []
+# - name: dashboard-kubeconfig
+#   secret:
+#     defaultMode: 420
+#     secretName: dashboard-kubeconfig
+
+## Additional volumeMounts to be added to kubernetes dashboard pods
+##
+extraVolumeMounts: []
+# - mountPath: /kubeconfig
+#   name: dashboard-kubeconfig
+#   readOnly: true
 
 # Annotations to be added to kubernetes dashboard pods
 podAnnotations:
@@ -100,6 +113,12 @@ service:
   ## set a specific load balancer Ip if you're using one
   # loadBalancerIP:
 
+  ## Enable or disable the kubernetes.io/cluster-service label. Should be disabled for GKE clusters >=1.15.
+  ## Otherwise, the addon manager will presume ownership of the service and try to delete it.
+  clusterServiceLabel:
+    enabled: true
+    key: "kubernetes.io/cluster-service"
+
 ingress:
   ## If true, Kubernetes Dashboard Ingress will be created.
   ##
@@ -153,69 +172,36 @@ ingress:
   #     hosts:
   #       - kubernetes-dashboard.domain.com
 
-###
-##
-# ** INGRESS-ROUTE
-##
-###
-ingressRoute:
-  ## If true, Kubernetes Dashboard IngressRoute will be created.
-  ##
-  enabled: true
+settings: {}
+  ## Cluster name that appears in the browser window title if it is set
+  # clusterName: ""
+  ## Max number of items that can be displayed on each list page
+  # itemsPerPage: 10
+  ## Number of seconds between every auto-refresh of logs
+  # logsAutoRefreshTimeInterval: 5
+  ## Number of seconds between every auto-refresh of every resource. Set 0 to disable
+  # resourceAutoRefreshTimeInterval: 5
+  ## Hide all access denied warnings in the notification panel
+  # disableAccessDeniedNotifications: false
 
-  ### used as Host-Matcher, for Certs
-  domainName: &domainName dash.thesym.site
-  wildcardSubdomainName: &wildcardSubdomainName "*.thesym.site"
+## Pinned CRDs that will be displayed in dashboard's menu
+pinnedCRDs: []
+  # - kind: customresourcedefinition
+  ##  Fully qualified name of a CRD
+  #   name: prometheuses.monitoring.coreos.com
+  ##  Display name
+  #   displayName: Prometheus
+  ##  Is this CRD namespaced?
+  #   namespaced: true
 
-  ## Kubernetes Dashboard IngressRoute annotations
-  ##
-  ## Add custom labels
-  # labels:
-  #   key: value
-  # annotations:
-  #   kubernetes.io/ingress.class: nginx
-  #   kubernetes.io/tls-acme: 'true'
-
-  ## Kubernetes Dashboard IngressRoute paths
-  ##
-  paths:
-    - /
-  #  - /*
-
-  ## Kubernetes Dashboard IngressRoute hostnames
-  ## Must be provided if IngressRoute is enabled
-  ##
-  hosts:
-    - *domainName
-
-
-  middlewares: {}
-  middlewares:
-   - name: basicauth
-     namespace: traefik
-  #- name: forwardauth
-  #  namespace: traefik
-
-  tls: {}
-  tls:
-    certResolver: LetsEncrypt
-    mainDomain: *domainName
-   #sans: *wildcardSubdomainName
-
-###
-##
-# ** METRICS-SCRAPER
-##
-###
 ## Metrics Scraper
 ## Container to scrape, store, and retrieve a window of time from the Metrics Server.
 ## refs: https://github.com/kubernetes-sigs/dashboard-metrics-scraper
 metricsScraper:
-  #enabled: false
-  enabled: true
+  enabled: false
   image:
     repository: kubernetesui/metrics-scraper
-    tag: v1.0.4
+    tag: v1.0.5
   resources: {}
   ## SecurityContext for the metrics scraper container
   containerSecurityContext:
@@ -232,12 +218,11 @@ metricsScraper:
 ##  - https://hub.helm.sh/charts/stable/metrics-server
 ##  - https://github.com/kubernetes-sigs/metrics-server
 metrics-server:
-  #enabled: false
-  enabled: true
+  enabled: false
   ## Example for additional args
-  args:
-   - --kubelet-preferred-address-types=InternalIP
-   - --kubelet-insecure-tls
+  # args:
+  #  - --kubelet-preferred-address-types=InternalIP
+  #  - --kubelet-insecure-tls
 
 rbac:
   # Specifies whether namespaced RBAC resources (Role, Rolebinding) should be created
@@ -294,4 +279,9 @@ containerSecurityContext:
   runAsGroup: 2001
 
 networkPolicy:
+  enabled: false
+
+## podSecurityPolicy for fine-grained authorization of pod creation and updates
+podSecurityPolicy:
+  # Specifies whether a pod security policy should be created
   enabled: false

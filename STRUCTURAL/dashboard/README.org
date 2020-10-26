@@ -1,0 +1,10 @@
+* K8S-DASHBOARD
+** INFO
+*** SOURCES
+    https://github.com/kubernetes/dashboard/tree/master/aio/deploy/helm-chart/kubernetes-dashboard
+    https://github.com/kubernetes/dashboard/tree/master/aio/deploy/helm-chart/kubernetes-dashboard
+**** access
+     https://stackoverflow.com/questions/46664104/how-to-sign-in-kubernetes-dashboard#tab-top
+     https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/README.md
+     https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md
+** TODO TODOS
