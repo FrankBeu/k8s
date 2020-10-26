@@ -210,6 +210,18 @@ tasks:
     silent: true
 
 
+  repoAdd:
+    desc: add the repository
+    cmds:
+      - |
+        helm repo add \
+        {{.chartRepoName}} \
+        {{.chartRepoUrl}}
+      - |
+        helm repo update
+    silent: true
+
+
   templateDebug:
     desc: "debug template; USAGE: `task templateDebug templateDebugTarget=admin`; DEFAULT: ingress"
     cmds:
@@ -285,6 +297,9 @@ tasks:
     desc: test the {{.name}} installation
     cmds:
       - |
+        echo -e "\n\x1b[33mCreating namespace:\x1b[0m cert-manager-test"
+        echo -e "\x1b[33mCreating issuer:\x1b[0m test-selfsigned"
+        echo -e "\x1b[33mIssuing cert:\x1b[0m test-selfsigned\n"
         cat <<EOF | kubectl apply -f -
         apiVersion: v1
         kind: Namespace
@@ -312,8 +327,9 @@ tasks:
             name: test-selfsigned
         EOF
       - |
-        kubectl describe certificate -n cert-manager-test 
+        kubectl get certificate -n cert-manager-test -oyaml
       - |
+        echo -e "\n\x1b[33mDeleting namespace:\x1b[0m cert-manager-test"
         kubectl delete ns cert-manager-test
     silent: true
 
