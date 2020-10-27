@@ -32,7 +32,7 @@ tasks:
 
 ###
 ##
-# ** ALPHABETICAL
+# ** MISC
 ##
 ###
   getImagesUsedClusterwideAll:
@@ -44,3 +44,80 @@ tasks:
         sort |\
         uniq -c
     silent: true
+
+
+  k8sUpgrade:
+    desc: " TODO upgrade the cluster"
+    cmds:
+      - |
+        swapoff -a
+    silent: true
+
+
+#  resourcesNamespacedGetwithXargs:
+#    desc: "get all resources from current namespace"
+#    cmds:
+#      - |
+#        kubectl api-resources --verbs=list --namespaced -o name \
+#        | xargs -n 1 kubectl get --show-kind --ignore-not-found
+
+
+  resourcesNamespacedGet:
+    desc: "get all resources from current namespace"
+    cmds:
+      - |
+        for APIRES in `kubectl api-resources --verbs=list --namespaced -o name`; do
+        RES=$(kubectl get --show-kind --ignore-not-found $APIRES)
+        [[ ! -z $RES ]] && echo -e "\x1b[33m$APIRES\x1b[0m\n$RES\n"; 
+        done
+    silent: true
+
+
+###
+##
+# ** INSTALLATION
+##
+###
+  installHelmPush:
+    ### cf. https://github.com/chartmuseum/helm-push
+    desc: "helm: install helm-push"
+    cmds:
+      - |
+        helm plugin install https://github.com/chartmuseum/helm-push
+    silent: true
+
+
+  installHelmSecrets:
+    ### cf. https://github.com/jkroepke/helm-secrets
+    desc: "helm: install helm-secrets"
+    cmds:
+      - |
+        helm plugin install https://github.com/jkroepke/helm-secrets
+    silent: true
+
+
+  installKubectlKrew:
+    ### cf. https://krew.sigs.k8s.io/docs/user-guide/setup/install/
+    ### for plugins see: https://github.com/kubernetes-sigs/krew-index/blob/master/plugins.md
+    desc: "kubectl: install krew"
+    cmds:
+      - |
+        (
+          cd "$(mktemp -d)" &&
+          curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/krew.tar.gz" &&
+          tar zxvf krew.tar.gz &&
+          KREW=./krew-"$(uname | tr '[:upper:]' '[:lower:]')_$(uname -m | sed -e 's/x86_64/amd64/' -e 's/arm.*$/arm/')" &&
+          "$KREW" install krew
+        )
+    silent: true
+
+
+  installKubectlPluginGopass:
+    ### cf. https://github.com/gopasspw/kubectl-gopass
+    desc: "kubectl: install gopass-plugin"
+    cmds:
+      - |
+        kubectl krew install gopass
+    silent: true
+
+
