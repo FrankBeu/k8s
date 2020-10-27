@@ -1,0 +1,6 @@
+* k3d
+  install a k8s cluster with k3s in a docker container using k3d
+** INFO
+*** SOURCES
+https://github.com/rancher/k3d
+** TODO TODOS

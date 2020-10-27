@@ -1,0 +1,69 @@
+###
+##
+# * TASKFILE
+##  https://taskfile.dev
+###
+version: '3'
+
+vars:
+
+  nodeName: k8s
+
+
+tasks:
+
+  taskDebug:
+    desc: show all variables in Taskfile
+    cmds:
+      - |
+        echo -e \
+        "\n{{range $key, $value := .}} {{$key }}:  \e[92m{{$value}}\e[0m\n {{end}}\n"
+    silent: true
+
+
+  default:
+    desc: display info
+    cmds:
+      - |
+        echo -e \
+        "\n{{.message}}\n"
+      - |
+        task -l
+    silent: true
+
+
+###
+##
+# ** ALPHABETICAL
+##
+###
+  clusterCreate:
+    desc: create the cluster {{.nodeName}}
+    cmds:
+      - |
+        k3d cluster create \
+                {{.nodeName}} \
+          --api-port 64433 \
+                -p 80:80@server[0] \
+          -p 443:443@server[0] \
+          -p 22:22@server[0] \
+          -p 993:993@server[0] \
+          -p 25:25@server[0] \
+          -p 587:587@server[0] \
+          -p 22222:22222@server[0] \
+          -p 33333:33333@server[0] \
+          -p 44444:44444@server[0] \
+          --k3s-server-arg --tls-san="${KUBE_HOST_EXTERNAL_IP}" \
+          --k3s-server-arg --tls-san="thesym.site" \
+          --k3s-server-arg --no-deploy="traefik" \
+          --volume /home/frank/k3s/PERSISTENCE:/PERSISTENCE \
+    silent: true
+
+
+  clusterDelete:
+    desc: create the cluster {{.nodeName}}
+    cmds:
+      - |
+        k3d cluster delete \
+                {{.nodeName}} \
+    silent: true
