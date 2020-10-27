@@ -6,3 +6,6 @@
     run:
     task repositoryGitHookLinkCreate
 ** TODO TODOS
+*** make path to PERSISTENCE/ relative
+    currently repo has to be called k3s 
+    because of named volumes in ./CLUSTER/k3d/Taskfile.yml
