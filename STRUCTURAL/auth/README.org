@@ -1,0 +1,8 @@
+* ORY
+** SOURCES
+   https://k8s.ory.sh/helm/
+** INFO
+*** List all available charts
+    helm search repo ory
+*** get repository
+    git clone https://github.com/ory/k8s

@@ -1,0 +1,8 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kratos-selfservice-ui-node
+  labels:
+    name: kratos-selfservice-ui-node
+    tier: auth

@@ -1,0 +1,10 @@
+#!/usr/bin/env zsh
+###
+##
+# * APPLICATION
+##
+###
+helm install \
+        --namespace hydra \
+        hydra \
+        ../CHART/hydra

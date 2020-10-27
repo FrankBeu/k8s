@@ -1,0 +1,6 @@
+* SOURCES
+https://k8s.ory.sh/helm/
+** TODOS
+*** values.yaml
+    config.dsn
+    config.secrets

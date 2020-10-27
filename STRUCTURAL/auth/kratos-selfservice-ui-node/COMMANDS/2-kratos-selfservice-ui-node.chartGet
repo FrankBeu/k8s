@@ -1,0 +1,7 @@
+#!/usr/bin/env zsh
+###
+##
+# * CHART
+##
+###
+helm pull ory/kratos-selfservice-ui-node -d ../CHART --untar

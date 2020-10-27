@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+###
+##
+# * APPLICATION
+##
+###
+helm install \
+	--namespace kratos-selfservice-ui-node \
+	kratos-selfservice-ui-node ../CHART/kratos-selfservice-ui-node
