@@ -1,0 +1,52 @@
+###
+##
+# * TASKFILE
+##  https://taskfile.dev
+###
+version: '3'
+
+vars:
+
+
+
+tasks:
+
+  taskDebug:
+    desc: show all variables in Taskfile
+    cmds:
+      - |
+        echo -e \
+        "\n{{range $key, $value := .}} {{$key }}:  \e[92m{{$value}}\e[0m\n {{end}}\n"
+    silent: true
+
+
+  default:
+    desc: display info
+    cmds:
+      - |
+        echo -e \
+        "\n{{.message}}\n"
+      - |
+        task -l
+    silent: true
+
+
+###
+##
+# ** TESTING
+##
+###
+  imageGet:
+    desc: get the nixosImage
+    cmds:
+      - |
+        docker pull nixos/nix
+    silent: true
+
+
+  containerRun:
+    desc: create the container
+    cmds:
+      - |
+        docker run --name k8sTest -ti nixos/nix sh
+    silent: true
