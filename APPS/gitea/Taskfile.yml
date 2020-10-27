@@ -26,12 +26,13 @@ vars:
   hostCertStaging:          ""                                                 ### letsencrypt
   # hostCertStaging:          true                                               ### letsencryptStaging
   hostAcmeEmail:            "fbeutelschiess@gmail.com"
+  hostPrivateKeySecretName: "letsencrypt-fbeutelschiessgmail.com"
 
   mappingPort:              3000
   mappingServiceName:       "{{.name}}-http"
 
   portforwardingPortSource: "3000"
-  portforwardingPortTarget: "3000"
+  portforwardingPortTarget: "22"
 
   pvName0:                  "{{.name}}-data"
   pvName1:                  "data-{{.name}}-postgresql-0"
@@ -135,20 +136,27 @@ tasks:
 
 
   8:
+    desc: ( sshConnectionEnable )
+    cmds:
+      - task: sshConnectionEnable
+    silent: true
+
+
+  9:
     desc: ( chartInstall )
     cmds:
       - task: chartInstall
     silent: true
 
 
-  9:
+  10:
     desc: ( chartUpdate )
     cmds:
       - task: chartUpdate
     silent: true
 
 
-  10:
+  11:
     desc: ( resourcesRemove )
     cmds:
       - task: resourcesRemove
@@ -283,8 +291,9 @@ tasks:
             {{- end}}
             email: {{.hostAcmeEmail}}
             privateKeySecret:
-              # name: {{.name}}-secret
-              name: letsencrypt-fbeutelschiess-gmail.com
+              name: {{.hostPrivateKeySecretName}}
+          tlsSecret: 
+            name: {{.name}}
           requestPolicy:
             insecure:
               action: Redirect
@@ -467,3 +476,20 @@ tasks:
 # ** CUSTOM
 ##
 ###
+  sshConnectionEnable:
+    desc: "debug template; USAGE: `task templateDebug templateDebugTarget=admin`; DEFAULT: ingress"
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        ---
+        apiVersion: getambassador.io/v2
+        kind:  TCPMapping
+        metadata:
+          name:  "{{.name}}-ssh"
+          namespace: {{.nameSpace}}
+        spec:
+          port: 8022
+            #host: "{{.domainName}}"
+          service: "{{.name}}-ssh.{{.nameSpace}}:22"
+        EOF
+    silent: true

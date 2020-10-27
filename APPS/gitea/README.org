@@ -22,3 +22,67 @@
 **** helm can currently not be updated
 ***** pod will fail crashLoop
 ***** user exists error and password not according to security policy
+*** TODO tcpMapping with SNI
+    https://github.com/datawire/ambassador/issues/1965
+**** currently not working
+**** test code
+---
+apiVersion: getambassador.io/v2
+kind:  TCPMapping
+metadata:
+  name:  msg
+  namespace: gitea
+spec:
+  port: 8022
+  host: msg.thesym.site
+  #   service: gitea-ssh.gitea:22
+  service: whoami.test-whoami:80
+---
+apiVersion: getambassador.io/v2
+kind:  TLSContext
+metadata:
+  name:  mattermost-context
+  namespace: gitea
+spec:
+  hosts:
+  - msg.ambassador-hosts
+  secret: msg.thesym.site.ambassador-hosts
+
+
+            ### not working
+            ### ---
+            ### apiVersion: getambassador.io/v2
+            ### kind:  TLSContext
+            ### metadata:
+            ###   name:  "{{.name}}-context"
+            ###     #namespace: {{.nameSpace}}
+            ###   namespace: ambassador-hosts
+            ### spec:
+            ###   hosts:
+            ###   #- "{{.name}}" ### cloning, wrong frontCert
+            ###   #- gitea ### cloning, wrong frontCert
+            ###   #- gitea.thesym.site ### not cloning, right frontCert
+            ###   #secret: "{{.domainName}}"
+            ###     ########
+            ###     #secret: "{{.domainName}}.ambassador-hosts"
+            ###     #secret: "{{.domainName}}"
+            ###     #- "{{.name}}" ### cloning, wrong frontCert
+            ###     #- gitea ### cloning, wrong frontCert
+            ###     - gitea ### not cloning, right frontCert
+            ###     #secret: gitea
+            ###   #secret: "{{.domainName}}"
+            ###   secret: gitea
+            ###   #secret: "gitea.thesym.site.ambassador-hosts"
+            ###   secret_namespacing: false
+            ###   sni: {{.domainName}}
+
+
+
+
+*** TODO upgrade
+{{- if not .Release.IsUpgrade -}}
+apiVersion: v1
+kind: Secret
+...
+{{- end -}}
+
