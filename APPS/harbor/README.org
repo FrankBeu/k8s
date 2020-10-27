@@ -1,0 +1,24 @@
+* harbor
+** INFO
+*** SOURCES
+    https://goharbor.io/
+    https://github.com/goharbor/harbor-helm
+    https://github.com/goharbor/harbor
+*** URLS
+    https://harbor.thesym.site/
+    https://notary.harbor.thesym.site/v2/ 
+*** TASKS
+**** push image to harbor
+***** create endpoint
+      via GUI on https://harbor.thesym.site/harbor/projects
+      "+ NEW PROJECT"
+***** tag an existing image with a tag matching the repo
+      docker tag harbor.thesym.site/flutter/webserver:0.3 harbor.thesym.site/magic/webserver:0.3
+***** loginto the repo
+***** push existing image
+      docker push harbor.thesym.site/magic/webserver:0.3
+***** cf. /home/frank/TMP/flutterImg
+**** push helmchart to harbor
+**** vulnerabilities
+https://thenewstack.io/how-to-scan-docker-images-for-vulnerabilities-with-harbor/
+** TODO TODOS

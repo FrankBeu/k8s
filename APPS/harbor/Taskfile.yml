@@ -1,0 +1,623 @@
+###
+##
+# * TASKFILE
+##  https://taskfile.dev
+###
+version: '3'
+
+vars:
+
+  name:                     harbor
+
+  nameSpace:                "{{.name}}"
+
+  domainName:               "{{.name}}.thesym.site"
+  domainNameNotary:         "notary.{{.name}}.thesym.site"
+
+  chartRepoUrl:             https://helm.goharbor.io
+  chartRepoName:            harbor
+  chartName:                "{{.name}}"
+
+  filter:                   "basic-allow"                                      ### NOT WORKING; NOT implemented yet
+  # filter:                  "basic-auth"
+  # filter:                  "basic-deny"                                      ###     WORKING; NOT implemented properly -> redirect to thesym.site
+  ### filter:                  "ory"                                           ### NOT WORKING; NOT implemented yet
+  
+  labelTier:                devOps
+  
+  hostCertStaging:          ""                                                 ### letsencrypt
+  # hostCertStaging:          true                                             ### letsencryptStaging
+  hostAcmeEmail:            "fbeutelschiess@gmail.com"
+  hostPrivateKeySecretName: "letsencrypt-fbeutelschiessgmail.com"
+
+  mappingPort:              443
+  mappingServiceName:       "{{.name}}"
+  mappingPortNotary:        4443
+  mappingServiceNameNotary: "{{.name}}"
+
+  portforwardingPortSource: "4443"
+  portforwardingPortTarget: "443"
+
+  pvName0:                  "{{.name}}"
+  pvRelativePath0:          "{{.name}}"
+  pvStorageSize0:           18Gi
+  pvStorageClass0:          "local-path"
+
+  #pvName0:                  "{{.name}}-registry"
+  #pvRelativePath0:          "{{.name}}/registry"
+  #pvStorageSize0:           5Gi
+  #pvStorageClass0:          "local-path"
+
+  # pvName1:                  "{{.name}}-chartmuseum"
+  # pvRelativePath1:          "{{.name}}/chartmuseum"
+  # pvStorageSize1:           5Gi
+  # pvStorageClass1:          "local-path"
+
+  # pvName2:                  "{{.name}}-jobservice"
+  # pvRelativePath2:          "{{.name}}/jobservice"
+  # pvStorageSize2:           1Gi
+  # pvStorageClass2:          "local-path"
+
+  # pvName3:                  "{{.name}}-database"
+  # pvRelativePath3:          "{{.name}}/database"
+  # pvStorageSize3:           1Gi
+  # pvStorageClass3:          "local-path"
+
+  # pvName4:                  "{{.name}}-redis"
+  # pvRelativePath4:          "{{.name}}/redis"
+  # pvStorageSize4:           1Gi
+  # pvStorageClass4:          "local-path"
+
+  # pvName5:                  "{{.name}}-trivy"
+  # pvRelativePath5:          "{{.name}}/trivy"
+  # pvStorageSize5:           5Gi
+  # pvStorageClass5:          "local-path"
+
+
+  templateDebugTarget:       "ingress/ingress"
+
+  # servicePort:               5432
+
+  message:                   Tasks for {{.name}}{{if .chartName}}-helm{{end}}
+
+  chartSecretsExist:         true
+  # chartSecretsExist:         false
+  chartVariablesSet: |- 
+    --set externalURL=https://{{.domainName}} \
+    --set expose.type=clusterIP \
+    --set internalTLS.enabled=false \
+    --set expose.tls.auto.commonName={{.name}} \
+    --set persistence.persistentVolumeClaim.registry.existingClaim={{.pvName0}} \
+    --set persistence.persistentVolumeClaim.registry.storageClass={{.pvStorageClass0}} \
+    --set persistence.persistentVolumeClaim.registry.subPath=registry \
+    --set persistence.persistentVolumeClaim.chartmuseum.existingClaim={{.pvName0}} \
+    --set persistence.persistentVolumeClaim.chartmuseum.storageClass={{.pvStorageClass0}} \
+    --set persistence.persistentVolumeClaim.chartmuseum.subPath=chartmuseum \
+    --set persistence.persistentVolumeClaim.jobservice.existingClaim={{.pvName0}} \
+    --set persistence.persistentVolumeClaim.jobservice.storageClass={{.pvStorageClass0}} \
+    --set persistence.persistentVolumeClaim.jobservice.subPath=jobservice \
+    --set persistence.persistentVolumeClaim.database.existingClaim={{.pvName0}} \
+    --set persistence.persistentVolumeClaim.database.storageClass={{.pvStorageClass0}} \
+    --set persistence.persistentVolumeClaim.database.subPath=database \
+    --set persistence.persistentVolumeClaim.redis.existingClaim={{.pvName0}} \
+    --set persistence.persistentVolumeClaim.redis.storageClass={{.pvStorageClass0}} \
+    --set persistence.persistentVolumeClaim.redis.subPath=redis \
+    --set persistence.persistentVolumeClaim.trivy.existingClaim={{.pvName0}} \
+    --set persistence.persistentVolumeClaim.trivy.storageClass={{.pvStorageClass0}} \
+    --set persistence.persistentVolumeClaim.trivy.subPath=trivy \
+
+
+#--set internalTLS.enabled=true \
+### ingress
+#--set expose.ingress.hosts.core="{{.domainName}}" \
+#--set expose.ingress.hosts.notary="{{.domainNameNotary}}" \
+#--set expose.ingress.annotations."kubernetes\.io\/ingress\.class"=ambassador \
+
+    ### clusterIP
+### needs two Hosts harbor + notary
+# --set expose.type=clusterIP \
+
+
+tasks:
+
+  taskDebug:
+    desc: show all variables in Taskfile
+    cmds:
+      - |
+        echo -e \
+        "\n{{range $key, $value := .}} {{$key }}:  \e[92m{{$value}}\e[0m\n {{end}}\n"
+    silent: true
+
+
+  default:
+    desc: display info
+    cmds:
+      - |
+        echo -e \
+        "\n{{.message}}\n"
+      - |
+        task -l
+    silent: true
+
+
+###
+##
+# ** SEQUENCE
+##
+###
+  1:
+    desc: ( repoAdd )
+    cmds:
+      - task: repoAdd
+    silent: true
+
+
+  2:
+    desc: ( chartGet )
+    cmds:
+      - task: chartGet
+    silent: true
+
+
+  3:
+    desc: ( namespaceApply )
+    cmds:
+      - task: namespaceApply
+    silent: true
+
+
+  4:
+    desc: ( filterPolicyApply )
+    cmds:
+      - task: filterPolicyApply
+    silent: true
+
+
+  5:
+    desc: ( mappingApply )
+    cmds:
+      - task: mappingApply
+    silent: true
+
+
+  6:
+    desc: ( hostApply )
+    cmds:
+      - task: hostApply
+    silent: true
+
+
+  7:
+    desc: ( persistenceApply )
+    cmds:
+      - task: persistenceApply
+    silent: true
+
+
+  8:
+    desc: ( chartInstall )
+    cmds:
+      - task: chartInstall
+    silent: true
+
+
+  9:
+    desc: ( chartUpdate )
+    cmds:
+      - task: chartUpdate
+    silent: true
+
+
+  10:
+    desc: ( resourcesRemove )
+    cmds:
+      - task: resourcesRemove
+    silent: true
+
+
+###
+##
+# ** ALPHABETICAL
+##
+###
+  chartDebug:
+    desc: debug chart
+    cmds:
+      - |
+        helm install \
+        --namespace {{.nameSpace}} \
+        --dry-run \
+        --debug \
+        {{.name}} CHART/{{.chartName}} \
+        {{.chartVariablesSet}}
+    silent: true
+
+
+  chartGet:
+    desc: download the chart
+    cmds:
+      - |
+        helm pull \
+        {{.chartRepoName}}/{{.chartName}} \
+        -d CHART \
+        --untar
+    silent: true
+
+
+  chartInstall:
+    desc: install chart
+    cmds:
+      - |
+        helm \
+        {{- if eq .chartSecretsExist "true"}}
+        secrets \
+        {{- end}}
+        install \
+        {{.name}} CHART/{{.chartName}} \
+        --namespace {{.nameSpace}} \
+        {{.chartVariablesSet}}
+        {{- if eq .chartSecretsExist "true"}}
+        -f sec.yaml
+        {{- end}}
+    silent: true
+
+
+  chartUpdate:
+    desc: update chart
+    cmds:
+      - |
+        helm \
+        {{- if eq .chartSecretsExist "true"}}
+        secrets \
+        {{- end}}
+        upgrade \
+        --namespace {{.nameSpace}} \
+        {{.name}} CHART/{{.chartName}} \
+        {{.chartVariablesSet}}
+        {{- if eq .chartSecretsExist "true"}}
+        -f sec.yaml
+        {{- end}}
+    silent: true
+
+
+  chartRemove:
+    desc: (chartUninstall + namespaceDelete + persistentVolumeDelete)
+    cmds:
+      - task: chartUninstall
+      - task: namespaceDelete
+      - task: persistentVolumeDelete
+    silent: true
+
+
+  chartUninstall:
+    desc: uninstall the {{.name}}-chart
+    cmds:
+      - |
+        helm --namespace {{.nameSpace}} uninstall {{.name}}
+    silent: true
+  
+
+  filterPolicyApply:
+    desc: create the host for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: FilterPolicy
+        metadata:
+          name: {{.name}}
+          namespace: {{.nameSpace}}
+        spec:
+          rules:
+          - host: {{.domainName}}
+            path: "*"
+            filters: 
+            #- name: {{.filter}}
+            - name: {{if eq .filter "basic-allow"}}"basic-auth"{{else}}{{.filter}}{{end}}
+              namespace: "ambassador"
+              {{- if eq .filter "basic-allow"}}
+              onDeny:  "continue"
+              onAllow: "continue"
+              {{- end}}
+        EOF
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: FilterPolicy
+        metadata:
+          name: {{.name}}-notary
+          namespace: {{.nameSpace}}
+        spec:
+          rules:
+          - host: {{.domainNameNotary}}
+            path: "*"
+            filters: 
+            #- name: {{.filter}}
+            - name: {{if eq .filter "basic-allow"}}"basic-auth"{{else}}{{.filter}}{{end}}
+              namespace: "ambassador"
+              {{- if eq .filter "basic-allow"}}
+              onDeny:  "continue"
+              onAllow: "continue"
+              {{- end}}
+        EOF
+    silent: true
+
+
+  hostApply:
+    desc: apply the host for {{.name}} and {{.name}}Notary
+    cmds:
+      - |
+        ### Harbor
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: Host
+        metadata:
+          name: {{.name}}
+          namespace: ambassador-hosts
+        spec:
+          hostname: {{.domainName}}
+          acmeProvider:
+            {{- if .hostCertStaging }}
+            authority: https://acme-staging-v02.api.letsencrypt.org/directory
+            {{- else}}
+            authority: https://acme-v02.api.letsencrypt.org/directory
+            {{- end}}
+            email: {{.hostAcmeEmail}}
+            privateKeySecret:
+              name: {{.hostPrivateKeySecretName}}
+          tlsSecret: 
+            name: {{.name}}
+          requestPolicy:
+            insecure:
+              action: Redirect
+        EOF
+
+        ### Notary
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: Host
+        metadata:
+          name: {{.name}}-notary
+          namespace: ambassador-hosts
+        spec:
+          hostname: {{.domainNameNotary}}
+          acmeProvider:
+            {{- if .hostCertStaging }}
+            authority: https://acme-staging-v02.api.letsencrypt.org/directory
+            {{- else}}
+            authority: https://acme-v02.api.letsencrypt.org/directory
+            {{- end}}
+            email: {{.hostAcmeEmail}}
+            privateKeySecret:
+              name: {{.hostPrivateKeySecretName}}
+          tlsSecret: 
+            name: {{.name}}-notary
+          requestPolicy:
+            insecure:
+              action: Redirect
+        EOF
+    silent: true
+
+
+  mappingApply:
+    desc: apply the mapping for {{.name}} and {{.name}}Notary
+    cmds:
+      - |
+        ### Harbor
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: Mapping
+        metadata:
+          name: {{.name}}
+          namespace: {{.nameSpace}}
+        spec:
+          prefix: /
+          #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
+          service: https://{{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPort}}
+          host: {{.domainName}}
+        EOF
+
+        ### Notary
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: Mapping
+        metadata:
+          name: {{.name}}-notary
+          namespace: {{.nameSpace}}
+        spec:
+          prefix: /
+          #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
+          service: https://{{.mappingServiceNameNotary}}.{{.nameSpace}}:{{.mappingPortNotary}}
+          host: {{.domainNameNotary}}
+        EOF
+    silent: true
+
+
+  namespaceApply:
+    desc: apply the namespace {{.nameSpace}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1 
+        kind: Namespace 
+        metadata: 
+          name: {{.nameSpace}}
+          labels: 
+            name: {{.nameSpace}}
+            tier: {{.labelTier}}
+        EOF
+    silent: true
+
+
+  namespaceDelete:
+    desc: delete the namespace {{.nameSpace}}
+    cmds:
+      - |
+        kubectl delete namespace {{.nameSpace}}
+    silent: true
+
+
+  portforward:
+    desc: portforwarding for {{.name}}
+    cmds:
+      - |
+        #kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -l component=core -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
+    silent: true
+
+
+  persistenceApply:
+    desc: apply persistence for {{.name}}
+    cmds:
+      ### database
+      - |
+        {{- if .pvName0 }}
+        mkdir -p ../../PERSISTENCE/{{.name}}
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: PersistentVolume
+        metadata:
+          name: {{.pvName0}}
+          labels:
+            type: local
+        spec:
+          storageClassName: {{.pvStorageClass0}}
+          capacity:
+            storage: {{.pvStorageSize0}}
+          accessModes:
+            - ReadWriteOnce
+          hostPath:
+            path: "/PERSISTENCE/{{.pvRelativePath0}}"
+        ---
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          name: {{.pvName0}}
+          namespace: {{.nameSpace}}
+        spec:
+          volumeName: {{.pvName0}}
+          storageClassName: {{.pvStorageClass0}}
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: {{.pvStorageSize0}}
+        EOF
+        {{- end }}
+
+        {{- if .pvName1 }}
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: PersistentVolume
+        metadata:
+          name: {{.pvName1}}
+          labels:
+            type: local
+        spec:
+          storageClassName: manual
+          capacity:
+            storage: {{.pvStorageSize1}}
+          accessModes:
+            - ReadWriteOnce
+          hostPath:
+            path: "/PERSISTENCE/{{.pvRelativePath1}}"
+        ---
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          name: {{.pvName1}}
+          namespace: {{.nameSpace}}
+        spec:
+          volumeName: {{.pvName1}}
+          storageClassName: {{.pvStorageClass1}}
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: {{.pvStorageSize1}}
+        EOF
+        {{- end }}
+    silent: true
+
+
+  persistentVolumeDelete:
+    desc: delete the pv(s) for {{.name}}
+    cmds:
+      - |
+        {{- if .pvName0 }}
+        kubectl delete pv {{.pvName0}}
+        {{- end }}
+        {{- if .pvName1 }}
+        kubectl delete pv {{.pvName1}}
+        {{- end }}
+    silent: true
+
+
+  repoAdd:
+    desc: add the repository
+    cmds:
+      - |
+        helm repo add \
+        {{.chartRepoName}} \
+        {{.chartRepoUrl}}
+      - |
+        helm repo update
+    silent: true
+
+
+  resourcesRemove:
+    desc: (namespaceDelete + persistentVolumeDelete)
+    cmds:
+      - task: namespaceDelete
+      - task: persistentVolumeDelete
+    silent: true
+
+
+  templateDebug:
+    desc: "debug template; USAGE: `task templateDebug templateDebugTarget=admin`; DEFAULT: ingress"
+    cmds:
+      - |
+        helm template \
+        --namespace {{.nameSpace}} \
+        ./CHART/{{.chartName}} \
+        --debug \
+        -s templates/{{.templateDebugTarget}}.yaml \
+        {{.chartVariablesSet}}
+    silent: true
+
+
+###
+##
+# ** CUSTOM
+##
+###
+
+###
+##
+# *** DEPRECATED
+##
+###
+### ###
+### ##
+### # * PATCH
+### ##
+### ###
+### kubectl --namespace harbor patch ingress harbor-harbor-ingress --patch "$(cat ../ingressPatch.yaml)"
+### kubectl --namespace harbor patch ingress harbor-harbor-ingress-notary --patch "$(cat ../ingressPatch.yaml)"
+### #!/usr/bin/env zsh
+### ###
+### ##
+### # * PATCH
+### ##
+### ###
+### kubectl --namespace harbor patch ingress harbor-harbor-ingress --patch "$(cat ../ingressPatch.yaml)"
+### kubectl --namespace harbor patch ingress harbor-harbor-ingress-notary --patch "$(cat ../ingressPatch.yaml)"
+### ### get ingress
+### # kg ingress -o yaml >! ingressBAK.yaml
+### # kg ingress -o yaml > ingressBAK.yaml
+###
+###
+###
+### ingressPatch.yaml
+#spec:
+#  tls: []
