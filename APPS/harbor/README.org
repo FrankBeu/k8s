@@ -21,4 +21,6 @@
 **** push helmchart to harbor
 **** vulnerabilities
 https://thenewstack.io/how-to-scan-docker-images-for-vulnerabilities-with-harbor/
+**** [#1] use API
+     https://harbor.thesym.site/devcenter-api-2.0
 ** TODO TODOS
