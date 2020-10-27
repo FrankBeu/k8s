@@ -370,7 +370,7 @@ tasks:
     desc: portforwarding for {{.name}}
     cmds:
       - |
-        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -o name) {{.portforwardingPortTarget}}:{{.portforwardingPortSource}}
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
     silent: true
 
 
