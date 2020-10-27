@@ -9,5 +9,3 @@ helm template \
 	openproject ../CHART/openproject \
 	--debug \
 	-s templates/ingress.yaml
-        
-

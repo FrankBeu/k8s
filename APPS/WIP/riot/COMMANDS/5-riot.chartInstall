@@ -1,0 +1,10 @@
+#!/usr/bin/env zsh
+###
+##
+# * APPLICATION
+##
+###
+helm install \
+	--namespace riot \
+        riot \
+	../CHART/riot-im

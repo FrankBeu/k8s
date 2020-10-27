@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+###
+##
+# * UPGRADE
+##
+###
+helm upgrade \
+	--namespace riot \
+	riot ../CHART/riot-im \

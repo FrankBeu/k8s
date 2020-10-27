@@ -2,7 +2,7 @@
 ###
 ##
 # * REPOSITORY
-#   
+#
 ##
 ###
 echo -ne 'Enter your harbor.thesym.site credentials \nUsername: ' && read HARBOR_USERNAME

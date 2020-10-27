@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+###
+##
+# * CHART
+##
+###
+helm pull halkeye/riot-im -d ../CHART
+cd ../CHART
+tar -xzf riot-im-*.tgz

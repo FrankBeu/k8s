@@ -1,0 +1,10 @@
+#!/usr/bin/env zsh
+###
+##
+# * APPLICATION
+##
+###
+helm install \
+	--namespace matrix \
+        matrix \
+	../CHART/matrix-chart

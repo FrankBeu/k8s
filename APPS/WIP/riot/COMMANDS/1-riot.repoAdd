@@ -1,0 +1,8 @@
+#!/usr/bin/env zsh
+###
+##
+# * REPOSITORY
+##
+###
+helm repo add halkeye https://halkeye.github.io/helm-charts/#
+helm repo update

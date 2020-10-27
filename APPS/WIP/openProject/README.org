@@ -1,6 +1,6 @@
 * OpenProject
 ** manual
-*** first login 
+*** first login
 admin - admin
 *** change password
 ** TODO TODOS

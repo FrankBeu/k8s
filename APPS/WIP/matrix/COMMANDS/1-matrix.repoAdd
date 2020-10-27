@@ -1,0 +1,10 @@
+#!/usr/bin/env zsh
+###
+##
+# * REPOSITORY
+##
+###
+cd ../CHART
+git clone https://github.com/dacruz21/matrix-chart.git
+cd matrix-chart
+helm dependency update

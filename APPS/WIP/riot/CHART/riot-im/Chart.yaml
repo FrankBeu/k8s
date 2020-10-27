@@ -1,0 +1,18 @@
+apiVersion: v1
+appVersion: v1.7.2
+description: Communicate the way you want with Riot - a universal secure chat app
+  entirely under your control.
+home: https://about.riot.im/
+icon: https://raw.githubusercontent.com/vector-im/riot-web/develop/res/themes/riot/img/logos/riot-im-logo-black-text.png
+keywords:
+- synapse
+- chat
+- matrix
+- riot
+maintainers:
+- email: helm@gavinmogan.com
+  name: Gavin Mogan
+name: riot-im
+sources:
+- https://github.com/vector-im/riot-web
+version: 0.2.5
