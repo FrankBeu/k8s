@@ -8,23 +8,51 @@ version: '3'
 vars:
 
   name:                     ambassador
+
   nameSpace:                "{{.name}}"
+
   domainName:               "{{.name}}.thesym.site"
 
   chartRepoUrl:             https://www.getambassador.io
   chartRepoName:            datawire
   chartName:                "{{.name}}"
   
+  # filter:     "basic-allow"                                                    ### NOT WORKING; NOT implemented yet
+  filter:     "basic-auth"
+  # filter:     "basic-deny"                                                     ###     WORKING; NOT implemented properly -> redirect to thesym.site
+  ### filter:     "ory"                                                          ### NOT WORKING; NOT implemented yet
+
   labelTier:                edge
   
-  # hostCertStaging:          ""                                                 ### letsencrypt
-  hostCertStaging:          true                                               ### letsencryptStaging
+  hostCertStaging:          ""                                                 ### letsencrypt
+  # hostCertStaging:          true                                               ### letsencryptStaging
   hostAcmeEmail:            "fbeutelschiess@gmail.com"
+
+  mappingPort:              80
+  mappingServiceName:       "{{.chartName}}"
+
+  portforwardingPortSource: ""
+  portforwardingPortTarget: ""
 
   templateDebugTarget:       "templates/ingress.yaml"
 
   message:                   Tasks for {{.name}}{{if .chartName}}-helm{{end}}
 
+  # chartSecretsExist:         true
+  chartSecretsExist:         false
+  chartVariablesSet: |-
+    --set service.ports[0].name=http \
+    --set service.ports[0].port=80 \
+    --set service.ports[0].targetPort=8080 \
+    --set service.ports[1].name=https \
+    --set service.ports[1].port=443 \
+    --set service.ports[1].targetPort=8443 \
+    --set service.ports[2].name=ssh \
+    --set service.ports[2].port=22 \
+    --set service.ports[2].targetPort=8022 \
+    #--set service.ports[3].name=test \
+    #--set service.ports[3].port=22222 \
+    #--set service.ports[3].targetPort=22222 \
 
 tasks:
 
@@ -89,33 +117,30 @@ tasks:
 
 
   6:
+    desc: ( chartInstall )
+    cmds:
+      - task: chartInstall
+    silent: true
+
+
+  7:
     desc: ( filterApply )
     cmds:
       - task: filterApply
     silent: true
 
 
-  7:
+  8:
     desc: ( filterPolicyApply )
     cmds:
       - task: filterPolicyApply
     silent: true
 
 
-  8:
+  9:
     desc: ( hostApply )
     cmds:
       - task: hostApply
-    silent: true
-#                                                               #
-##                                                             ## 
-###                                                           ###
-############################## DONE #############################
-
-  9:
-    desc: ( chartInstall )
-    cmds:
-      - task: chartInstall
     silent: true
 
 
@@ -153,7 +178,8 @@ tasks:
         --namespace {{.nameSpace}} \
         --dry-run \
         --debug \
-        {{.chartName}} CHART/{{.chartName}}
+        {{.chartName}} CHART/{{.chartName}} \
+        {{.chartVariablesSet}}
     silent: true
 
 
@@ -172,21 +198,17 @@ tasks:
     desc: install chart
     cmds:
       - |
-        helm install \
+        helm \
+        {{- if eq .chartSecretsExist "true"}}
+        secrets \
+        {{- end}}
+        install \
+        {{.name}} CHART/{{.chartName}} \
         --namespace {{.nameSpace}} \
-        {{.chartName}} CHART/{{.chartName}} \
-      ### traefik-START
-      # - |
-      #   helm install \
-      #   --namespace {{.nameSpace}} \
-      #   {{.chartName}} CHART/{{.chartName}} \
-      #   --set ingress.enabled=True \
-      #   --set ingress.annotations."kubernetes\.io\/ingress\.class"=traefik \
-      #   --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.middlewares"={{.traefikMiddleware}} \
-      #   --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.tls\.certresolver"={{.traefikCertResolver}} \
-      #   --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.tls\.domains\.0\.main"={{.domainName}} \
-      #   --set ingress.hosts.0={{.domainName}}
-      ### traefik-END
+        {{.chartVariablesSet}}
+        {{- if eq .chartSecretsExist "true"}}
+        -f sec.yaml
+        {{- end}}
     silent: true
 
 
@@ -194,21 +216,17 @@ tasks:
     desc: update chart
     cmds:
       - |
-        helm upgrade \
+        helm \
+        {{- if eq .chartSecretsExist "true"}}
+        secrets \
+        {{- end}}
+        upgrade \
         --namespace {{.nameSpace}} \
-        {{.chartName}} CHART/{{.chartName}} \
-      ### traefik-START
-      # - |
-      #   helm upgrade \
-      #   --namespace {{.nameSpace}} \
-      #   {{.chartName}} CHART/{{.chartName}} \
-      #   --set ingress.enabled=True \
-      #   --set ingress.annotations."kubernetes\.io\/ingress\.class"=traefik \
-      #   --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.middlewares"={{.traefikMiddleware}} \
-      #   --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.tls\.certresolver"={{.traefikCertResolver}} \
-      #   --set ingress.annotations."traefik\.ingress\.kubernetes\.io\/router\.tls\.domains\.0\.main"={{.domainName}} \
-      #   --set ingress.hosts.0={{.domainName}}
-      ### traefik-END
+        {{.name}} CHART/{{.chartName}} \
+        {{.chartVariablesSet}}
+        {{- if eq .chartSecretsExist "true"}}
+        -f sec.yaml
+        {{- end}}
     silent: true
 
 
@@ -217,15 +235,14 @@ tasks:
     cmds:
       - task: chartUninstall
       - task: namespaceDelete
-      - task: persistVolumeDelete
     silent: true
 
 
   chartUninstall:
-    desc: uninstall the {{.chartName}}-chart
+    desc: uninstall the {{.name}}-chart
     cmds:
       - |
-        helm uninstall {{.chartName}}
+        helm --namespace {{.nameSpace}} uninstall {{.name}}
     silent: true
   
 
@@ -245,12 +262,12 @@ tasks:
         apiVersion: getambassador.io/v2
         kind: Mapping
         metadata:
-          name: {{.name}}-mapping
+          name: {{.name}}
           namespace: {{.nameSpace}}
         spec:
           prefix: /
           #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
-          service: {{.name}}.{{.nameSpace}}:{{.mappingPort}}
+          service: {{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPort}}
           host: {{.domainName}}
         EOF
     silent: true
@@ -285,50 +302,6 @@ tasks:
     cmds:
       - |
         kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
-    silent: true
-
-
-  persistenceApply:
-    desc: "TODO: apply a persistent volume"
-    cmds:
-      - |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: v1
-        kind: PersistentVolume
-        metadata:
-          name: {{.name}}-pv
-          labels:
-            type: local
-        spec:
-          storageClassName: manual
-          capacity:
-            storage: {{.pvStorageSize}}
-          accessModes:
-            - ReadWriteOnce
-          hostPath:
-            path: "/PERSISTENCE/{{.pvRelativePath}}"
-        ---
-        apiVersion: v1
-        kind: PersistentVolumeClaim
-        metadata:
-          name: {{.name}}-pv-claim
-          namespace: {{.nameSpace}}
-        spec:
-          storageClassName: manual
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: {{.pvStorageSize}}
-        EOF
-    silent: true
-
-
-  persistentVolumeDelete:
-    desc: delete the persistent volume {{.name}}-pv
-    cmds:
-      - |
-        kubectl delete pv {{.name}}-pv
     silent: true
 
 

@@ -8,3 +8,10 @@ spec:
   hostname: api.thesym.site
   acmeProvider:
     email: fbeutelschiess@gmail.com
+    privateKeySecret:
+      name: letsencrypt-fbeutelschiessgmail.com
+  tlsSecret:
+    name: ambassador
+  requestPolicy:
+    insecure:
+      action: Redirect
