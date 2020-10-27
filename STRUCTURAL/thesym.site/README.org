@@ -1,0 +1,7 @@
+* APP_NAME
+** INFO
+*** SOURCES
+** TODO TODOS
+*** TODO create a Gate for the Domain
+overview of all avaailable subdomains
+in relation to authorization
