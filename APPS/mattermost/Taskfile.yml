@@ -17,8 +17,8 @@ vars:
   chartRepoName:            "{{.name}}"
   chartName:                mattermost-team-edition
 
-  # filter:                  "basic-allow"                                       ### NOT WORKING; NOT implemented yet
-  filter:                   "basic-auth"
+  filter:                  "basic-allow"                                       ### NOT WORKING; NOT implemented yet
+  # filter:                  "basic-auth"
   # filter:                  "basic-deny"                                        ###     WORKING; NOT implemented properly -> redirect to thesym.site
   ### filter:     "ory"                                                          ### NOT WORKING; NOT implemented yet
 
@@ -27,6 +27,7 @@ vars:
   hostCertStaging:          ""                                                 ### letsencrypt
   # hostCertStaging:          true                                               ### letsencryptStaging
   hostAcmeEmail:            "fbeutelschiess@gmail.com"
+  hostPrivateKeySecretName: "letsencrypt-fbeutelschiessgmail.com"
 
   mappingPort:              8065
   mappingServiceName:       "{{.chartName}}"
@@ -49,11 +50,14 @@ vars:
   message:                   Tasks for {{.name}}{{if .chartName}}-helm{{end}}
 
   chartVariablesSet: |-
+    --set mysql.persistence.existingClaim=mattermost-db \
     --set persistence.data.existingClaim=mattermost-data \
     --set persistence.plugins.existingClaim=mattermost-plugins \
-    --set mysql.persistence.existingClaim=mattermost-db \
     --set configJSON.EmailSettings.SendEmailNotifications=true \
     --set configJSON.ServiceSettings.SiteURL="https://{{.domainName}}" \
+    --set configJSON.TeamSettings.EnableTeamCreation=false \
+    --set configJSON.TeamSettings.RestrictDirectMessage=team \
+
 
 tasks:
 
@@ -268,7 +272,9 @@ tasks:
             {{- end}}
             email: {{.hostAcmeEmail}}
             privateKeySecret:
-              name: {{.name}}-secret
+              name: {{.hostPrivateKeySecretName}}
+          tlsSecret:
+            name: {{.name}}
           requestPolicy:
             insecure:
               action: Redirect
