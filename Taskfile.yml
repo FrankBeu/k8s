@@ -66,9 +66,9 @@ tasks:
     desc: "get all resources from current namespace"
     cmds:
       - |
-        for APIRES in `kubectl api-resources --verbs=list --namespaced -o name`; do
-        RES=$(kubectl get --show-kind --ignore-not-found $APIRES)
-        [[ ! -z $RES ]] && echo -e "\x1b[33m$APIRES\x1b[0m\n$RES\n"; 
+        for APIRESOURCES in `kubectl api-resources --verbs=list --namespaced -o name`; do
+        RES=$(kubectl get --show-kind --ignore-not-found ${APIRESOURCES})
+        [[ ! -z ${RESOURCES} ]] && echo -e "\x1b[33m${APIRESOURCES}\x1b[0m\n${RESOURCES}\n"; 
         done
     silent: true
 
