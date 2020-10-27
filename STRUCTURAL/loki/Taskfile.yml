@@ -28,6 +28,7 @@ vars:
   hostCertStaging:          ""                                                 ### letsencrypt
   # hostCertStaging:          true                                               ### letsencryptStaging
   hostAcmeEmail:            "fbeutelschiess@gmail.com"
+  hostPrivateKeySecretName: "letsencrypt-fbeutelschiessgmail.com"
 
   mappingPort:              80                                                 ### uses servicePort
   mappingServiceName:       "{{.chartName}}-grafana"
@@ -256,8 +257,7 @@ tasks:
         apiVersion: getambassador.io/v2
         kind: Host
         metadata:
-          name: {{.name}}-host
-          # namespace: {{.nameSpace}}
+          name: {{.name}}
           namespace: ambassador-hosts
         spec:
           hostname: {{.domainName}}
@@ -269,7 +269,9 @@ tasks:
             {{- end}}
             email: {{.hostAcmeEmail}}
             privateKeySecret:
-              name: {{.name}}-secret
+              name: {{.hostPrivateKeySecretName}}
+          tlsSecret:
+            name: {{.name}}
           requestPolicy:
             insecure:
               action: Redirect
