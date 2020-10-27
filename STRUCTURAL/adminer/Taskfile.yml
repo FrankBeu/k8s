@@ -21,12 +21,13 @@ vars:
   filter:     "basic-auth"
   # filter:     "basic-deny"                                                     ###     WORKING; NOT implemented properly -> redirect to thesym.site
   ### filter:     "ory"                                                          ### NOT WORKING; NOT implemented yet
-  
+
   labelTier:                database
-  
+
   hostCertStaging:          ""                                                 ### letsencrypt
   # hostCertStaging:          true                                               ### letsencryptStaging
   hostAcmeEmail:            "fbeutelschiess@gmail.com"
+  hostPrivateKeySecretName: "letsencrypt-fbeutelschiessgmail.com"
 
   mappingPort:              80
   mappingServiceName:       "{{.chartName}}"
@@ -70,7 +71,7 @@ tasks:
   1:
     desc: ( repoAdd )
     cmds:
-      - task: repoAdd 
+      - task: repoAdd
     silent: true
 
 
@@ -84,7 +85,7 @@ tasks:
   3:
     desc: ( namespaceApply )
     cmds:
-      - task: namespaceApply 
+      - task: namespaceApply
     silent: true
 
 
@@ -112,7 +113,7 @@ tasks:
   7:
     desc: ( chartInstall )
     cmds:
-      - task: chartInstall 
+      - task: chartInstall
     silent: true
 
 
@@ -189,7 +190,7 @@ tasks:
       - |
         helm --namespace {{.nameSpace}} uninstall {{.chartName}}
     silent: true
-  
+
 
   filterPolicyApply:
     desc: create the host for {{.name}}
@@ -205,7 +206,7 @@ tasks:
           rules:
           - host: {{.domainName}}
             path: "*"
-            filters: 
+            filters:
             #- name: {{.filter}}
             - name: {{if eq .filter "basic-allow"}}"basic-auth"{{else}}{{.filter}}{{end}}
               namespace: "ambassador"
@@ -237,17 +238,15 @@ tasks:
             {{- end}}
             email: {{.hostAcmeEmail}}
             privateKeySecret:
-              name: {{.name}}-secret
+              name: {{.hostPrivateKeySecretName}}
+          tlsSecret:
+            name: {{.name}}
           requestPolicy:
             insecure:
               action: Redirect
         EOF
     silent: true
 
-            #authority: >-
-            #  {{if .hostCertStaging}} https://acme-staging-v02.api.letsencrypt.org/directory
-            #  {{else}} https://acme-v02.api.letsencrypt.org/directory
-            #  {{end}}
 
   mappingApply:
     desc: apply the mapping for {{.name}}
@@ -273,11 +272,11 @@ tasks:
     cmds:
       - |
         cat <<EOF | kubectl apply -f -
-        apiVersion: v1 
-        kind: Namespace 
-        metadata: 
+        apiVersion: v1
+        kind: Namespace
+        metadata:
           name: {{.nameSpace}}
-          labels: 
+          labels:
             name: {{.nameSpace}}
             tier: {{.labelTier}}
         EOF
@@ -330,4 +329,3 @@ tasks:
 # ** CUSTOM
 ##
 ###
-
