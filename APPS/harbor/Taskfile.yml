@@ -85,7 +85,7 @@ vars:
   chartVariablesSet: |- 
     --set externalURL=https://{{.domainName}} \
     --set expose.type=clusterIP \
-    --set internalTLS.enabled=false \
+    --set internalTLS.enabled=true \
     --set expose.tls.auto.commonName={{.name}} \
     --set persistence.persistentVolumeClaim.registry.existingClaim={{.pvName0}} \
     --set persistence.persistentVolumeClaim.registry.storageClass={{.pvStorageClass0}} \
