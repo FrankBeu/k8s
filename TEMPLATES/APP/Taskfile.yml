@@ -21,9 +21,9 @@ vars:
   filter:     "basic-auth"
   # filter:     "basic-deny"                                                     ###     WORKING; NOT implemented properly -> redirect to thesym.site
   ### filter:     "ory"                                                          ### NOT WORKING; NOT implemented yet
-  
+
   labelTier:                LABEL_TIER
-  
+
   # hostCertStaging:          ""                                                 ### letsencrypt
   hostCertStaging:          true                                               ### letsencryptStaging
   hostAcmeEmail:            "fbeutelschiess@gmail.com"
@@ -39,7 +39,7 @@ vars:
   # pvRelativePath0:          "{{.name}}/data"
   # pvStorageSize0:           10Gi
   # pvStorageClass0:          local-path
-  # pvName1:                  "{{.name}}-db"    
+  # pvName1:                  "{{.name}}-db"
   # pvRelativePath1:          "{{.name}}/db"
   # pvStorageSize1:           8Gi
   # pvStorageClass1:          local-path
@@ -52,7 +52,7 @@ vars:
 
   chartSecretsExist:         true
   # chartSecretsExist:         false
-  # chartVariablesSet: |- 
+  # chartVariablesSet: |-
   #   --set hostnames="{"{{.domainName}}"}" \
   #   --set domain="{{.superDomainName}}" \
   #   --set initialAccout.username=mailadmin \
@@ -88,84 +88,84 @@ tasks:
   # 1:
   #   desc: (  )
   #   cmds:
-  #     - task: 
+  #     - task:
   #   silent: true
 
 
   # 2:
   #   desc: (  )
   #   cmds:
-  #     - task: 
+  #     - task:
   #   silent: true
 
 
   # 3:
   #   desc: (  )
   #   cmds:
-  #     - task: 
+  #     - task:
   #   silent: true
 
 
   # 4:
   #   desc: (  )
   #   cmds:
-  #     - task: 
+  #     - task:
   #   silent: true
 
 
   # 5:
   #   desc: (  )
   #   cmds:
-  #     - task: 
+  #     - task:
   #   silent: true
 
 
   # 6:
   #   desc: (  )
   #   cmds:
-  #     - task: 
+  #     - task:
   #   silent: true
 
 
   # 7:
   #   desc: (  )
   #   cmds:
-  #     - task: 
+  #     - task:
   #   silent: true
 
 
   # 8:
   #   desc: (  )
   #   cmds:
-  #     - task: 
+  #     - task:
   #   silent: true
 
 
   # 9:
   #   desc: (  )
   #   cmds:
-  #     - task: 
+  #     - task:
   #   silent: true
 
 
   # 10:
   #   desc: (  )
   #   cmds:
-  #     - task: 
+  #     - task:
   #   silent: true
 
 
   # 11:
   #   desc: (  )
   #   cmds:
-  #     - task: 
+  #     - task:
   #   silent: true
 
 
   # 12:
   #   desc: (  )
   #   cmds:
-  #     - task: 
+  #     - task:
   #   silent: true
 
 
@@ -319,7 +319,7 @@ tasks:
       - |
         helm --namespace {{.nameSpace}} uninstall {{.name}}
     silent: true
-  
+
 
   configMapApply:
     desc: apply the configMap for {{.name}}
@@ -392,7 +392,7 @@ tasks:
           rules:
           - host: {{.domainName}}
             path: "*"
-            filters: 
+            filters:
             #- name: {{.filter}}
             - name: {{if eq .filter "basic-allow"}}"basic-auth"{{else}}{{.filter}}{{end}}
               namespace: "ambassador"
@@ -425,7 +425,7 @@ tasks:
             email: {{.hostAcmeEmail}}
             privateKeySecret:
               name: {{.hostPrivateKeySecretName}}
-          tlsSecret: 
+          tlsSecret:
             name: {{.name}}
           requestPolicy:
             insecure:
@@ -458,11 +458,11 @@ tasks:
     cmds:
       - |
         cat <<EOF | kubectl apply -f -
-        apiVersion: v1 
-        kind: Namespace 
-        metadata: 
+        apiVersion: v1
+        kind: Namespace
+        metadata:
           name: {{.nameSpace}}
-          labels: 
+          labels:
             name: {{.nameSpace}}
             tier: {{.labelTier}}
         EOF
@@ -632,4 +632,3 @@ tasks:
 # ** CUSTOM
 ##
 ###
-
