@@ -121,3 +121,15 @@ tasks:
     silent: true
 
 
+###
+##
+# ** REPOSITORY
+##
+###
+  repositoryGitHookLinkCreate:
+    desc: "create a symlink from GIT/hooks to .git/hooks"
+    cmds:
+      - |
+        rm -r ./.git/hooks
+        ln -srf ./GIT/hooks/ ./.git/hooks
+    silent: true
