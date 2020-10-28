@@ -1,5 +1,9 @@
 * MATTERMOST
 ** INFO
+*** DATABASE
+    Do not manipulate the Mattermost database directly.
+    Mattermost is designed to stop working if data integrity is compromised.
+    Any manipulation of the database must be done using the built in command line tools.
 *** SOURCES
     https://github.com/mattermost/mattermost-helm
 ** TODO TODOS
