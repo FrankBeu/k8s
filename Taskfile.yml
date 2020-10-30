@@ -47,7 +47,7 @@ tasks:
 
 
   k8sUpgrade:
-    desc: " TODO upgrade the cluster"
+    desc: "TODO upgrade the cluster"
     cmds:
       - |
         swapoff -a
@@ -78,7 +78,7 @@ tasks:
 # ** INSTALLATION
 ##
 ###
-  installHelmPush:
+  installationHelmPluginPush:
     ### cf. https://github.com/chartmuseum/helm-push
     desc: "helm: install helm-push"
     cmds:
@@ -87,7 +87,7 @@ tasks:
     silent: true
 
 
-  installHelmSecrets:
+  installationHelmPluginSecrets:
     ### cf. https://github.com/jkroepke/helm-secrets
     desc: "helm: install helm-secrets"
     cmds:
@@ -96,7 +96,7 @@ tasks:
     silent: true
 
 
-  installKubectlKrew:
+  installationKubectlKrew:
     ### cf. https://krew.sigs.k8s.io/docs/user-guide/setup/install/
     ### for plugins see: https://github.com/kubernetes-sigs/krew-index/blob/master/plugins.md
     desc: "kubectl: install krew"
@@ -112,7 +112,7 @@ tasks:
     silent: true
 
 
-  installKubectlPluginGopass:
+  installationKubectlPluginGopass:
     ### cf. https://github.com/gopasspw/kubectl-gopass
     desc: "kubectl: install gopass-plugin"
     cmds:
@@ -124,8 +124,8 @@ tasks:
 ###
 ##
 # ** REPOSITORY
-##
-###
+#
+#
   repositoryGitHookLinkCreate:
     desc: "create a symlink from GIT/hooks to .git/hooks"
     cmds:
@@ -133,3 +133,21 @@ tasks:
         rm -r ./.git/hooks
         ln -srf ./GIT/hooks/ ./.git/hooks
     silent: true
+
+
+###
+##
+# ** MISC
+#
+#
+  helmRepoThesymSiteAdd:
+    desc: "add thesym.site as repo"
+    cmds:
+      - |
+        summon --up bash -c 'helm repo add --username=frank --password=${PASSWORD} thesym.site https://harbor.thesym.site/chartrepo'
+        ###working
+        #helm repo add --username=frank --password=YH2Kfo6Mbif1ZHg2npNXfLdE thesym.site https://harbor.thesym.site/chartrepo
+        #summon --up bash -c 'echo $PASSWORD'
+    silent: true
+
+
