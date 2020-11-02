@@ -1,0 +1,104 @@
+###
+##
+# * flutter
+##
+###
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-flutter
+  labels:
+    name: test-flutter
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: regcred
+  namespace: test-flutter
+  selfLink: /api/v1/namespaces/test-flutter/secrets/regcred
+  uid: b534d904-8505-4150-9181-7e76ce1ce72c
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: ewoJImF1dGhzIjogewoJCSJoYXJib3IudGhlc3ltLnNpdGUiOiB7CgkJCSJhdXRoIjogIlpuSmhibXM2T0RrbEsyYzVZVnhIZlg0dlYyVkhjMkEzZGpzPSIKCQl9Cgl9Cn0K
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: flutter
+  namespace: test-flutter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flutter
+  template:
+    metadata:
+      labels:
+        app: flutter
+    spec:
+      containers:
+        - name: flutter
+          #image: harbor.thesym.site/flutter/webserver@latest
+          #image: harbor.thesym.site/flutter/webserver@sha256:fee07351c5a9a668a0ad2615f471ee3d8b9fe3cf41ac1896ace5c70eb63eb6d4
+          #image: harbor.thesym.site/flutter/webserver@sha256:2424b5aa8a7e30a4705350a84084462a09a3747c29755ba6397278b26b1f7a19
+          #image: harbor.thesym.site/flutter/webserver@sha256:1ed2c772dffce62df732fe97c7bc3282bfe9b0ac3c3e3f7033553c503231911a
+          image: harbor.thesym.site/flutter/webserver@sha256:82ac558e0490be705dcf3a7e5bdac22c86cd660fc00901d16e0bc9c891d8e0be
+      imagePullSecrets:
+        - name: regcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flutter
+  namespace: test-flutter
+  labels:
+    app: flutter
+spec:
+  type: ClusterIP
+  ports:
+    - port: 22222
+      name: flutter
+  selector:
+    app: flutter
+---
+#apiVersion: traefik.containo.us/v1alpha1
+#kind: IngressRoute
+#metadata:
+#  name: flutter-ingressRoute
+#  namespace: test-flutter
+#spec:
+#  entryPoints:
+#    - websecure
+#  routes:
+#    - kind: Rule
+#      match: Host(`flutter.thesym.site`)
+#      services:
+#        - name: flutter
+#          port: 22222
+#      middlewares:
+#        - name: basicauth
+#          namespace: traefik
+#  tls:
+#    certResolver: LetsEncryptStaging
+#    domains:
+#      - main: "flutter.thesym.site"
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: flutter-ingress
+  namespace: test-flutter
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    #traefik.ingress.kubernetes.io/router.middlewares: traefik-basicauth@kubernetescrd
+    traefik.ingress.kubernetes.io/router.tls.certresolver: LetsEncryptStaging
+    traefik.ingress.kubernetes.io/router.tls.domains.0.main: flutter.thesym.site
+spec:
+  rules:
+  - host: flutter.thesym.site
+    http:
+      paths:
+      - backend:
+          serviceName: flutter
+          servicePort: 22222
