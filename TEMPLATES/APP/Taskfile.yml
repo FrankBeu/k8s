@@ -5,13 +5,28 @@
 ###
 version: '3'
 
+
+includes:
+
+  # taskfileRepository: ../../Taskfile.yml
+  varsGlobal:         ../../TaskfileVariablesGlobal.yml
+
 vars:
+
+  ###
+  ##
+  # global vars (imported as varsGlobal) will never be overwritten.
+  # However, they can only be used after setting an (ignored) value.
+  #
+  domainGlobal: GLOBAL
+
 
   name:                     NAME
 
   nameSpace:                "{{.name}}"
 
-  domainName:               "{{.name}}.thesym.site"
+  domainName:               "{{.name}}.{{.domainGlobal}}"
+  # domainNameAlt:            "NAME_ALT.{{.domainGlobal}}"
 
   chartRepoUrl:             https://URL
   chartRepoName:            CHART_REPO_NAME
@@ -24,8 +39,8 @@ vars:
 
   labelTier:                LABEL_TIER
 
-  # hostCertStaging:          ""                                                 ### letsencrypt
-  hostCertStaging:          true                                               ### letsencryptStaging
+  hostCertStaging:          ""                                                 ### letsencrypt
+  # hostCertStaging:          true                                               ### letsencryptStaging
   hostAcmeEmail:            "fbeutelschiess@gmail.com"
   hostPrivateKeySecretName: "letsencrypt-fbeutelschiessgmail.com"
 
@@ -56,6 +71,9 @@ vars:
   #   --set hostnames="{"{{.domainName}}"}" \
   #   --set domain="{{.superDomainName}}" \
   #   --set initialAccout.username=mailadmin \
+
+
+  # helmchartRepoSrcPath:      "/home/frank/SRC/GIT/NAME"
 
 
 tasks:
@@ -379,7 +397,7 @@ tasks:
 
 
   filterPolicyApply:
-    desc: create the host for {{.name}}
+    desc: create the filterPolicy for {{.name}}
     cmds:
       - |
         cat <<EOF | kubectl apply -f -
@@ -400,6 +418,18 @@ tasks:
               onDeny:  "continue"
               onAllow: "continue"
               {{- end}}
+          {{- if .domainNameAlt }}
+          - host: {{.domainNameAlt}}
+            path: "*"
+            filters:
+            #- name: {{.filter}}
+            - name: {{if eq .filter "basic-allow"}}"basic-auth"{{else}
+              namespace: "ambassador"
+              {{- if eq .filter "basic-allow"}}
+              onDeny:  "continue"
+              onAllow: "continue"
+              {{- end}}
+          {{- end}}
         EOF
     silent: true
 
@@ -430,6 +460,30 @@ tasks:
           requestPolicy:
             insecure:
               action: Redirect
+        {{- if .domainNameAlt }}
+        ---
+        apiVersion: getambassador.io/v2
+        kind: Host
+        metadata:
+          name: {{.name}}-alt
+          namespace: ambassador-hosts
+        spec:
+          hostname: {{.domainNameAlt}}
+          acmeProvider:
+            {{- if .hostCertStaging }}
+            authority: https://acme-staging-v02.api.letsencrypt.org/di
+            {{- else}}
+            authority: https://acme-v02.api.letsencrypt.org/directory
+            {{- end}}
+            email: {{.hostAcmeEmail}}
+            privateKeySecret:
+              name: {{.hostPrivateKeySecretName}}
+          tlsSecret:
+            name: {{.name}}-alt
+          requestPolicy:
+            insecure:
+              action: Redirect
+        {{- end }}
         EOF
     silent: true
 
@@ -449,6 +503,19 @@ tasks:
           #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
           service: {{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPort}}
           host: {{.domainName}}
+        {{- if .domainNameAlt }} 
+        ---
+        apiVersion: getambassador.io/v2
+        kind: Mapping
+        metadata:
+          name: {{.name}}-alt
+          namespace: {{.nameSpace}}
+        spec:
+          prefix: / 
+          #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
+          service: {{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPo
+          host: {{.domainNameAlt}}
+        {{- end }}
         EOF
     silent: true
 

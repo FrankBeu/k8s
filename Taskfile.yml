@@ -145,9 +145,6 @@ tasks:
     cmds:
       - |
         summon --up bash -c 'helm repo add --username=frank --password=${PASSWORD} thesym.site https://harbor.thesym.site/chartrepo'
-        ###working
-        #helm repo add --username=frank --password=YH2Kfo6Mbif1ZHg2npNXfLdE thesym.site https://harbor.thesym.site/chartrepo
-        #summon --up bash -c 'echo $PASSWORD'
     silent: true
 
 
