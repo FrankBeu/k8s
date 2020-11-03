@@ -1,5 +1,4 @@
 {{- if .Values.ingress.enabled -}}
-{{ $ingress := .Values.ingress }}
 {{- $fullName := include "openproject-helm-chart.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}
 {{- if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -17,18 +16,26 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  rules:
-  {{ range $hosts := $ingress.hosts }}
-  - host: {{ $hosts.host }}
-    http:
-      paths:
-      - path: {{ $ingress.path }}
-        backend:
-          serviceName: {{ $fullName }}
-          servicePort: {{ $svcPort }}
-  {{ end }}
-  {{ if $ingress.tls }}
+  {{- if .Values.ingress.tls }}
   tls:
-    {{- $ingress.tls | toYaml | nindent 4 }}
-  {{ end }}
-{{- end }}
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ . }}
+            backend:
+              serviceName: {{ $fullName }}
+              servicePort: {{ $svcPort }}
+          {{- end }}
+    {{- end }}
+  {{- end }}

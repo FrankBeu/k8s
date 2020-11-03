@@ -1,0 +1,27 @@
+postgresql:
+    postgresqlPassword: ENC[AES256_GCM,data:lJi6bTyYjjsGD++IWKd/sHMHADVi3Pl5,iv:/12+0aOCK02T++J05WEm6sxTqOuV85h3n2mqNj0uXGc=,tag:RKwWKihM5B47B7WaQ/i8jQ==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    lastmodified: '2020-10-31T23:54:27Z'
+    mac: ENC[AES256_GCM,data:q3TYJ0UYGbF6g4tfqUpTApzNL/EIgBXD/YIOIR1qmQpR9EWmHna4GXMr49DCuzfB74PRppq1yQZlrYPVQI9QYEHkMBeEA8Z+Cwl/fKrmCmBQbing2Oaf3Sl02HIWnlSJ203ZABTcNb4jcywbWfIL6xmHHMr6EV6AHEO3+dYdL+E=,iv:c0PPOY4x09kvcH0SOx1CL3n0aUhgPxG7hTCZuxNFwW0=,tag:AR7xcd80EN0m4djJD2FvGw==,type:str]
+    pgp:
+    -   created_at: '2020-10-31T23:54:27Z'
+        enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            wcBMA5g1mpiqebPrAQgAqLUI7c1y02vEl7zOKRbjazodsis1IXnKYUet3xcXOCLT
+            W7D1CEiODWVfGv9RyLQm3w1WlWK3Su/6amcw+7GJjXu1vsFmzzeyky9ZsOKnaYJJ
+            ZTn8u5JRxlg1BOvcxX7d/0I/sIBemN++E7XoJQeLMrLKX0Vzosb96qtIWUJLDFTr
+            set1k+UH7p3b87ot7iCr/ov8VicV9zvvonj9z5dGcIOWvoEskyWTAhVx2PdHJc94
+            AplEZA+8S3cRu7WICap+P0CqT6dSW3tlieMFr7t0QhQoIvvYIRYpV2JqUW1mSgWQ
+            j3SPow2qEwND+IhzITbX6M1/q1m5FZeYTfFfRXljmNLgAeQ+1Yd6m5B6uhKtMMYA
+            nirj4Qs14HLgpuHGpeCh4itRlg7g6eVyuqHoyOICFQkgomYOIgcIB16k2nbTShZT
+            AcwYKjnzM+A85KdNTRyQKzfe3HnweejjHS3iGx2uTOFfkQA=
+            =SNXX
+            -----END PGP MESSAGE-----
+        fp: 1D84EE970AE7355C458D371CBA6C33BFC04ACC36
+    unencrypted_suffix: _unencrypted
+    version: 3.6.1

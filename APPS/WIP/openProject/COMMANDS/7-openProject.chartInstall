@@ -1,9 +1,0 @@
-#!/usr/bin/env zsh
-###
-##
-# * APPLICATION
-##
-###
-helm install \
-	--namespace openproject \
-	openproject ../CHART/openproject

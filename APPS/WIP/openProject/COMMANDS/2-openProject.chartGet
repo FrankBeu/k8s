@@ -1,7 +1,0 @@
-#!/usr/bin/env zsh
-###
-##
-# * CHART
-##
-###
-helm pull thesym.site/openproject/openproject -d ../CHART --untar

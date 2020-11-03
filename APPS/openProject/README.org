@@ -1,0 +1,22 @@
+* OpenProject
+** INFO
+*** SOURCES
+** TASKS
+*** manual
+**** first login
+     admin - admin
+***** change password
+**** SystemSettings
+     https://project.thesym.site/settings
+***** Host name
+      project.thesym.site 
+***** Protocol
+      https
+** TODO TODOS
+*** mailserver
+*** config
+**** create k8s-config 
+***** via helm?
+***** as env?
+***** as mount?
+      /app/config/configuration.yml.example

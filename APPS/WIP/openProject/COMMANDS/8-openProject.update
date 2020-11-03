@@ -1,9 +1,0 @@
-#!/usr/bin/env zsh
-###
-##
-# * UPGRADE
-##
-###
-helm upgrade \
-	--namespace openproject \
-	openproject ../CHART/openproject \
