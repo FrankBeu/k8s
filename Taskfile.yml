@@ -146,5 +146,3 @@ tasks:
       - |
         summon --up bash -c 'helm repo add --username=frank --password=${PASSWORD} thesym.site https://harbor.thesym.site/chartrepo'
     silent: true
-
-

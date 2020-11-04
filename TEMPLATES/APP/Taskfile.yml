@@ -73,7 +73,7 @@ vars:
   #   --set initialAccout.username=mailadmin \
 
 
-  # helmchartRepoSrcPath:      "/home/frank/SRC/GIT/NAME"
+  # helmchartRepoSrcPath:      "/home/frank/SRC/REPO-HOST/NAME"
 
 
 tasks:
@@ -106,84 +106,84 @@ tasks:
   # 1:
   #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
 
 
   # 2:
   #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
 
 
   # 3:
   #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
 
 
   # 4:
   #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
 
 
   # 5:
   #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
 
 
   # 6:
   #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
 
 
   # 7:
   #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
 
 
   # 8:
   #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
 
 
   # 9:
   #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
 
 
   # 10:
   #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
 
 
   # 11:
   #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
 
 
   # 12:
   #   desc: (  )
   #   cmds:
-  #     - task:
+  #     - task: 
   #   silent: true
 
 
@@ -423,7 +423,7 @@ tasks:
             path: "*"
             filters:
             #- name: {{.filter}}
-            - name: {{if eq .filter "basic-allow"}}"basic-auth"{{else}
+            - name: {{if eq .filter "basic-allow"}}"basic-auth"{{else}}{{.filter}}{{end}}
               namespace: "ambassador"
               {{- if eq .filter "basic-allow"}}
               onDeny:  "continue"
@@ -471,7 +471,7 @@ tasks:
           hostname: {{.domainNameAlt}}
           acmeProvider:
             {{- if .hostCertStaging }}
-            authority: https://acme-staging-v02.api.letsencrypt.org/di
+            authority: https://acme-staging-v02.api.letsencrypt.org/directory
             {{- else}}
             authority: https://acme-v02.api.letsencrypt.org/directory
             {{- end}}
@@ -503,7 +503,7 @@ tasks:
           #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
           service: {{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPort}}
           host: {{.domainName}}
-        {{- if .domainNameAlt }} 
+        {{- if .domainNameAlt }}
         ---
         apiVersion: getambassador.io/v2
         kind: Mapping
@@ -511,9 +511,9 @@ tasks:
           name: {{.name}}-alt
           namespace: {{.nameSpace}}
         spec:
-          prefix: / 
+          prefix: /
           #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
-          service: {{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPo
+          service: {{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPort}}
           host: {{.domainNameAlt}}
         {{- end }}
         EOF
