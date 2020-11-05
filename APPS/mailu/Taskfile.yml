@@ -513,7 +513,7 @@ tasks:
         apiVersion: getambassador.io/v2
         kind: Mapping
         metadata:
-          name: acme-challenge-mapping
+          name: acme-challenge
           namespace: {{.nameSpace}}
         spec:
           prefix: /.well-known/acme-challenge/
@@ -523,7 +523,7 @@ tasks:
         apiVersion: v1
         kind: Service
         metadata:
-          name: acme-challenge-service
+          name: acme-challenge
           namespace: {{.nameSpace}}
         spec:
           ports:
@@ -532,6 +532,15 @@ tasks:
           selector:
             acme.cert-manager.io/http01-solver: "true"
         EOF
+    silent: true
+
+
+  certChallengeUtilsDelete:
+    desc: "delete the redirection resources"
+    cmds:
+      - |
+        kubectl delete -n {{.nameSpace}} service acme-challenge
+        kubectl delete -n {{.nameSpace}} mapping acme-challenge
     silent: true
 
 
