@@ -1,0 +1,527 @@
+###
+##
+# * TASKFILE
+##  https://taskfile.dev
+###
+version: '3'
+
+
+includes:
+
+  varsGlobal:         ../../TaskfileVariablesGlobal.yml
+
+vars:
+
+  ###
+  ##
+  # global vars (imported as varsGlobal) will never be overwritten.
+  # However, they can only be used after setting an (ignored) value.
+  #
+  domainGlobal: GLOBAL
+
+
+  name:                     jitsi
+
+  nameSpace:                "{{.name}}"
+
+  domainName:               "{{.name}}.{{.domainGlobal}}"
+  # domainNameAlt:            "NAME_ALT.{{.domainGlobal}}"
+
+  ### chartRepoUrl:           already added by the global Taskfile
+  #chartRepoName:            "thesym.site/library"                                ### library
+  chartRepoName:            "thesym.site"                                        ### project
+  chartName:                "{{.name}}"
+
+  chartImagePullPolicy:     "IfNotPresent"
+
+  # filter:     "basic-allow"                                                    ### NOT WORKING; NOT implemented yet
+  filter:     "basic-auth"
+  # filter:     "basic-deny"                                                     ###     WORKING; NOT implemented properly -> redirect to thesym.site
+  ### filter:     "ory"                                                          ### NOT WORKING; NOT implemented yet
+
+  labelTier:                LABEL_TIER
+
+  hostCertStaging:          ""                                                 ### letsencrypt
+  # hostCertStaging:          true                                               ### letsencryptStaging
+  hostAcmeEmail:            "fbeutelschiess@gmail.com"
+  hostPrivateKeySecretName: "letsencrypt-fbeutelschiessgmail.com"
+
+  mappingPort:              80
+  mappingServiceName:       "{{.name}}"
+
+  portforwardingPortSource: ""
+  portforwardingPortTarget: ""
+
+  # pvName0:                  "{{.name}}-data"
+  # pvRelativePath0:          "{{.name}}/data"
+  # pvStorageSize0:           10Gi
+  # pvStorageClass0:          local-path
+  # pvName1:                  "{{.name}}-db"
+  # pvRelativePath1:          "{{.name}}/db"
+  # pvStorageSize1:           8Gi
+  # pvStorageClass1:          local-path
+
+  templateDebugTarget:       "ingress"
+
+  # servicePort:               5432
+
+  message:                   Tasks for {{.name}}{{if .chartName}}-helm{{end}}
+
+  # chartSecretsExist:         true
+  chartSecretsExist:         false
+  chartVariablesSet: |-
+    --set  shardCount=1 \
+    --set  jicofo.imagePullPolicy="{{.chartImagePullPolicy}}" \
+    --set  jicofo.resources.requests.cpu="10m" \
+    --set  jicofo.resources.requests.memory="400Mi" \
+    --set     jvb.imagePullPolicy="{{.chartImagePullPolicy}}" \
+    --set     jvb.resources.requests.cpu="10m" \
+    --set     jvb.resources.requests.memory="1000Mi" \
+    --set     jvb.monitoring.imagePullPolicy="{{.chartImagePullPolicy}}" \
+    --set     jvb.monitoring.resources.requests.cpu="10m" \
+    --set     jvb.monitoring.resources.requests.memory="100Mi" \
+    --set prosody.imagePullPolicy="{{.chartImagePullPolicy}}" \
+    --set prosody.resources.requests.cpu="10m" \
+    --set prosody.resources.requests.memory="300Mi" \
+    --set     web.imagePullPolicy="{{.chartImagePullPolicy}}" \
+    --set     web.resources.requests.cpu="10m" \
+    --set     web.resources.requests.memory="300Mi" \
+    --set    haproxy.ingress.host="{{.domainName}}" \
+
+
+  helmchartRepoSrcPath:      "/home/frank/SRC/GITHUB/jitsi-helm"
+
+
+tasks:
+
+  taskDebug:
+    desc: show all variables in Taskfile
+    cmds:
+      - |
+        echo -e \
+        "\n{{range $key, $value := .}} {{$key }}:  \e[92m{{$value}}\e[0m\n {{end}}\n"
+    silent: true
+
+
+  default:
+    desc: display info
+    cmds:
+      - |
+        echo -e \
+        "\n{{.message}}\n"
+      - |
+        task -l
+    silent: true
+
+
+###
+##
+# ** SEQUENCE
+##
+###
+  1:
+    desc: ( repoClone )
+    cmds:
+      - task: repoClone
+    silent: true
+
+
+  2:
+    desc: ( chartSignedAdd2Repo )
+    cmds:
+      - task: chartSignedAdd2Repo
+    silent: true
+
+
+  3:
+    desc: ( chartGet )
+    cmds:
+      - task: chartGet
+    silent: true
+
+
+  4:
+    desc: ( namespaceApply )
+    cmds:
+      - task: namespaceApply
+    silent: true
+
+
+  5:
+    desc: ( filterPolicyApply )
+    cmds:
+      - task: filterPolicyApply
+    silent: true
+
+
+  6:
+    desc: ( mappingApply )
+    cmds:
+      - task: mappingApply
+    silent: true
+
+
+  7:
+    desc: ( watermarkApply )
+    cmds:
+      - task: watermarkApply
+    silent: true
+
+
+  8:
+    desc: ( hostApply )
+    cmds:
+      - task: hostApply
+    silent: true
+
+
+  9:
+    desc: ( persistenceApply )
+    cmds:
+      - task: persistenceApply
+    silent: true
+
+
+  10:
+    desc: ( chartInstall )
+    cmds:
+      - task: chartInstall
+    silent: true
+
+
+  12:
+    desc: ( chartUpdate )
+    cmds:
+      - task: chartUpdate
+    silent: true
+
+
+  13:
+    desc: ( resourcesRemove )
+    cmds:
+      - task: resourcesRemove
+    silent: true
+
+
+###
+##
+# ** ALPHABETICAL
+##
+###
+  chartDebug:
+    desc: debug chart
+    cmds:
+      - |
+        helm install \
+        --namespace {{.nameSpace}} \
+        --dry-run \
+        --debug \
+        {{.name}} CHART/{{.chartName}} \
+        {{.chartVariablesSet}}
+    silent: true
+
+
+  chartGet:
+    desc: download the chart
+    cmds:
+      - |
+        helm pull \
+        {{.chartRepoName}}/{{.chartName}}/{{.chartName}} \
+        -d CHART \
+        --untar
+    silent: true
+        # {{.chartRepoName}}/{{.chartName}} \                 ### library
+        # {{.chartRepoName}}/{{.chartName}}/{{.chartName}} \  ### project
+
+
+  chartInstall:
+    desc: install chart
+    cmds:
+      - |
+        helm \
+        {{- if eq .chartSecretsExist "true"}}
+        secrets \
+        {{- end}}
+        install \
+        {{.name}} CHART/{{.chartName}} \
+        --namespace {{.nameSpace}} \
+        {{.chartVariablesSet}}
+        {{- if eq .chartSecretsExist "true"}}
+        -f sec.yaml
+        {{- end}}
+    silent: true
+
+
+  chartUpdate:
+    desc: update chart
+    cmds:
+      - |
+        helm \
+        {{- if eq .chartSecretsExist "true"}}
+        secrets \
+        {{- end}}
+        upgrade \
+        --namespace {{.nameSpace}} \
+        {{.name}} CHART/{{.chartName}} \
+        {{.chartVariablesSet}}
+        {{- if eq .chartSecretsExist "true"}}
+        -f sec.yaml
+        {{- end}}
+    silent: true
+
+
+  chartRemove:
+    desc: (chartUninstall + namespaceDelete + persistentVolumeDelete)
+    cmds:
+      - task: chartUninstall
+      - task: namespaceDelete
+      - task: persistentVolumeDelete
+    silent: true
+
+
+  chartUninstall:
+    desc: uninstall the {{.name}}-chart
+    cmds:
+      - |
+        helm --namespace {{.nameSpace}} uninstall {{.name}}
+    silent: true
+
+
+  filterPolicyApply:
+    desc: create the filterPolicy for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: FilterPolicy
+        metadata:
+          name: {{.name}}
+          namespace: {{.nameSpace}}
+        spec:
+          rules:
+          - host: {{.domainName}}
+            path: "*"
+            filters:
+            #- name: {{.filter}}
+            - name: {{if eq .filter "basic-allow"}}"basic-auth"{{else}}{{.filter}}{{end}}
+              namespace: "ambassador"
+              {{- if eq .filter "basic-allow"}}
+              onDeny:  "continue"
+              onAllow: "continue"
+              {{- end}}
+          {{- if .domainNameAlt }}
+          - host: {{.domainNameAlt}}
+            path: "*"
+            filters:
+            #- name: {{.filter}}
+            - name: {{if eq .filter "basic-allow"}}"basic-auth"{{else}}{{.filter}}{{end}}
+              namespace: "ambassador"
+              {{- if eq .filter "basic-allow"}}
+              onDeny:  "continue"
+              onAllow: "continue"
+              {{- end}}
+          {{- end}}
+        EOF
+    silent: true
+
+
+  hostApply:
+    desc: apply the host for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: Host
+        metadata:
+          name: {{.name}}
+          namespace: ambassador-hosts
+        spec:
+          hostname: {{.domainName}}
+          acmeProvider:
+            {{- if .hostCertStaging }}
+            authority: https://acme-staging-v02.api.letsencrypt.org/directory
+            {{- else}}
+            authority: https://acme-v02.api.letsencrypt.org/directory
+            {{- end}}
+            email: {{.hostAcmeEmail}}
+            privateKeySecret:
+              name: {{.hostPrivateKeySecretName}}
+          tlsSecret:
+            name: {{.name}}
+          requestPolicy:
+            insecure:
+              action: Redirect
+        {{- if .domainNameAlt }}
+        ---
+        apiVersion: getambassador.io/v2
+        kind: Host
+        metadata:
+          name: {{.name}}-alt
+          namespace: ambassador-hosts
+        spec:
+          hostname: {{.domainNameAlt}}
+          acmeProvider:
+            {{- if .hostCertStaging }}
+            authority: https://acme-staging-v02.api.letsencrypt.org/directory
+            {{- else}}
+            authority: https://acme-v02.api.letsencrypt.org/directory
+            {{- end}}
+            email: {{.hostAcmeEmail}}
+            privateKeySecret:
+              name: {{.hostPrivateKeySecretName}}
+          tlsSecret:
+            name: {{.name}}-alt
+          requestPolicy:
+            insecure:
+              action: Redirect
+        {{- end }}
+        EOF
+    silent: true
+
+
+  mappingApply:
+    desc: apply the mapping for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: Mapping
+        metadata:
+          name: {{.name}}
+          namespace: {{.nameSpace}}
+        spec:
+          prefix: /
+          #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
+          service: {{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPort}}
+          host: {{.domainName}}
+        {{- if .domainNameAlt }}
+        ---
+        apiVersion: getambassador.io/v2
+        kind: Mapping
+        metadata:
+          name: {{.name}}-alt
+          namespace: {{.nameSpace}}
+        spec:
+          prefix: /
+          #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
+          service: {{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPort}}
+          host: {{.domainNameAlt}}
+        {{- end }}
+        EOF
+    silent: true
+
+
+  namespaceApply:
+    desc: apply the namespace {{.nameSpace}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: {{.nameSpace}}
+          labels:
+            name: {{.nameSpace}}
+            tier: {{.labelTier}}
+        EOF
+    silent: true
+
+
+  namespaceDelete:
+    desc: delete the namespace {{.nameSpace}}
+    cmds:
+      - |
+        kubectl delete namespace {{.nameSpace}}
+    silent: true
+
+
+  portforward:
+    desc: portforwarding for {{.name}}
+    cmds:
+      - |
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
+        #kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -l app.kubernetes.io/name={{.name}} -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
+    silent: true
+
+
+  resourcesRemove:
+    desc: (namespaceDelete)
+    cmds:
+      - task: namespaceDelete
+    silent: true
+
+
+  serviceApply:
+    desc: apply the service for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: {{.name}}
+          namespace: {{.nameSpace}}
+          labels:
+            app: {{.name}}
+        spec:
+          type: NodePort
+          ports:
+           - port: {{.servicePort}}
+          selector:
+            app: {{.name}}
+        EOF
+    silent: true
+
+
+  templateDebug:
+    desc: "debug template; USAGE: `task templateDebug templateDebugTarget=admin`; DEFAULT: ingress"
+    cmds:
+      - |
+        helm template \
+        --namespace {{.nameSpace}} \
+        ./CHART/{{.chartName}} \
+        --debug \
+        -s templates/{{.templateDebugTarget}}.yaml \
+        {{.chartVariablesSet}}
+    silent: true
+
+
+###
+##
+# ** CUSTOM
+#
+#
+  repoClone:
+    desc: "clone the repo for the helm-chart"
+    cmds:
+      - git clone https://github.com/krakazyabra/jitsi-helm {{.helmchartRepoSrcPath}}
+    silent: true
+
+
+  chartAdd2Repo:
+    desc: "add the helmChart to harbor.thesym.site/library"
+    cmds:
+      ### needs a path to a repository
+      # - summon --up bash -c 'helm push --username=frank --password=${PASSWORD} {{.helmchartRepoSrcPath}} https://harbor.thesym.site/chartrepo'                                       ### library
+      - summon --up bash -c 'helm push --username=frank --password=${PASSWORD} {{.helmchartRepoSrcPath}} https://harbor.thesym.site/chartrepo/{{.name}}'                             ### project
+    silent: true
+
+
+  chartSignedAdd2Repo:
+    desc: "add the signed helmChart to harbor.thesym.site/library"
+    cmds:
+      - |
+        helm package --sign --key frank@thesym.site {{.helmchartRepoSrcPath}}
+        # summon --up bash -c 'curl -F "chart=@`ls {{.name}}-*.tgz`" -F "prov=@`ls {{.name}}-*.tgz.prov`" https://frank:${PASSWORD}@harbor.thesym.site/api/chartrepo/charts'           ### library
+        summon --up bash -c 'curl -F "chart=@`ls {{.name}}-*.tgz`" -F "prov=@`ls {{.name}}-*.tgz.prov`" https://frank:${PASSWORD}@harbor.thesym.site/api/chartrepo/{{.name}}/charts' ### project
+        rm ./{{.name}}-*.tgz*
+    silent: true
+
+
+
+
+  watermarkApply:
+    desc: apply the watermark for {{.name}}
+    cmds:
+      - kubectl create configmap -n {{.nameSpace}}  watermark --from-file=watermark.png
+    silent: true
