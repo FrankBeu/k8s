@@ -7,6 +7,9 @@ haproxy:
   ingress:
     host: jitsi.domain.org
     tlsEnable: true
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      kubernetes.io/ingress.class: nginx
 jicofo:
   name: jicofo
   image: jitsi/jicofo
