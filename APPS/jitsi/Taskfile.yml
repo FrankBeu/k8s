@@ -88,7 +88,10 @@ vars:
     --set web.resources.requests.memory="300Mi" \
     --set haproxy.ingress.host="{{.domainName}}" \
     --set haproxy.ingress.annotations."kubernetes\.io\/ingress\.class"=ambassador \
-
+    --set web.config.watermarkLink="{{.domainName}}" \
+    --set web.config.appName="Meet@TheSymSite" \
+    --set web.config.nativeAppName="Meet@TheSymSite" \
+    --set web.config.providerName="{{.domainGlobal}}" \
 
   helmchartRepoSrcPath:      "/home/frank/SRC/GITHUB/jitsi-helm"
 
@@ -149,9 +152,9 @@ tasks:
 
 
   5:
-    desc: ( watermarkApply )
+    desc: ( watermarkCreate )
     cmds:
-      - task: watermarkApply
+      - task: watermarkCreate
     silent: true
 
 
@@ -480,6 +483,13 @@ tasks:
         # summon --up bash -c 'curl -F "chart=@`ls {{.name}}-*.tgz`" -F "prov=@`ls {{.name}}-*.tgz.prov`" https://frank:${PASSWORD}@harbor.thesym.site/api/chartrepo/charts'           ### library
         summon --up bash -c 'curl -F "chart=@`ls {{.name}}-*.tgz`" -F "prov=@`ls {{.name}}-*.tgz.prov`" https://frank:${PASSWORD}@harbor.thesym.site/api/chartrepo/{{.name}}/charts' ### project
         rm ./{{.name}}-*.tgz*
+    silent: true
+
+
+  watermarkCreate:
+    desc: create the watermark for {{.name}}
+    cmds:
+      - kubectl create configmap -n {{.nameSpace}} watermark --from-file=watermark.png
     silent: true
 
 
