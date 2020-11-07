@@ -88,9 +88,9 @@ vars:
     --set web.resources.requests.memory="300Mi" \
     --set haproxy.ingress.host="{{.domainName}}" \
     --set haproxy.ingress.annotations."kubernetes\.io\/ingress\.class"=ambassador \
-    --set web.config.watermarkLink="{{.domainName}}" \
-    --set web.config.appName="Meet@TheSymSite" \
-    --set web.config.nativeAppName="Meet@TheSymSite" \
+    --set web.config.watermarkLink="https://{{.domainName}}" \
+    --set web.config.appName="{{.name}}" \
+    --set web.config.nativeAppName="{{.name}}" \
     --set web.config.providerName="{{.domainGlobal}}" \
 
   helmchartRepoSrcPath:      "/home/frank/SRC/GITHUB/jitsi-helm"

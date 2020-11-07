@@ -52,6 +52,12 @@ web:
       memmory: 300Mi
   ## If you want to use your own custom watermark, first create configmap from your png file: `kubectl create configmap -n <namespace> watermark --from-file=watermark.png`
   watermark: true
+  config:
+    watermarkLink: "https://example.org"
+    appName: jitsi
+    nativeAppName: jitsi
+    providerName: example.org
+
 
 JICOFO_AUTH_PASSWORD: ""
 JICOFO_COMPONENT_SECRET: ""
