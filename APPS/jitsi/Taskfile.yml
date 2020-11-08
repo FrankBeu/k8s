@@ -24,7 +24,7 @@ vars:
 
   nameSpace:                "{{.name}}"
 
-  domainName:               "{{.name}}.{{.domainGlobal}}"
+  domainName:               "coms.{{.domainGlobal}}"
   # domainNameAlt:            "NAME_ALT.{{.domainGlobal}}"
 
   ### chartRepoUrl:           already added by the global Taskfile
@@ -122,7 +122,6 @@ tasks:
 ##
 # ** SEQUENCE
 #
-#
   1:
     desc: ( repoClone )
     cmds:
@@ -159,34 +158,27 @@ tasks:
 
 
   6:
-    desc: ( filterPolicyApply )
-    cmds:
-      - task: filterPolicyApply
-    silent: true
-
-
-  7:
-    desc: ( mappingApply )
-    cmds:
-      - task: mappingApply
-    silent: true
-
-
-  8:
-    desc: ( hostApply )
-    cmds:
-      - task: hostApply
-    silent: true
-
-
-  9:
     desc: ( chartInstall )
     cmds:
       - task: chartInstall
     silent: true
 
 
-  10:
+  7:
+    desc: ( certChallengeUtilsCreate )
+    cmds:
+      - task: certChallengeUtilsCreate
+    silent: true
+
+
+  8:
+    desc: ( certChallengeUtilsDelete )
+    cmds:
+      - task: certChallengeUtilsDelete
+    silent: true
+
+
+  9:
     desc: ( chartUpdate )
     cmds:
       - task: chartUpdate
@@ -277,130 +269,6 @@ tasks:
     silent: true
 
 
-  filterPolicyApply:
-    desc: create the filterPolicy for {{.name}}
-    cmds:
-      - |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: getambassador.io/v2
-        kind: FilterPolicy
-        metadata:
-          name: {{.name}}
-          namespace: {{.nameSpace}}
-        spec:
-          rules:
-          - host: {{.domainName}}
-            path: "*"
-            filters:
-            #- name: {{.filter}}
-            - name: {{if eq .filter "basic-allow"}}"basic-auth"{{else}}{{.filter}}{{end}}
-              namespace: "ambassador"
-              {{- if eq .filter "basic-allow"}}
-              onDeny:  "continue"
-              onAllow: "continue"
-              {{- end}}
-          {{- if .domainNameAlt }}
-          - host: {{.domainNameAlt}}
-            path: "*"
-            filters:
-            #- name: {{.filter}}
-            - name: {{if eq .filter "basic-allow"}}"basic-auth"{{else}}{{.filter}}{{end}}
-              namespace: "ambassador"
-              {{- if eq .filter "basic-allow"}}
-              onDeny:  "continue"
-              onAllow: "continue"
-              {{- end}}
-          {{- end}}
-        EOF
-    silent: true
-
-
-  hostApply:
-    desc: apply the host for {{.name}}
-    cmds:
-      - |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: getambassador.io/v2
-        kind: Host
-        metadata:
-          name: {{.name}}
-          namespace: ambassador-hosts
-        spec:
-          hostname: {{.domainName}}
-          acmeProvider:
-            {{- if .hostCertStaging }}
-            authority: https://acme-staging-v02.api.letsencrypt.org/directory
-            {{- else}}
-            authority: https://acme-v02.api.letsencrypt.org/directory
-            {{- end}}
-            email: {{.hostAcmeEmail}}
-            privateKeySecret:
-              name: {{.hostPrivateKeySecretName}}
-          tlsSecret:
-            name: {{.name}}
-          requestPolicy:
-            insecure:
-              action: Redirect
-        {{- if .domainNameAlt }}
-        ---
-        apiVersion: getambassador.io/v2
-        kind: Host
-        metadata:
-          name: {{.name}}-alt
-          namespace: ambassador-hosts
-        spec:
-          hostname: {{.domainNameAlt}}
-          acmeProvider:
-            {{- if .hostCertStaging }}
-            authority: https://acme-staging-v02.api.letsencrypt.org/directory
-            {{- else}}
-            authority: https://acme-v02.api.letsencrypt.org/directory
-            {{- end}}
-            email: {{.hostAcmeEmail}}
-            privateKeySecret:
-              name: {{.hostPrivateKeySecretName}}
-          tlsSecret:
-            name: {{.name}}-alt
-          requestPolicy:
-            insecure:
-              action: Redirect
-        {{- end }}
-        EOF
-    silent: true
-
-
-  mappingApply:
-    desc: apply the mapping for {{.name}}
-    cmds:
-      - |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: getambassador.io/v2
-        kind: Mapping
-        metadata:
-          name: {{.name}}
-          namespace: {{.nameSpace}}
-        spec:
-          prefix: /
-          #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
-          service: {{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPort}}
-          host: {{.domainName}}
-        {{- if .domainNameAlt }}
-        ---
-        apiVersion: getambassador.io/v2
-        kind: Mapping
-        metadata:
-          name: {{.name}}-alt
-          namespace: {{.nameSpace}}
-        spec:
-          prefix: /
-          #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
-          service: {{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPort}}
-          host: {{.domainNameAlt}}
-        {{- end }}
-        EOF
-    silent: true
-
-
   namespaceApply:
     desc: apply the namespace {{.nameSpace}}
     cmds:
@@ -458,7 +326,6 @@ tasks:
 ##
 # ** CUSTOM
 #
-#
   repoClone:
     desc: "clone the repo for the helm-chart"
     cmds:
@@ -514,7 +381,7 @@ tasks:
         spec:
           prefix: /.well-known/acme-challenge/
           rewrite: ""
-          service: acme-challenge-service
+          service: acme-challenge
         ---
         apiVersion: v1
         kind: Service
@@ -529,6 +396,7 @@ tasks:
             acme.cert-manager.io/http01-solver: "true"
         EOF
     silent: true
+      ### kg cert
       ### use `kubectl wait --for=delete pod/acme-resolver --timeout=60s` then delete resources
 
 
