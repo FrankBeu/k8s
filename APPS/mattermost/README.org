@@ -6,6 +6,19 @@
     Any manipulation of the database must be done using the built in command line tools.
 *** SOURCES
     https://github.com/mattermost/mattermost-helm
+*** PLUGINS
+**** Installation
+     Download a Plugin to ...PERSISTENCE/mattermost/plugins
+     Enable it in the Taskfile.yml
+**** Configuration
+    Due to the readonly config.json
+    keys and values have to be taken from the DevTools
+    Send a request from https://msg.thesym.site/admin_console/plugins/plugin_jitsi (SAVE)
+    look for the PUT-Request in DevTools
+    filter for Plugin
+    take the config and apply it to the Taskfile.yml
+**** Jitsi
+      https://github.com/mattermost/mattermost-plugin-jitsi/
 ** TODO TODOS
 ** Erledigtes
 *** DONE Passwords

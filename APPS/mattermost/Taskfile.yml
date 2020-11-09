@@ -1,11 +1,24 @@
 ###
 ##
 # * TASKFILE
-##  https://taskfile.dev
-###
+#   https://taskfile.dev
+#
 version: '3'
 
+
+includes:
+
+  varsGlobal:         ../../TaskfileVariablesGlobal.yml
+
 vars:
+
+  ###
+  ##
+  # global vars (imported as varsGlobal) will never be overwritten.
+  # However, they can only be used after setting an (ignored) value.
+  #
+  domainGlobal: GLOBAL
+
 
   name:                     mattermost
 
@@ -57,8 +70,19 @@ vars:
     --set configJSON.ServiceSettings.SiteURL="https://{{.domainName}}" \
     --set configJSON.TeamSettings.EnableTeamCreation=false \
     --set configJSON.TeamSettings.RestrictDirectMessage=team \
+    --set configJSON.PluginSettings.PluginStates."com\.mattermost\.nps".Enable=true \
+    --set configJSON.PluginSettings.PluginStates.jitsi.Enable=true \
+    --set configJSON.PluginSettings.Plugins.jitsi.jitsiurl="https://coms.{{.domainGlobal}}" \
+    --set configJSON.PluginSettings.Plugins.jitsi.jitsinamingscheme="mattermost" \
 
 
+#    --set configJSON.PluginSettings.Plugins.jitsi.jitsinamingscheme="words" \
+#    --set configJSON.PluginSettings.Plugins.jitsi.jitsilinkvalidtime=30 \
+#    --set configJSON.PluginSettings.Plugins.jitsi.jitsijwt=null \
+#    --set configJSON.PluginSettings.Plugins.jitsi.jitsiembedded=null \
+#    --set configJSON.PluginSettings.Plugins.jitsi.jitsicompatibilitymode=false \
+#    --set configJSON.PluginSettings.Plugins.jitsi.jitsiappsecret=null \
+#    --set configJSON.PluginSettings.Plugins.jitsi.jitsiappid=null \
 tasks:
 
   taskDebug:
@@ -516,4 +540,25 @@ tasks:
     cmds:
       - |
         kubectl get -n {{.nameSpace}} $(kubectl get secret --field-selector type=Opaque -l=app!={{.name}}-mysql -o name) -o jsonpath='{.data.config\.json}' | base64 -d | jq -C | less
+    silent: true
+
+
+  pluginJitsiInstall:
+    desc: "install the jitsi plugin"
+    cmds:
+      - |
+        cd ../../PERSISTENCE/mattermost/plugins
+        curl -LJO https://github.com/mattermost/mattermost-plugin-jitsi/releases/download/v2.0.0/jitsi-2.0.0.tar.gz
+    silent: true
+
+
+  restart:
+    desc: restart {{.name}}
+    cmds:
+      - |
+        kubectl \
+        --namespace {{.nameSpace}} \
+        rollout \
+        restart deployment \
+        {{.nameSpace}}-{{.chartName}}
     silent: true
