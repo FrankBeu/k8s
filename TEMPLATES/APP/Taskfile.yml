@@ -1,8 +1,8 @@
 ###
 ##
 # * TASKFILE
-##  https://taskfile.dev
-###
+#   https://taskfile.dev
+#
 version: '3'
 
 
@@ -101,8 +101,8 @@ tasks:
 ###
 ##
 # ** SEQUENCE
-##
-###
+#
+#
   # 1:
   #   desc: (  )
   #   cmds:
@@ -260,18 +260,25 @@ tasks:
 ###
 ##
 # ** ALPHABETICAL
-##
-###
+#
+#
   chartDebug:
     desc: debug chart
     cmds:
       - |
-        helm install \
+        helm \
+        {{- if eq .chartSecretsExist "true"}}
+        secrets \
+        {{- end}}
+        install \
+        {{.name}} CHART/{{.chartName}} \
         --namespace {{.nameSpace}} \
         --dry-run \
         --debug \
-        {{.name}} CHART/{{.chartName}} \
         {{.chartVariablesSet}}
+        {{- if eq .chartSecretsExist "true"}}
+        -f sec.yaml
+        {{- end}}
     silent: true
 
 
@@ -697,5 +704,5 @@ tasks:
 ###
 ##
 # ** CUSTOM
-##
-###
+#
+#
