@@ -20,13 +20,6 @@ spec:
   resources:
     requests:
       storage: {{ .Values.persistence.size }}
-  {{- if .Values.persistence.storageClass }}
-  {{- if (eq "-" .Values.persistence.storageClass) }}
-  storageClassName: ""
-  {{- else }}
-  storageClassName: {{ .Values.persistence.storageClass }}
-  {{- end }}
-  {{- end }}
 
 ---
 apiVersion: v1
@@ -34,13 +27,6 @@ kind: PersistentVolume
 metadata:
   name: {{ include "mailu.claimName" . }}
 spec:
-  {{- if .Values.persistence.storageClass }}
-  {{- if (eq "-" .Values.persistence.storageClass) }}
-  storageClassName: ""
-  {{- else }}
-  storageClassName: {{ .Values.persistence.storageClass }}
-  {{- end }}
-  {{- end }}
   capacity:
     storage: {{ .Values.persistence.size }}
   accessModes:

@@ -1,7 +1,8 @@
 * MAILU
 ** SOURCES
 ** INFO
-*** Persistence storageClassName missmatch
+*** Installation
+**** Persistence storageClassName missmatch
     insert in both pv and pvc under spec:
     {{- if .Values.persistence.storageClass }}
     {{- if (eq "-" .Values.persistence.storageClass) }}
@@ -10,4 +11,6 @@
     storageClassName: {{ .Values.persistence.storageClass }}
     {{- end }}
     {{- end }}
+**** if roundcube is not coming up because of a db-connection error
+     delete db-persistence and retry
 ** TODO TODOS

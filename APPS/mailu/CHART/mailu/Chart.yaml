@@ -3,4 +3,4 @@ appVersion: "1.8"
 description: Mailu mail system
 icon: https://mailu.io/master/_images/logo.png
 name: mailu
-version: 0.0.7
+version: 0.0.8
