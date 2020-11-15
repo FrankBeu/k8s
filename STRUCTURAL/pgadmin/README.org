@@ -1,0 +1,7 @@
+* pgadmin
+** INFO
+*** SOURCES
+    https://www.pgadmin.org/
+**** helm
+    https://artifacthub.io/packages/helm/runix/pgadmin4
+** TODO TODOS
