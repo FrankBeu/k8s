@@ -21,7 +21,7 @@ vars:
   # filter:     "basic-deny"                                                     ###     WORKING; NOT implemented properly -> redirect to thesym.site
   ### filter:     "ory"                                                          ### NOT WORKING; NOT implemented yet
 
-  labelTier:                vcs
+  labelTier:                devOps
 
   hostCertStaging:          ""                                                 ### letsencrypt
   # hostCertStaging:          true                                               ### letsencryptStaging

@@ -26,7 +26,7 @@ vars:
   nameSpace:                "{{.name}}"
 
   superDomainName:          "{{.domainGlobal}}"
-  domainName:               "{{.name}}.{{.domainGlobal}}"
+  domainName:               "mail.{{.domainGlobal}}"
 
   chartRepoUrl:             https://mailu.github.io/helm-charts/
   chartRepoName:            "{{.name}}"
@@ -37,7 +37,7 @@ vars:
   # filter:                   "basic-deny"                    ###     WORKING; NOT implemented properly -> redirect to thesym.site
   ### filter:                 "ory"                           ### NOT WORKING; NOT implemented yet
 
-  labelTier:                mail
+  labelTier:                communication
 
   
   hostCertStaging:          ""                                                 ### letsencrypt

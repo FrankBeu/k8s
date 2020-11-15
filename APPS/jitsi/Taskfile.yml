@@ -39,7 +39,7 @@ vars:
   # filter:     "basic-deny"                                                     ###     WORKING; NOT implemented properly -> redirect to thesym.site
   ### filter:     "ory"                                                          ### NOT WORKING; NOT implemented yet
 
-  labelTier:                LABEL_TIER
+  labelTier:                communication
 
   hostCertStaging:          ""                                                 ### letsencrypt
   # hostCertStaging:          true                                               ### letsencryptStaging
