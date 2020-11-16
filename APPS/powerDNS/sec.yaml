@@ -1,0 +1,30 @@
+powerdns:
+    postgres:
+        username: ENC[AES256_GCM,data:u+5Q0w==,iv:0pMLHpAXVnH+KhWaskfvjNYqH1h1/9WDKpwGHqLPyWw=,tag:xj431uWhyZHtB0dcxbkVeg==,type:str]
+        password: ENC[AES256_GCM,data:gmDA4yxiq0iYfd1QiP9oc06wVHX5czq5,iv:38GxNVKUvjcDEvcvVoqZYMt6FrkQdqmFIYsDWRVuLiQ=,tag:qpb1eAJ9SWP9EUvlUnF0Wg==,type:str]
+        database: ENC[AES256_GCM,data:cKS84g==,iv:5HXF6z5WP/5IlHayatBdhutz0w9nxOS9Y3NvfDnBtwQ=,tag:5AaEjevZ3vHATcB2GjMI+Q==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    lastmodified: '2020-11-14T17:11:37Z'
+    mac: ENC[AES256_GCM,data:C/LzdLymgAeR6irkwtA7Hv5mtnx/uj5A6CJqy3ZLfrZuJnl0YZP8u63+rwSfPeq+csuqajgCQ330AYevMC8p2fw7jhjrGvsGrOIm/fD16FucBQkv7d68077Y6bWUoHXFPWEv9kAE5LZT/+gMhBFrwJi+y9oPWJWQ8OmrU0zhJ/4=,iv:IrKWQykpuQhphphFUY+0u8S4LPDAnDgACkGsxsOivow=,tag:xkKPVt4wEQcVf2O2+feAPA==,type:str]
+    pgp:
+    -   created_at: '2020-11-14T17:11:37Z'
+        enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            wcBMA5g1mpiqebPrAQgABeHVgvMyRPnsVr1uajENYs1aPEzVNDMlKTRTUoGBkU+Y
+            bpkJzPvF54BJ+A64jBkfqSNdUkmKZkBGGQlkG6A8Dbx+z5PXUA0EnGQK/Ql0ejK7
+            Rx8KwXQ/KRb8nNrRkg/Fqty0iMR1kDi3VlEA0Gk6TcwviqOdO08Vt77VaXokWMIc
+            aMMS+mO2aq+VWRxVmM+aJIbaOubBWzxFlvcwiNwSZibrzprF3zw3Dc6a50wCYKM4
+            lB5kt74laWrHslfHWaL5aURy+3Jfu+eCh0+/tTGEGvohTUyYByNH4c7DtGDvuJCp
+            EWePRrMp9RvTFy5ebf+HJ6txGk5LukhApGjvxO2DzdLgAeRKWHKxBpN40zu1FU+3
+            IQI24SNI4IXgweGaBODK4nHf2AjgveUgpV7omwmPQUaYgESb4Q1PTGeBPL/nVtj6
+            UYpStvRp/eAg5KyqRdJOEsJFw7g5TOsAKtriSwJT9OEcmAA=
+            =P47V
+            -----END PGP MESSAGE-----
+        fp: 1D84EE970AE7355C458D371CBA6C33BFC04ACC36
+    unencrypted_suffix: _unencrypted
+    version: 3.6.1
