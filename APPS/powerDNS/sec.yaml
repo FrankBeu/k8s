@@ -1,29 +1,30 @@
-powerdns:
-    postgres:
-        username: ENC[AES256_GCM,data:u+5Q0w==,iv:0pMLHpAXVnH+KhWaskfvjNYqH1h1/9WDKpwGHqLPyWw=,tag:xj431uWhyZHtB0dcxbkVeg==,type:str]
-        password: ENC[AES256_GCM,data:gmDA4yxiq0iYfd1QiP9oc06wVHX5czq5,iv:38GxNVKUvjcDEvcvVoqZYMt6FrkQdqmFIYsDWRVuLiQ=,tag:qpb1eAJ9SWP9EUvlUnF0Wg==,type:str]
-        database: ENC[AES256_GCM,data:cKS84g==,iv:5HXF6z5WP/5IlHayatBdhutz0w9nxOS9Y3NvfDnBtwQ=,tag:5AaEjevZ3vHATcB2GjMI+Q==,type:str]
+postgresql:
+    global:
+        postgresql:
+            postgresqlDatabase: ENC[AES256_GCM,data:fGkzYg==,iv:WRQ4LmAvdMYtXH9gtU151T60uALeFDkNK9C4Y1WQ9Wc=,tag:axcv4eZ4S2SHylZ1gkVXzg==,type:str]
+            postgresqlUsername: ENC[AES256_GCM,data:zP9eNA==,iv:aRX9xj/z+ZHGD+GJHXTGvaoUKZW0Q+mVrFGA/6IquUQ=,tag:9zPSgDVi8JP3STyi75tbDw==,type:str]
+            postgresqlPassword: ENC[AES256_GCM,data:JcJs0x7vmek/vumfZwqF5TCv5u8rQNtc,iv:FGdL02UFZmaPYW9d3qT7y2Zj6cinH8StrM7T5t4XEmA=,tag:pnjh1jNczEXD1GbRoRNzvQ==,type:str]
 sops:
     kms: []
     gcp_kms: []
     azure_kv: []
     hc_vault: []
-    lastmodified: '2020-11-14T17:11:37Z'
-    mac: ENC[AES256_GCM,data:C/LzdLymgAeR6irkwtA7Hv5mtnx/uj5A6CJqy3ZLfrZuJnl0YZP8u63+rwSfPeq+csuqajgCQ330AYevMC8p2fw7jhjrGvsGrOIm/fD16FucBQkv7d68077Y6bWUoHXFPWEv9kAE5LZT/+gMhBFrwJi+y9oPWJWQ8OmrU0zhJ/4=,iv:IrKWQykpuQhphphFUY+0u8S4LPDAnDgACkGsxsOivow=,tag:xkKPVt4wEQcVf2O2+feAPA==,type:str]
+    lastmodified: '2020-11-17T02:38:00Z'
+    mac: ENC[AES256_GCM,data:uxp4/fEAPpKWpnaWlAEIZEJsmYoyACzssO1uPieJKUIfehGS+Uv8MHQZnrdeS2msFiF3tCvy3DKc/sXe+yvM28pgoKSHzuqMoEMwnUjUISe7mVhAJf7gWxWot+dBzQmPqey0XBHKZVt0Uvkei3/g27ZDySRna3joAyvIhIyCaMo=,iv:4Yu4JpWZ1LegwzxF3RHKJ4LbTo8oOJ2o3k+CX7fe1Cc=,tag:1qEnopOXLvexRihI+eGgfA==,type:str]
     pgp:
-    -   created_at: '2020-11-14T17:11:37Z'
+    -   created_at: '2020-11-17T01:41:43Z'
         enc: |-
             -----BEGIN PGP MESSAGE-----
 
-            wcBMA5g1mpiqebPrAQgABeHVgvMyRPnsVr1uajENYs1aPEzVNDMlKTRTUoGBkU+Y
-            bpkJzPvF54BJ+A64jBkfqSNdUkmKZkBGGQlkG6A8Dbx+z5PXUA0EnGQK/Ql0ejK7
-            Rx8KwXQ/KRb8nNrRkg/Fqty0iMR1kDi3VlEA0Gk6TcwviqOdO08Vt77VaXokWMIc
-            aMMS+mO2aq+VWRxVmM+aJIbaOubBWzxFlvcwiNwSZibrzprF3zw3Dc6a50wCYKM4
-            lB5kt74laWrHslfHWaL5aURy+3Jfu+eCh0+/tTGEGvohTUyYByNH4c7DtGDvuJCp
-            EWePRrMp9RvTFy5ebf+HJ6txGk5LukhApGjvxO2DzdLgAeRKWHKxBpN40zu1FU+3
-            IQI24SNI4IXgweGaBODK4nHf2AjgveUgpV7omwmPQUaYgESb4Q1PTGeBPL/nVtj6
-            UYpStvRp/eAg5KyqRdJOEsJFw7g5TOsAKtriSwJT9OEcmAA=
-            =P47V
+            wcBMA5g1mpiqebPrAQgAq+aUmG+krJI4vNDHS3egU6FDFjEJFslpu78B99YhOVpw
+            qqG/cxsWW/pmCFX4foAAU6wN/XuXln8v8Q67NLE0WAi1mGjxKjo21yHTg3+lSba6
+            P6zBjt6MCVf54FSnQmwQNdV3/Z7VxCASuJ3jCNyaS245RjAJ3r57q6Vx/T1bl20I
+            ane0lqn9ebFRzwMYdl1y2UDeupVYUJvtAQJwFNw5Gq+w6qodT7AaVySsBIgJsdl4
+            mztE+biUJ3EPzC1lpidIfWvg0eqgbFil5pjQUIrCkOJj9e4bwfNTs75huTQKyAYa
+            SFJ36EQQ4ydSUKTwkZQfea36DSbEgsDA3wU+AS50o9LgAeQfH35k8w52hxwqI0yh
+            crMS4R7U4HDg4uEYSuAx4pUupNvgeeVAl166XlxXHCuErj1m4lonE6r/ZNi7N6+W
+            9rPaL4+cz+Ai5JriKENiOrJYcETWmmv8YRrirHf6w+Fl4AA=
+            =KDXp
             -----END PGP MESSAGE-----
         fp: 1D84EE970AE7355C458D371CBA6C33BFC04ACC36
     unencrypted_suffix: _unencrypted
