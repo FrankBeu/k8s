@@ -461,7 +461,7 @@ tasks:
             {{- end}}
             email: {{.hostAcmeEmail}}
             privateKeySecret:
-              name: {{.hostPrivateKeySecretName}}
+              name: {{.hostPrivateKeySecretName}}{{- if .hostCertStaging }}-staging{{- end}}
           tlsSecret:
             name: {{.name}}
           requestPolicy:
@@ -484,7 +484,7 @@ tasks:
             {{- end}}
             email: {{.hostAcmeEmail}}
             privateKeySecret:
-              name: {{.hostPrivateKeySecretName}}
+              name: {{.hostPrivateKeySecretName}}{{- if .hostCertStaging }}-staging{{- end}}
           tlsSecret:
             name: {{.name}}-alt
           requestPolicy:
@@ -555,8 +555,8 @@ tasks:
     desc: portforwarding for {{.name}}
     cmds:
       - |
-        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
-        #kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -l app.kubernetes.io/name={{.name}} -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -n {{.nameSpace}} -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
+        #kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -n {{.nameSpace}} -l app.kubernetes.io/name={{.name}} -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
     silent: true
 
 
