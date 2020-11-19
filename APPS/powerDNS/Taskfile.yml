@@ -94,27 +94,20 @@ tasks:
 #
 #
   1:
-    desc: ( chartGet )
-    cmds:
-      - task: chartGet
-    silent: true
-
-
-  2:
     desc: ( namespaceApply )
     cmds:
       - task: namespaceApply
     silent: true
 
 
-  3:
+  2:
     desc: ( chartInstall )
     cmds:
       - task: chartInstall
     silent: true
 
 
-  4:
+  3:
     desc: ( chartUpdate )
     cmds:
       - task: chartUpdate
@@ -135,7 +128,7 @@ tasks:
         secrets \
         {{- end}}
         install \
-        {{.name}} CHART/{{.chartName}} \
+        {{.name}} {{.chartRepoName}}/{{.chartName}}/{{.chartName}} \
         --namespace {{.nameSpace}} \
         --dry-run \
         --debug \
@@ -166,7 +159,7 @@ tasks:
         secrets \
         {{- end}}
         install \
-        {{.name}} CHART/{{.chartName}} \
+        {{.name}} {{.chartRepoName}}/{{.chartName}}/{{.chartName}} \
         --namespace {{.nameSpace}} \
         {{.chartVariablesSet}}
         {{- if eq .chartSecretsExist "true"}}
@@ -185,7 +178,7 @@ tasks:
         {{- end}}
         upgrade \
         --namespace {{.nameSpace}} \
-        {{.name}} CHART/{{.chartName}} \
+        {{.name}} {{.chartRepoName}}/{{.chartName}}/{{.chartName}} \
         {{.chartVariablesSet}}
         {{- if eq .chartSecretsExist "true"}}
         -f sec.yaml
@@ -194,7 +187,7 @@ tasks:
 
 
   chartRemove:
-    desc: (chartUninstall + namespaceDelete + persistentVolumeDelete)
+    desc: (chartUninstall + namespaceDelete)
     cmds:
       - task: chartUninstall
       - task: namespaceDelete
