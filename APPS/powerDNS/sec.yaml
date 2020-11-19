@@ -4,13 +4,15 @@ postgresql:
             postgresqlDatabase: ENC[AES256_GCM,data:fGkzYg==,iv:WRQ4LmAvdMYtXH9gtU151T60uALeFDkNK9C4Y1WQ9Wc=,tag:axcv4eZ4S2SHylZ1gkVXzg==,type:str]
             postgresqlUsername: ENC[AES256_GCM,data:zP9eNA==,iv:aRX9xj/z+ZHGD+GJHXTGvaoUKZW0Q+mVrFGA/6IquUQ=,tag:9zPSgDVi8JP3STyi75tbDw==,type:str]
             postgresqlPassword: ENC[AES256_GCM,data:JcJs0x7vmek/vumfZwqF5TCv5u8rQNtc,iv:FGdL02UFZmaPYW9d3qT7y2Zj6cinH8StrM7T5t4XEmA=,tag:pnjh1jNczEXD1GbRoRNzvQ==,type:str]
+powerdns:
+    api_key: ENC[AES256_GCM,data:0wMluX1+EWPlavqrqmU5uq/cxCWopTCy,iv:6beFwdGVXpz0lVag1LJcezng/3VLRt+uSZqiN7eihOg=,tag:FIiMwRQqF76s4MMO2eSZUA==,type:str]
 sops:
     kms: []
     gcp_kms: []
     azure_kv: []
     hc_vault: []
-    lastmodified: '2020-11-17T02:38:00Z'
-    mac: ENC[AES256_GCM,data:uxp4/fEAPpKWpnaWlAEIZEJsmYoyACzssO1uPieJKUIfehGS+Uv8MHQZnrdeS2msFiF3tCvy3DKc/sXe+yvM28pgoKSHzuqMoEMwnUjUISe7mVhAJf7gWxWot+dBzQmPqey0XBHKZVt0Uvkei3/g27ZDySRna3joAyvIhIyCaMo=,iv:4Yu4JpWZ1LegwzxF3RHKJ4LbTo8oOJ2o3k+CX7fe1Cc=,tag:1qEnopOXLvexRihI+eGgfA==,type:str]
+    lastmodified: '2020-11-18T12:33:59Z'
+    mac: ENC[AES256_GCM,data:JIG4H826xcVgVLT/XJp9/4ME950mnh6TtQyf/unlJy1vbRk1qgMqgTEPbDDk4icibAvEs6Zc/VSTZ9xKfqRziUKA58RK/CQGhoelaSFTBHvy/OD1mB5v0X5eyS9tj79O7h5YW5WA8QgLJpio2+mQNKopMA05JooozE5Flx1FxSQ=,iv:2OJ1Ktc5EBVo9T3D0ZIhLiPFS9ioqlexedgG0WkMsVQ=,tag:WYL+jF+uHO7XU2MlL86SOg==,type:str]
     pgp:
     -   created_at: '2020-11-17T01:41:43Z'
         enc: |-

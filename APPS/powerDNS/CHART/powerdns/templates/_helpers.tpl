@@ -89,25 +89,10 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "powerdnsadmin.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "powerdns.name" . }}-admin
+app.kubernetes.io/name: {{ include "powerdns.name" . }}admin
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{- define "powerdnsadmin.postgresql.dns" -}}
 {{- printf "postgresql://%s:%s@%s-postgresql.%s:%.f/%s" .Values.postgresql.global.postgresql.postgresqlUsername .Values.postgresql.global.postgresql.postgresqlPassword .Release.Name .Release.Namespace .Values.postgresql.global.postgresql.servicePort .Values.postgresql.global.postgresql.postgresqlDatabase -}}
 {{- end -}}
-
-{{/*
-{{- printf "postgresql://%s:%s@%s-postgresql.%s:%.f/%s"
-.Values.postgresql.global.postgresql.postgresqlUsername
-.Values.postgresql.global.postgresql.postgresqlPassword
-.Release.Name
-.Release.Namespace
-.Values.postgresql.global.postgresql.servicePort
-.Values.postgresql.global.postgresql.postgresqlDatabase
--}}
-*/}}
-
-{{/*
-{{ tpl "postgresql://{{ .Values.db.username }}:{{ .Values.db.password }}@{{ .Values.db.host }}:{{.Values.db.port | toString }}/{{ .Values.db.database }}" . | b64enc | quote }}
-*/}}

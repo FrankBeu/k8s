@@ -26,7 +26,6 @@ vars:
   nameSpace:                "{{.name}}"
 
   domainName:               "{{.name}}.{{.domainGlobal}}"
-  # domainNameAlt:            "NAME_ALT.{{.domainGlobal}}"
 
   ### chartRepoUrl:         already added by the global Taskfile
   chartRepoName:            "thesym.site"
@@ -44,34 +43,27 @@ vars:
   hostAcmeEmail:            "fbeutelschiess@gmail.com"
   hostPrivateKeySecretName: "letsencrypt-fbeutelschiessgmail.com"
 
-  mappingPort:              80
-  mappingServiceName:       "{{.name}}"
-
-  portforwardingPortSource: "5353"
-  portforwardingPortTarget: "53"
-
-  # pvName0:                  "{{.name}}-data"
-  # pvRelativePath0:          "{{.name}}/data"
-  # pvStorageSize0:           10Gi
-  # pvStorageClass0:          local-path
-  # pvName1:                  "{{.name}}-db"
-  # pvRelativePath1:          "{{.name}}/db"
-  # pvStorageSize1:           8Gi
-  # pvStorageClass1:          local-path
+  portforwardingPortSource: "8080"
+  portforwardingPortTarget: "80"
 
   templateDebugTarget:       "ingress"
-
-  # servicePort:               53
 
   message:                   Tasks for {{.name}}{{if .chartName}}-helm{{end}}
 
   chartSecretsExist:         true
-  # chartSecretsExist:         false
   chartVariablesSet: |-
     --set service.type=NodePort \
     --set service.port=22222 \
     --set persistence.existingClaim={{.pvName0}} \
     --set resources.requests.cpu="10m" \
+    --set powerdnsadmin.resources.requests.cpu="10m" \
+    --set postgresql.resources.requests.cpu="10m" \
+    --set powerdnsadmin.host.acmeEmail={{.hostAcmeEmail}} \
+    --set powerdnsadmin.host.certStaging={{.hostCertStaging}} \
+    --set powerdnsadmin.host.name={{.domainName}} \
+    --set powerdnsadmin.host.namespace=ambassador-hosts \
+    --set powerdnsadmin.host.privateKeySecretName={{.hostPrivateKeySecretName}} \
+    --set powerdnsadmin.filter={{.filter}} \
 
 
 tasks:
@@ -101,157 +93,31 @@ tasks:
 # ** SEQUENCE
 #
 #
-  # 1:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
-
-
-  # 2:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
-
-
-  # 3:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
-
-
-  # 4:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
-
-
-  # 5:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
-
-
-  # 6:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
-
-
-  # 7:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
-
-
-  # 8:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
-
-
-  # 9:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
-
-
-  # 10:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
-
-
-  # 11:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
-
-
-  # 12:
-  #   desc: (  )
-  #   cmds:
-  #     - task: 
-  #   silent: true
-
-
   1:
-    desc: ( repoAdd )
-    cmds:
-      - task: repoAdd
-    silent: true
-
-
-  2:
     desc: ( chartGet )
     cmds:
       - task: chartGet
     silent: true
 
 
-  3:
+  2:
     desc: ( namespaceApply )
     cmds:
       - task: namespaceApply
     silent: true
 
 
-  4:
-    desc: ( filterPolicyApply )
-    cmds:
-      - task: filterPolicyApply
-    silent: true
-
-
-  5:
-    desc: ( mappingApply )
-    cmds:
-      - task: mappingApply
-    silent: true
-
-
-  6:
-    desc: ( hostApply )
-    cmds:
-      - task: hostApply
-    silent: true
-
-
-  7:
-    desc: ( persistenceApply )
-    cmds:
-      - task: persistenceApply
-    silent: true
-
-
-  8:
+  3:
     desc: ( chartInstall )
     cmds:
       - task: chartInstall
     silent: true
 
 
-  9:
+  4:
     desc: ( chartUpdate )
     cmds:
       - task: chartUpdate
-    silent: true
-
-
-  10:
-    desc: ( resourcesRemove )
-    cmds:
-      - task: resourcesRemove
     silent: true
 
 
@@ -344,187 +210,6 @@ tasks:
     silent: true
 
 
-  configMapApply:
-    desc: apply the configMap for {{.name}}
-    cmds:
-      - |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: v1
-        kind: ConfigMap
-        metadata:
-          name: {{.name}}-config
-          namespace: {{.nameSpace}}
-          labels:
-            app: {{.name}}
-        data: {{ .configMapData | nindent 2}}
-        EOF
-    silent: true
-
-
-  deploymentApply:
-    desc: apply the deployment for {{.name}}
-    cmds:
-      - |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: apps/v1
-        kind: Deployment
-        metadata:
-          name: {{.name}}
-          namespace: {{.nameSpace}}
-        spec:
-          replicas: 1
-          selector:
-            matchLabels:
-              app: {{.name}}
-          template:
-            metadata:
-              labels:
-                app: {{.name}}
-            spec:
-              containers:
-                - name: {{.name}}
-                  image: postgres:10.4
-                  imagePullPolicy: "IfNotPresent"
-                  ports:
-                    - containerPort: 5432
-                  envFrom:
-                    - configMapRef:
-                        name: {{.name}}-config
-                  volumeMounts:
-                    - mountPath: /var/lib/postgresql/data
-                      name: {{.name}}db
-              volumes:
-                - name: {{.name}}db
-                  persistentVolumeClaim:
-                    claimName: {{.name}}
-        EOF
-    silent: true
-
-
-  filterPolicyApply:
-    desc: create the filterPolicy for {{.name}}
-    cmds:
-      - |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: getambassador.io/v2
-        kind: FilterPolicy
-        metadata:
-          name: {{.name}}
-          namespace: {{.nameSpace}}
-        spec:
-          rules:
-          - host: {{.domainName}}
-            path: "*"
-            filters:
-            #- name: {{.filter}}
-            - name: {{if eq .filter "basic-allow"}}"basic-auth"{{else}}{{.filter}}{{end}}
-              namespace: "ambassador"
-              {{- if eq .filter "basic-allow"}}
-              onDeny:  "continue"
-              onAllow: "continue"
-              {{- end}}
-          {{- if .domainNameAlt }}
-          - host: {{.domainNameAlt}}
-            path: "*"
-            filters:
-            #- name: {{.filter}}
-            - name: {{if eq .filter "basic-allow"}}"basic-auth"{{else}}{{.filter}}{{end}}
-              namespace: "ambassador"
-              {{- if eq .filter "basic-allow"}}
-              onDeny:  "continue"
-              onAllow: "continue"
-              {{- end}}
-          {{- end}}
-        EOF
-    silent: true
-
-
-  hostApply:
-    desc: apply the host for {{.name}}
-    cmds:
-      - |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: getambassador.io/v2
-        kind: Host
-        metadata:
-          name: {{.name}}
-          namespace: ambassador-hosts
-        spec:
-          hostname: {{.domainName}}
-          acmeProvider:
-            {{- if .hostCertStaging }}
-            authority: https://acme-staging-v02.api.letsencrypt.org/directory
-            {{- else}}
-            authority: https://acme-v02.api.letsencrypt.org/directory
-            {{- end}}
-            email: {{.hostAcmeEmail}}
-            privateKeySecret:
-              name: {{.hostPrivateKeySecretName}}
-          tlsSecret:
-            name: {{.name}}
-          requestPolicy:
-            insecure:
-              action: Redirect
-        {{- if .domainNameAlt }}
-        ---
-        apiVersion: getambassador.io/v2
-        kind: Host
-        metadata:
-          name: {{.name}}-alt
-          namespace: ambassador-hosts
-        spec:
-          hostname: {{.domainNameAlt}}
-          acmeProvider:
-            {{- if .hostCertStaging }}
-            authority: https://acme-staging-v02.api.letsencrypt.org/directory
-            {{- else}}
-            authority: https://acme-v02.api.letsencrypt.org/directory
-            {{- end}}
-            email: {{.hostAcmeEmail}}
-            privateKeySecret:
-              name: {{.hostPrivateKeySecretName}}
-          tlsSecret:
-            name: {{.name}}-alt
-          requestPolicy:
-            insecure:
-              action: Redirect
-        {{- end }}
-        EOF
-    silent: true
-
-
-  mappingApply:
-    desc: apply the mapping for {{.name}}
-    cmds:
-      - |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: getambassador.io/v2
-        kind: Mapping
-        metadata:
-          name: {{.name}}
-          namespace: {{.nameSpace}}
-        spec:
-          prefix: /
-          #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
-          service: {{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPort}}
-          host: {{.domainName}}
-        {{- if .domainNameAlt }}
-        ---
-        apiVersion: getambassador.io/v2
-        kind: Mapping
-        metadata:
-          name: {{.name}}-alt
-          namespace: {{.nameSpace}}
-        spec:
-          prefix: /
-          #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
-          service: {{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPort}}
-          host: {{.domainNameAlt}}
-        {{- end }}
-        EOF
-    silent: true
-
-
   namespaceApply:
     desc: apply the namespace {{.nameSpace}}
     cmds:
@@ -549,140 +234,26 @@ tasks:
     silent: true
 
 
-  portforward:
-    desc: portforwarding for {{.name}}
+  portforwardAdmin:
+    desc: portforwarding for {{.name}}Admin
     cmds:
       - |
-        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
-        #kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -l app.kubernetes.io/name={{.name}} -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod  -n {{.nameSpace}} -l app.kubernetes.io/name={{.name}}admin -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
     silent: true
 
 
-  persistenceApply:
-    desc: apply persistence for {{.name}}
-    cmds:
-      ### database
-      - |
-        {{- if .pvName0 }}
-        cat <<EOF | kubectl apply -f -
-        apiVersion: v1
-        kind: PersistentVolume
-        metadata:
-          name: {{.pvName0}}
-          labels:
-            type: local
-        spec:
-          storageClassName: {{.pvStorageClass0}}
-          capacity:
-            storage: {{.pvStorageSize0}}
-          accessModes:
-            - ReadWriteOnce
-          hostPath:
-            path: "/PERSISTENCE/{{.pvRelativePath0}}"
-        ---
-        apiVersion: v1
-        kind: PersistentVolumeClaim
-        metadata:
-          name: {{.pvName0}}
-          namespace: {{.nameSpace}}
-        spec:
-          volumeName: {{.pvName0}}
-          storageClassName: {{.pvStorageClass0}}
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: {{.pvStorageSize0}}
-        EOF
-        {{- end }}
-
-        {{- if .pvName1 }}
-        cat <<EOF | kubectl apply -f -
-        apiVersion: v1
-        kind: PersistentVolume
-        metadata:
-          name: {{.pvName1}}
-          labels:
-            type: local
-        spec:
-          storageClassName: {{.pvStorageClass1}}
-          capacity:
-            storage: {{.pvStorageSize1}}
-          accessModes:
-            - ReadWriteOnce
-          hostPath:
-            path: "/PERSISTENCE/{{.pvRelativePath1}}"
-        ---
-        apiVersion: v1
-        kind: PersistentVolumeClaim
-        metadata:
-          name: {{.pvName1}}
-          namespace: {{.nameSpace}}
-        spec:
-          volumeName: {{.pvName1}}
-          storageClassName: {{.pvStorageClass1}}
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: {{.pvStorageSize1}}
-        EOF
-        {{- end }}
-    silent: true
-
-
-  persistentVolumeDelete:
-    desc: delete the pv(s) for {{.name}}
+  portforwardWebserver:
+    desc: portforwarding for {{.name}}Webserver
     cmds:
       - |
-        {{- if .pvName0 }}
-        kubectl delete pv {{.pvName0}}
-        {{- end }}
-        {{- if .pvName1 }}
-        kubectl delete pv {{.pvName1}}
-        {{- end }}
-    silent: true
-
-
-  repoAdd:
-    desc: add the repository
-    cmds:
-      - |
-        helm repo add \
-        {{.chartRepoName}} \
-        {{.chartRepoUrl}}
-      - |
-        helm repo update
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -n {{.nameSpace}} -l app.kubernetes.io/name={{.name}} -o name) 8081:8081
     silent: true
 
 
   resourcesRemove:
-    desc: (namespaceDelete + persistentVolumeDelete)
+    desc: (namespaceDelete)
     cmds:
       - task: namespaceDelete
-      - task: persistentVolumeDelete
-    silent: true
-
-
-  serviceApply:
-    desc: apply the service for {{.name}}
-    cmds:
-      - |
-        cat <<EOF | kubectl apply -f -
-        apiVersion: v1
-        kind: Service
-        metadata:
-          name: {{.name}}
-          namespace: {{.nameSpace}}
-          labels:
-            app: {{.name}}
-        spec:
-          type: NodePort
-          ports:
-           - port: {{.servicePort}}
-          selector:
-            app: {{.name}}
-        EOF
     silent: true
 
 
