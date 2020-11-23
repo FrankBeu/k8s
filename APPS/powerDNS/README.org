@@ -1,6 +1,31 @@
 * powerdns
 ** INFO
 *** SOURCES
+**** Admin
+     https://github.com/ngoduykhanh/PowerDNS-Admin
+***** wiki
+      https://github.com/ngoduykhanh/PowerDNS-Admin/wiki
 *** API
     https://doc.powerdns.com/md/httpapi/README/
+*** create DB-Table-Dumps
+**** user
+     #+begin_src shell
+       pg_dump \
+         -U pdns \
+         --table="user" \
+         --data-only \
+         --column-inserts \
+         pdnsadmin
+     #+end_src
+**** setting
+     #+begin_src shell
+       pg_dump \
+         -U pdns \
+         --table="setting" \
+         --data-only \
+         --column-inserts \
+         pdnsadmin
+     #+end_src
 ** TODO TODOS
+   Authentication
+   https://powerdns.thesym.site/admin/setting/authentication

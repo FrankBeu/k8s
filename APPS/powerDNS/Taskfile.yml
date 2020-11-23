@@ -64,6 +64,7 @@ vars:
     --set powerdnsadmin.host.namespace=ambassador-hosts \
     --set powerdnsadmin.host.privateKeySecretName={{.hostPrivateKeySecretName}} \
     --set powerdnsadmin.filter={{.filter}} \
+    --set powerdnsadmin.config.setting.signup_enabled=False \
 
 
 tasks:
@@ -108,9 +109,10 @@ tasks:
 
 
   3:
-    desc: ( chartUpdate )
+
+    desc: ( adminUpdate )
     cmds:
-      - task: chartUpdate
+      - task: adminUpdate
     silent: true
 
 
@@ -227,22 +229,6 @@ tasks:
     silent: true
 
 
-  portforwardAdmin:
-    desc: portforwarding for {{.name}}Admin
-    cmds:
-      - |
-        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod  -n {{.nameSpace}} -l app.kubernetes.io/name={{.name}}admin -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
-    silent: true
-
-
-  portforwardWebserver:
-    desc: portforwarding for {{.name}}Webserver
-    cmds:
-      - |
-        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -n {{.nameSpace}} -l app.kubernetes.io/name={{.name}} -o name) 8081:8081
-    silent: true
-
-
   resourcesRemove:
     desc: (namespaceDelete)
     cmds:
@@ -256,7 +242,7 @@ tasks:
       - |
         helm template \
         --namespace {{.nameSpace}} \
-        ./CHART/{{.chartName}} \
+        {{.name}} {{.chartRepoName}}/{{.chartName}}/{{.chartName}} \
         --debug \
         -s templates/{{.templateDebugTarget}}.yaml \
         {{.chartVariablesSet}}
@@ -268,3 +254,33 @@ tasks:
 # ** CUSTOM
 #
 #
+  adminUpdate:
+    desc: update the user and config for powerDNS-Admin
+    cmds:
+      - kubectl delete job powerdnsadmin-db-setup
+      - task: chartUpdate
+    silent: true
+
+
+  portforwardAdmin:
+    desc: portforwarding for {{.name}}Admin
+    cmds:
+      - |
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod  -n {{.nameSpace}} -l app.kubernetes.io/name={{.name}}admin -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
+    silent: true
+
+
+  portforwardDatabase:
+    desc: portforwarding for {{.name}}Database
+    cmds:
+      - |
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod  -n {{.nameSpace}} -l app.kubernetes.io/name=postgresql -o name) 5432:5432
+    silent: true
+
+
+  portforwardWebserver:
+    desc: portforwarding for {{.name}}Webserver
+    cmds:
+      - |
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -n {{.nameSpace}} -l app.kubernetes.io/name={{.name}} -o name) 8081:8081
+    silent: true
