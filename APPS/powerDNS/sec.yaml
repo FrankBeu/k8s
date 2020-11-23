@@ -5,13 +5,21 @@ postgresql:
     postgresqlPassword: ENC[AES256_GCM,data:naCsGZcI1p813QBRpSiDtQo7DNkqyUUf,iv:2EnC1g5z5cBJzgxLPY0wUkHNFh/oUjA5vy79iPfJlXk=,tag:YV/YhxjcGXEqzKZfBYrEUw==,type:str]
 powerdns:
     api_key: ENC[AES256_GCM,data:0wMluX1+EWPlavqrqmU5uq/cxCWopTCy,iv:6beFwdGVXpz0lVag1LJcezng/3VLRt+uSZqiN7eihOg=,tag:FIiMwRQqF76s4MMO2eSZUA==,type:str]
+powerdnsadmin:
+    config:
+        user:
+            username: ENC[AES256_GCM,data:kCKxdhE=,iv:UxAUZeEsysB1aBIN4DYisoawZl/lOGJk/Ai1AKl/tBY=,tag:Y/hJlqxMQ9gDl5lgan+gDg==,type:str]
+            password: ENC[AES256_GCM,data:nxKsqpoEqlZO/kfZPp0QgwgMWvpH3wwLfQ+707KDbfSclCnqDA5MVCQgtMDPzfPLTPAjqIdSilaqe8NV,iv:89Ooy4PZ1SoYE0OhzawqZOS+eNzQXYumVe5ApKtM0mE=,tag:oaQxeeEdHY//stbudsS7yg==,type:str]
+            firstname: ENC[AES256_GCM,data:19wfi28=,iv:sPRns4JEdf0RiCitJUnSQUbnpfOHTdA/IUS1gteS2To=,tag:CPn8/4Tgs6zoj7zuS576Dg==,type:str]
+            lastname: ENC[AES256_GCM,data:l/GwhSq87pUvtN7eNQ==,iv:HdKId7ILhbXdOfrwRoALFYPZMJMTuwOf5sB5zUcncRk=,tag:EkLiEflKKEd+JheREqYyRg==,type:str]
+            email: ENC[AES256_GCM,data:wL/b63CDosZqiB4BJPmBNbI=,iv:YwN2l9Vt6CgYjTXVA/zm2+Yx8RJCQS9ynWJwSdtqGtA=,tag:HSFqguJaNjiUT2KkI7ruGg==,type:str]
 sops:
     kms: []
     gcp_kms: []
     azure_kv: []
     hc_vault: []
-    lastmodified: '2020-11-19T23:30:22Z'
-    mac: ENC[AES256_GCM,data:3CvHTICWl0NkjdIGAReRpoDfPleaUTU0VQAwA4TEKixCpySjb1kMrJhIh+IIZZGsSYZlcdvEPJZCC9SWy8hohRETyOp44BVmk8ahglLCzfPfVLscfkhBQAkU6wlTM16dIaPwn/EthdcguDdg+3GUVktki/GOjMJNDO5wBj1jVeU=,iv:occPZ4NS9tWvpRoEXxot/cBHugIZDvEysmEG2YDZVeI=,tag:9L+f4AZ4PN9hAPya15ztjg==,type:str]
+    lastmodified: '2020-11-23T04:00:44Z'
+    mac: ENC[AES256_GCM,data:DuFbLrtnPJ6TDGit+aIWJYkLtLUW42nArfBXcTK/IwmOdiCUKGQVk45t2b4F0VQuklV3PRDt7smm51X+hTOFriKddAib7tIrXsZ4kiJPgYAYxFA1kxSpqEzqAC+PeFKis4UzEMjiU4qTno9BBS03GpYl/RhmqgooT+jTnmcZXgg=,iv:LquVWTMbY7GRhE2Pr+5Yb9Mj2M25Jd7RtKEvkD9p9cg=,tag:dx9t+UernViyRgY46vbVOg==,type:str]
     pgp:
     -   created_at: '2020-11-17T01:41:43Z'
         enc: |-
