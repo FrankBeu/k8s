@@ -6,6 +6,6 @@
 #   https://hub.helm.sh/charts/stable/metallb
 #
 # helm search hub metallb
-# helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+# helm repo add stable https://charts.helm.sh/stable
 # helm fetch stable/metallb
 # tar -xv metallb-*.tgz
