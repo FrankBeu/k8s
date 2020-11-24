@@ -144,5 +144,5 @@ tasks:
     desc: "add thesym.site as repo"
     cmds:
       - |
-        summon --up bash -c 'helm repo add --username=frank --password=${PASSWORD} thesym.site https://harbor.thesym.site/chartrepo'
+        summon --up bash -c 'helm repo add --username=frank --password=${HARBOR_PASSWORD} thesym.site https://harbor.thesym.site/chartrepo'
     silent: true
