@@ -27,5 +27,9 @@
          pdnsadmin
      #+end_src
 ** TODO TODOS
-   Authentication
-   https://powerdns.thesym.site/admin/setting/authentication
+*** Authentication
+    https://powerdns.thesym.site/admin/setting/authentication
+*** update image
+    after ci
+*** update schema
+    according to used pdns-version (in relation to update-image-todo)
