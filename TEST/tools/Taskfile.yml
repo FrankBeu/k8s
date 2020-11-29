@@ -1,0 +1,136 @@
+###
+##
+# * TASKFILE
+#   https://taskfile.dev
+#
+version: '3'
+
+
+includes:
+
+  # taskfileRepository: ../../Taskfile.yml
+  varsGlobal:         ../../TaskfileVariablesGlobal.yml
+
+vars:
+
+  ###
+  ##
+  # global vars (imported as varsGlobal) will never be overwritten.
+  # However, they can only be used after setting an (ignored) value.
+  #
+  domainGlobal: GLOBAL
+
+
+  name:                     test-tools
+
+  nameSpace:                "{{.name}}"
+
+  labelTier:                testing
+
+  message:                   Tasks for {{.name}}{{if .chartName}}-helm{{end}}
+
+
+tasks:
+
+  taskDebug:
+    desc: show all variables in Taskfile
+    cmds:
+      - |
+        echo -e \
+        "\n{{range $key, $value := .}} {{$key }}:  \e[92m{{$value}}\e[0m\n {{end}}\n"
+    silent: true
+
+
+  default:
+    desc: display info
+    cmds:
+      - |
+        echo -e \
+        "\n{{.message}}\n"
+      - |
+        task -l
+    silent: true
+
+
+###
+##
+# ** SEQUENCE
+#
+#
+  1:
+    desc: ( namespaceApply )
+    cmds:
+      - task: namespaceApply
+    silent: true
+
+
+  2:
+    desc: ( busyBoxRun )
+    cmds:
+      - task: busyBoxRun
+    silent: true
+
+
+  3:
+    desc: ( archRun )
+    cmds:
+      - task: archRun
+    silent: true
+
+
+  4:
+    desc: ( namespaceDelete )
+    cmds:
+      - task: namespaceDelete
+    silent: true
+
+
+###
+##
+# ** ALPHABETICAL
+#
+#
+  namespaceApply:
+    desc: apply the namespace {{.nameSpace}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: {{.nameSpace}}
+          labels:
+            name: {{.nameSpace}}
+            tier: {{.labelTier}}
+        EOF
+    silent: true
+
+
+  namespaceDelete:
+    desc: delete the namespace {{.nameSpace}}
+    cmds:
+      - |
+        kubectl delete namespace {{.nameSpace}}
+    silent: true
+
+
+###
+##
+# ** CUSTOM
+#
+#
+#
+  busyBoxRun:
+    desc: "run a busybox-debug container"
+    cmds:
+      - |
+        kubectl run --namespace {{.nameSpace}} -i --tty --rm debug --image=busybox --restart=Never -- sh
+    silent: true
+
+
+  archRun:
+    desc: "run a archlinux-debug container"
+    cmds:
+      - |
+        kubectl run --namespace {{.nameSpace}} -i --tty --rm arch --image=archlinux --restart=Never -- sh
+    silent: true

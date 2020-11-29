@@ -37,31 +37,40 @@ metadata:
   namespace: test-whoami
   labels:
     app: whoami
+#spec:
+#  type: ClusterIP
+#  ports:
+#    - port: 80
+#      name: whoami
+#  selector:
+#    app: whoami
 spec:
-  type: ClusterIP
+  type: NodePort
   ports:
     - port: 80
       name: whoami
+      #targetPort: 80
+      nodePort: 30005
   selector:
     app: whoami
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: whoami
-  namespace: test-whoami
-spec:
-  entryPoints:
-    - web
-  routes:
-    - kind: Rule
-      match: Host(`whoami.thesym.site`)
-      services:
-        - name: whoami
-          port: 80
-      middlewares:
-        - name: basicauth
-          namespace: traefik
+#---
+#apiVersion: traefik.containo.us/v1alpha1
+#kind: IngressRoute
+#metadata:
+#  name: whoami
+#  namespace: test-whoami
+#spec:
+#  entryPoints:
+#    - web
+#  routes:
+#    - kind: Rule
+#      match: Host(`whoami.thesym.site`)
+#      services:
+#        - name: whoami
+#          port: 80
+#      middlewares:
+#        - name: basicauth
+#          namespace: traefik
 #---
 #apiVersion: networking.k8s.io/v1beta1
 #kind: Ingress
