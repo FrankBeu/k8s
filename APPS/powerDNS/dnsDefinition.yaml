@@ -1,0 +1,104 @@
+dns:
+  domains:
+    - name: thesym.site
+      kind: forward
+      records:
+        - name:     "@"
+          type:     SOA
+          content:  "ns1.domain.com. dnsadmin.domain.com. 2019090253 10800 3600 604800 3600"
+          ttl:      3600
+          priority: null
+
+        - name:     "@"
+          type:     NS
+          content:  ns1.domain.com
+          ttl:      3600
+          priority: null
+
+        # - name:     "@"
+        #   type:     SOA
+        #   content:  "thesym.site. dnsadmin.thesym.site. 2019090253 10800 3600 604800 3600"
+        #   ttl:      3600
+        #   priority: null
+
+        # - name:     "@"
+        #   type:     NS
+        #   content:  thesym.site
+        #   ttl:      3600
+        #   priority: null
+
+        - name:     "@"
+          type:     NS
+          content:  ns2.domain.com
+          ttl:      3600
+          priority: null
+
+        - name:     "@"
+          type:     A
+          ip:       93.207.169.162
+          ttl:      1800
+          priority: null
+
+        - name:     "*"
+          type:     A
+          ip:       93.207.169.162
+          ttl:      3600
+          priority: null
+
+        - name:     mail
+          type:     A
+          ip:       93.207.169.162
+          ttl:      1800
+          priority: null
+
+        - name:     mx
+          type:     A
+          ip:       93.207.169.162
+          ttl:      1800
+          priority: null
+
+        - name:     "@"
+          type:     MX
+          content:  mail.thesym.site
+          ttl:      1800
+          priority: 30
+
+        - name:     "*"
+          type:     MX
+          content:  mail.thesym.site
+          ttl:      1800
+          priority: 30
+
+        - name:     "@"
+          type:     TXT
+          content:  "v=spf1 mx a:mail.thesym.site -all"
+          ttl:      1800
+          priority: null
+
+        - name:     dkim._domainkey
+          type:     TXT
+          content:  "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsezGzA1n6+6/q216w63aCh9S59OS5hxbtcybT1C1jMZxcSyxT/PhbUfQWJpPeIcucK1sVTKwOkZmlwb+cIEI+UyQBN1J43Zwu5aFIjiD40AAterln58Lo/sZF/IOL4lQokDG698gZRCy5ccJAD9bPQP1IhIc1SbtsIItaD6rBZW+jjD3e58JSPLNcrbww1NiabetuNOYLrTxkDP6q9fgQJ7fWqJxhizeu/zMBTQxhkPiDzd7vXJnUXpmZ0uuwvUOFq7Y/4/F9/BCt1VXBG0/twUgCwFfJ+K1VoABF3NroGnugPPL91de5T+/9fZdz8A/ei2/G1lVxfDQj/BI9lvsDQIDAQAB"
+          ttl:      1800
+          priority: null
+
+        - name:     _dmarc
+          type:     TXT
+          content:  "v=DMARC1; p=reject; adkim=s; aspf=s"
+          ttl:      1800
+          priority: null
+
+
+      # - name: 169.207.93.in-addr.arpa
+      #   kind: reverse
+      #   records:
+      #   - name:     "@"
+      #     type:     SOA
+      #     content:  "thesym.site. dnsadmin.thesym.site. 2020112902 10800 3600 604800 3600"
+      #     ttl:      3600
+      #     priority: null
+
+      #   - name:     "162"
+      #     type:     PTR
+      #     DATA:     thesym.site
+      #     ttl:      3600
+      #     priority: null
