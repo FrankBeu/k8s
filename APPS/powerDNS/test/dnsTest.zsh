@@ -51,9 +51,9 @@ colordiff -b ${SIDE_BY_SIDE} \
 
 
 ###
-## ** thesym.site ANY
+## ** thesym.site ANY 
 #
-echo -e "\n\n\e[1;34mthesym.site \e[33mANY\e[0m\n"
+echo -e "\n\n\e[1;34mthesym.site \e[33mANY \e[0m -> SERIAL on SOA will \e[31mdiffer\e[0m\n"
 colordiff ${SIDE_BY_SIDE} \
           <(dig @ns1.domain.com +noall +answer  thesym.site ANY | sort -k4) \
           <(dig @${KUBE_HOST_EXTERNAL_IP} +noall +answer  thesym.site ANY | sort -k4)
