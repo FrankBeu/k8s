@@ -109,10 +109,23 @@ tasks:
 
 
   3:
-
     desc: ( adminUpdate )
     cmds:
       - task: adminUpdate
+    silent: true
+
+
+  4:
+    desc: ( testLoop )
+    cmds:
+      - task: testLoop
+    silent: true
+
+
+  5:
+    desc: ( dnsUpdate )
+    cmds:
+      - task: dnsUpdate
     silent: true
 
 
@@ -262,6 +275,14 @@ tasks:
     silent: true
 
 
+  dnsUpdate:
+    desc: update the DNS on powerDNS
+    cmds:
+      - kubectl delete job powerdns-dns-setup
+      - task: chartUpdate
+    silent: true
+
+
   portforwardAdmin:
     desc: portforwarding for {{.name}}Admin
     cmds:
@@ -283,4 +304,12 @@ tasks:
     cmds:
       - |
         kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -n {{.nameSpace}} -l app.kubernetes.io/name={{.name}} -o name) 8081:8081
+    silent: true
+
+
+  testLoop:
+    desc: run the dns-test in a loop
+    cmds:
+      - |
+        ./test/testLoop.zsh
     silent: true
