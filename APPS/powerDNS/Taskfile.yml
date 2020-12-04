@@ -147,6 +147,7 @@ tasks:
         --namespace {{.nameSpace}} \
         --dry-run \
         --debug \
+        -f dnsDefinition.yaml \
         {{.chartVariablesSet}}
         {{- if eq .chartSecretsExist "true"}}
         -f sec.yaml
@@ -176,6 +177,7 @@ tasks:
         install \
         {{.name}} {{.chartRepoName}}/{{.chartName}}/{{.chartName}} \
         --namespace {{.nameSpace}} \
+        -f dnsDefinition.yaml \
         {{.chartVariablesSet}}
         {{- if eq .chartSecretsExist "true"}}
         -f sec.yaml
@@ -194,6 +196,7 @@ tasks:
         upgrade \
         --namespace {{.nameSpace}} \
         {{.name}} {{.chartRepoName}}/{{.chartName}}/{{.chartName}} \
+        -f dnsDefinition.yaml \
         {{.chartVariablesSet}}
         {{- if eq .chartSecretsExist "true"}}
         -f sec.yaml
@@ -258,6 +261,7 @@ tasks:
         {{.name}} {{.chartRepoName}}/{{.chartName}}/{{.chartName}} \
         --debug \
         -s templates/{{.templateDebugTarget}}.yaml \
+        -f dnsDefinition.yaml \
         {{.chartVariablesSet}}
     silent: true
 
@@ -270,7 +274,7 @@ tasks:
   adminUpdate:
     desc: update the user and config for powerDNS-Admin
     cmds:
-      - kubectl delete job powerdnsadmin-db-setup
+      - kubectl delete --namespace {{.nameSpace}} job powerdnsadmin-db-setup
       - task: chartUpdate
     silent: true
 
@@ -278,7 +282,7 @@ tasks:
   dnsUpdate:
     desc: update the DNS on powerDNS
     cmds:
-      - kubectl delete job powerdns-dns-setup
+      - kubectl delete --namespace {{.nameSpace}} job powerdns-dns-setup
       - task: chartUpdate
     silent: true
 
@@ -307,9 +311,9 @@ tasks:
     silent: true
 
 
-  testLoop:
+  test:
     desc: run the dns-test in a loop
     cmds:
       - |
-        ./test/testLoop.zsh
+        ./TEST/testLoop.zsh
     silent: true

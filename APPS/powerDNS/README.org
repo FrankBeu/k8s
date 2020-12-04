@@ -31,5 +31,7 @@
     https://powerdns.thesym.site/admin/setting/authentication
 *** update image
     after ci
+**** Deprecation warning: The 'EPOCH' soa-edit value will be removed in PowerDNS 4.1
+     ???? nothing found in the changelog (perhaps the message itself is deprecated)
 *** update schema
     according to used pdns-version (in relation to update-image-todo)
