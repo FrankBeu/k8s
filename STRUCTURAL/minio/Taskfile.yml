@@ -1,0 +1,421 @@
+###
+##
+# * TASKFILE
+#   https://taskfile.dev
+#
+version: '3'
+
+
+includes:
+
+  # taskfileRepository: ../../Taskfile.yml
+  varsGlobal:         ../../TaskfileVariablesGlobal.yml
+
+vars:
+
+  ###
+  ##
+  # global vars (imported as varsGlobal) will never be overwritten.
+  # However, they can only be used after setting an (ignored) value.
+  #
+  domainGlobal: GLOBAL
+  basePath: GLOBAL
+
+
+  name:                     minio
+
+  nameSpace:                "{{.name}}"
+
+  domainName:               "{{.name}}.{{.domainGlobal}}"
+  # domainNameAlt:            "NAME_ALT.{{.domainGlobal}}"
+
+  filter:                   "basic-allow"                                      ### NOT WORKING; NOT implemented yet
+  # filter:                   "basic-auth"
+  # filter:                   "basic-deny"                                       ###     WORKING; NOT implemented properly -> redirect to thesym.site
+  ### filter:                 "ory"                                              ### NOT WORKING; NOT implemented yet
+
+  labelTier:                storage
+
+  hostCertStaging:          ""                                                 ### letsencrypt
+  # hostCertStaging:          true                                               ### letsencryptStaging
+  hostAcmeEmail:            "fbeutelschiess@gmail.com"
+  hostPrivateKeySecretName: "letsencrypt-fbeutelschiessgmail.com"
+
+  tenantName:               tenant
+
+  mappingPort:              9000
+  #mappingServiceName:       "{{.tenantName}}-zone-0-0"
+  mappingServiceName:       "{{.tenantName}}-hl"
+
+  portforwardingPortSource: "{{.mappingPort}}"
+  portforwardingPortTarget: "{{.mappingPort}}"
+
+  pvCount:                  4
+  pvName:                   "{{.tenantName}}-zone-0-0"
+  pvRelativePath:           "{{.name}}"
+  pvStorageSize:            5Gi
+  pvStorageClass:           local-retain
+  templateDebugTarget:       "ingress"
+
+  message:                   Tasks for {{.name}}{{if .chartName}}-helm{{end}}
+
+  chartSecretsExist:         true
+  # chartSecretsExist:         false
+  # chartVariablesSet: |-
+  #   --set hostnames="{"{{.domainName}}"}" \
+  #   --set domain="{{.superDomainName}}" \
+  #   --set initialAccout.username=mailadmin \
+
+
+  # helmchartRepoSrcPath:      "/home/frank/SRC/REPO-HOST/NAME"
+
+
+tasks:
+
+  taskDebug:
+    desc: show all variables in Taskfile
+    cmds:
+      - |
+        echo -e \
+        "\n{{range $key, $value := .}} {{$key }}:  \e[92m{{$value}}\e[0m\n {{end}}\n"
+    silent: true
+
+
+  default:
+    desc: display info
+    cmds:
+      - |
+        echo -e \
+        "\n{{.message}}\n"
+      - |
+        task -l
+    silent: true
+
+
+###
+##
+# ** SEQUENCE
+#
+  1:
+    desc: ( namespaceApply )
+    cmds:
+      - task: namespaceApply
+    silent: true
+
+
+  2:
+    desc: ( controllerInitialize )
+    cmds:
+      - task: controllerInitialize
+    silent: true
+
+
+  3:
+    desc: ( storageClassApply )
+    cmds:
+      - task: storageClassApply
+    silent: true
+
+
+  4:
+    desc: ( persistenceApply )
+    cmds:
+      - task: persistenceApply
+    silent: true
+
+
+  5:
+    desc: ( tenantApply )
+    cmds:
+      - task: tenantApply
+    silent: true
+
+
+  6:
+    desc: ( filterPolicyApply )
+    cmds:
+      - task: filterPolicyApply
+    silent: true
+
+
+  7:
+    desc: ( mappingApply )
+    cmds:
+      - task: mappingApply
+    silent: true
+
+
+  8:
+    desc: ( hostApply )
+    cmds:
+      - task: hostApply
+    silent: true
+
+
+###
+##
+# ** ALPHABETICAL
+#
+  filterPolicyApply:
+    desc: create the filterPolicy for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: FilterPolicy
+        metadata:
+          name: {{.name}}
+          namespace: {{.nameSpace}}
+        spec:
+          rules:
+          - host: {{.domainName}}
+            path: "*"
+            filters:
+            #- name: {{.filter}}
+            - name: {{if eq .filter "basic-allow"}}"basic-auth"{{else}}{{.filter}}{{end}}
+              namespace: "ambassador"
+              {{- if eq .filter "basic-allow"}}
+              onDeny:  "continue"
+              onAllow: "continue"
+              {{- end}}
+          {{- if .domainNameAlt }}
+          - host: {{.domainNameAlt}}
+            path: "*"
+            filters:
+            #- name: {{.filter}}
+            - name: {{if eq .filter "basic-allow"}}"basic-auth"{{else}}{{.filter}}{{end}}
+              namespace: "ambassador"
+              {{- if eq .filter "basic-allow"}}
+              onDeny:  "continue"
+              onAllow: "continue"
+              {{- end}}
+          {{- end}}
+        EOF
+    silent: true
+
+
+  hostApply:
+    desc: apply the host for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: Host
+        metadata:
+          name: {{.name}}
+          namespace: ambassador-hosts
+        spec:
+          hostname: {{.domainName}}
+          acmeProvider:
+            {{- if .hostCertStaging }}
+            authority: https://acme-staging-v02.api.letsencrypt.org/directory
+            {{- else}}
+            authority: https://acme-v02.api.letsencrypt.org/directory
+            {{- end}}
+            email: {{.hostAcmeEmail}}
+            privateKeySecret:
+              name: {{.hostPrivateKeySecretName}}{{- if .hostCertStaging }}-staging{{- end}}
+          tlsSecret:
+            name: {{.name}}
+          requestPolicy:
+            insecure:
+              action: Redirect
+        {{- if .domainNameAlt }}
+        ---
+        apiVersion: getambassador.io/v2
+        kind: Host
+        metadata:
+          name: {{.name}}-alt
+          namespace: ambassador-hosts
+        spec:
+          hostname: {{.domainNameAlt}}
+          acmeProvider:
+            {{- if .hostCertStaging }}
+            authority: https://acme-staging-v02.api.letsencrypt.org/directory
+            {{- else}}
+            authority: https://acme-v02.api.letsencrypt.org/directory
+            {{- end}}
+            email: {{.hostAcmeEmail}}
+            privateKeySecret:
+              name: {{.hostPrivateKeySecretName}}{{- if .hostCertStaging }}-staging{{- end}}
+          tlsSecret:
+            name: {{.name}}-alt
+          requestPolicy:
+            insecure:
+              action: Redirect
+        {{- end }}
+        EOF
+    silent: true
+
+
+  mappingApply:
+    desc: apply the mapping for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: Mapping
+        metadata:
+          name: {{.name}}
+          namespace: {{.nameSpace}}
+        spec:
+          prefix: /
+          service: https://{{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPort}}
+          #service: https://tenant-hl.{{.nameSpace}}:{{.mappingPort}}
+          host: {{.domainName}}
+        EOF
+    silent: true
+
+
+  namespaceApply:
+    desc: apply the namespace {{.nameSpace}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: {{.nameSpace}}
+          labels:
+            name: {{.nameSpace}}
+            tier: {{.labelTier}}
+        EOF
+    silent: true
+
+
+  namespaceDelete:
+    desc: delete the namespace {{.nameSpace}}
+    cmds:
+      - |
+        kubectl delete namespace {{.nameSpace}}
+    silent: true
+
+
+  portforward:
+    desc: portforwarding for {{.name}}
+    cmds:
+      - |
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -n {{.nameSpace}} -l v1.min.io/tenant={{.tenantName}} -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
+    silent: true
+
+
+  resourcesRemove:
+    desc: (namespaceDelete + persistentVolumeDelete)
+    cmds:
+      - task: namespaceDelete
+      - task: persistentVolumeDelete
+    silent: true
+
+
+###
+##
+# ** CUSTOM
+#
+  controllerInitialize:
+    desc: initialize minio
+    cmds:
+      - |
+        kubectl minio init --namespace={{.nameSpace}}
+    silent: true
+
+
+  controllerDelete:
+    desc: delete the minio controller
+    cmds:
+      - |
+        kubectl minio delete -n {{.nameSpace}}
+    silent: true
+
+
+  persistenceApply:
+    desc: apply persistence for {{.name}}
+    cmds:
+      ### database
+      - |
+        for I in $( seq {{.pvCount}} ); do
+        mkdir -p {{.basePath}}/PERSISTENCE/{{.name}}/${I}
+        done
+        for I in $( seq {{.pvCount}} ); do
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: PersistentVolume
+        metadata:
+          name: ${I}-{{.pvName}}
+          labels:
+            type: local
+        spec:
+          storageClassName: {{.pvStorageClass}}
+          capacity:
+            storage: {{.pvStorageSize}}
+          accessModes:
+            - ReadWriteOnce
+          hostPath:
+            path: "/PERSISTENCE/{{.pvRelativePath}}/${I}"
+        EOF
+        done
+    silent: true
+
+
+  persistentVolumeDelete:
+    desc: delete the pv(s) for {{.name}}
+    cmds:
+      - |
+        for I in $( seq {{.pvCount}} ); do
+          kubectl delete pv ${I}-{{.pvName}}
+        done
+    silent: true
+
+
+  storageClassApply:
+    desc: apply persistence for {{.name}}
+    cmds:
+      ### database
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: storage.k8s.io/v1
+        kind: StorageClass
+        metadata:
+          name: {{.pvStorageClass}}
+        provisioner: kubernetes.io/local
+        #provisioner: rancher.io/local-path
+        reclaimPolicy: Retain
+        allowVolumeExpansion: true
+        #mountOptions:
+        #  - debug
+        #volumeBindingMode: Immediate
+        volumeBindingMode: WaitForFirstConsumer
+        EOF
+    silent: true
+
+
+  tenantApply:
+    desc: create the tenant (tenant.yaml)
+    cmds:
+      - |
+        sops -d sec.yaml | kubectl --namespace={{.nameSpace}} apply -f -
+    silent: true
+
+
+  tenantCreate:
+    desc: create the tenant.yaml
+    cmds:
+      - |
+        kubectl \
+        minio tenant create \
+        --namespace={{.nameSpace}} \
+        --name  {{.tenantName}} \
+        --servers 1 \
+        --volumes {{.pvCount}} \
+        --storage-class {{.pvStorageClass}} \
+        --capacity 20Gi \
+        -o > sec.yaml &&
+        sops -i -e sec.yaml
+    silent: true
+
+
+  tenantDelete:
+    desc: delete the tenant
+    cmds:
+      - |
+        kubectl minio tenant delete -n {{.nameSpace}} --name {{.tenantName}}
+    silent: true

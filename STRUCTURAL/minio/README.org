@@ -1,0 +1,8 @@
+* minio
+** INFO
+*** SOURCES
+**** operator
+     https://github.com/minio/operator
+**** minio-client
+     https://docs.min.io/docs/minio-client-quickstart-guide.html
+** TODO TODOS
