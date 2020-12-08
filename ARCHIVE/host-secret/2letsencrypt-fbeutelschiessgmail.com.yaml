@@ -1,0 +1,127 @@
+apiVersion: v1
+data:
+  user.key: LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1IY0NBUUVFSUVSazZ6ZjEzL2QrZFFGd25iZnFoOGZ2V2cwSXQ3RGNETXd4RmFZbVpIVjBvQW9HQ0NxR1NNNDkKQXdFSG9VUURRZ0FFcGZpY2txZWRqN3RDa1ROc1VWbzlkREUyV24ycHI5Rkc0dGg2cWFOUDlacUkyR3krK2tkUwowcDBxYkJoQ3l1Z1R5eXV5aG9sdG5nTTVscWd4eU1KNDh3PT0KLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo=
+kind: Secret
+metadata:
+  creationTimestamp: "2020-11-15T01:47:57Z"
+  managedFields:
+  - apiVersion: v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:data:
+        .: {}
+        f:user.key: {}
+      f:metadata:
+        f:ownerReferences:
+          .: {}
+          k:{"uid":"4e5131ed-5d88-4cb3-8792-aa59055f80df"}:
+            .: {}
+            f:apiVersion: {}
+            f:kind: {}
+            f:name: {}
+            f:uid: {}
+          k:{"uid":"38f523dd-1a8f-46d4-934a-7080a0ae5687"}:
+            .: {}
+            f:apiVersion: {}
+            f:kind: {}
+            f:name: {}
+            f:uid: {}
+          k:{"uid":"3b8dda1f-ecfd-4d7a-8d23-dcf0f53d1cfa"}:
+            .: {}
+            f:apiVersion: {}
+            f:kind: {}
+            f:name: {}
+            f:uid: {}
+          k:{"uid":"60a5682f-a3b0-46d9-87ca-fb1878dfc6a8"}:
+            .: {}
+            f:apiVersion: {}
+            f:kind: {}
+            f:name: {}
+            f:uid: {}
+          k:{"uid":"920e5950-d1a5-4f9e-a117-c2a09aaada2b"}:
+            .: {}
+            f:apiVersion: {}
+            f:kind: {}
+            f:name: {}
+            f:uid: {}
+          k:{"uid":"405757a5-2915-43cd-8370-fe5cd6a902a9"}:
+            .: {}
+            f:apiVersion: {}
+            f:kind: {}
+            f:name: {}
+            f:uid: {}
+          k:{"uid":"a041f30d-0e17-46e2-bbb3-a13b4c9b7759"}:
+            .: {}
+            f:apiVersion: {}
+            f:kind: {}
+            f:name: {}
+            f:uid: {}
+          k:{"uid":"c524c14e-02a0-4a18-ba97-a9379ed58584"}:
+            .: {}
+            f:apiVersion: {}
+            f:kind: {}
+            f:name: {}
+            f:uid: {}
+          k:{"uid":"da059cb0-de4c-4186-aeb5-40df93c7b06f"}:
+            .: {}
+            f:apiVersion: {}
+            f:kind: {}
+            f:name: {}
+            f:uid: {}
+          k:{"uid":"f209586a-57b4-4bcb-a8dc-7b7680477c11"}:
+            .: {}
+            f:apiVersion: {}
+            f:kind: {}
+            f:name: {}
+            f:uid: {}
+      f:type: {}
+    manager: amb-sidecar
+    operation: Update
+    time: "2020-12-07T22:41:18Z"
+  name: letsencrypt-fbeutelschiessgmail.com
+  namespace: ambassador-hosts
+  ownerReferences:
+  - apiVersion: getambassador.io/v2
+    kind: Host
+    name: pgadmin
+    uid: 405757a5-2915-43cd-8370-fe5cd6a902a9
+  - apiVersion: getambassador.io/v2
+    kind: Host
+    name: dash
+    uid: 60a5682f-a3b0-46d9-87ca-fb1878dfc6a8
+  - apiVersion: getambassador.io/v2
+    kind: Host
+    name: harbor
+    uid: 3b8dda1f-ecfd-4d7a-8d23-dcf0f53d1cfa
+  - apiVersion: getambassador.io/v2
+    kind: Host
+    name: harbor-notary
+    uid: 4e5131ed-5d88-4cb3-8792-aa59055f80df
+  - apiVersion: getambassador.io/v2
+    kind: Host
+    name: project
+    uid: c524c14e-02a0-4a18-ba97-a9379ed58584
+  - apiVersion: getambassador.io/v2
+    kind: Host
+    name: project-alt
+    uid: a041f30d-0e17-46e2-bbb3-a13b4c9b7759
+  - apiVersion: getambassador.io/v2
+    kind: Host
+    name: powerdnsadmin
+    uid: 38f523dd-1a8f-46d4-934a-7080a0ae5687
+  - apiVersion: getambassador.io/v2
+    kind: Host
+    name: gitea
+    uid: 920e5950-d1a5-4f9e-a117-c2a09aaada2b
+  - apiVersion: getambassador.io/v2
+    kind: Host
+    name: argo
+    uid: f209586a-57b4-4bcb-a8dc-7b7680477c11
+  - apiVersion: getambassador.io/v2
+    kind: Host
+    name: minio
+    uid: da059cb0-de4c-4186-aeb5-40df93c7b06f
+  resourceVersion: "9192693"
+  selfLink: /api/v1/namespaces/ambassador-hosts/secrets/letsencrypt-fbeutelschiessgmail.com
+  uid: 165a6741-3037-4777-af21-19c15682e678
+type: Opaque
