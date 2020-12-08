@@ -32,10 +32,10 @@ vars:
   chartRepoName:            CHART_REPO_NAME
   chartName:                "{{.name}}"
 
-  # filter:     "basic-allow"                                                    ### NOT WORKING; NOT implemented yet
-  filter:     "basic-auth"
-  # filter:     "basic-deny"                                                     ###     WORKING; NOT implemented properly -> redirect to thesym.site
-  ### filter:     "ory"                                                          ### NOT WORKING; NOT implemented yet
+  # filter:                   "basic-allow"                                      ### NOT WORKING; NOT implemented yet
+  filter:                   "basic-auth"
+  # filter:                   "basic-deny"                                       ###     WORKING; NOT implemented properly -> redirect to thesym.site
+  ### filter:                 "ory"                                              ### NOT WORKING; NOT implemented yet
 
   labelTier:                LABEL_TIER
 
@@ -260,7 +260,6 @@ tasks:
 ###
 ##
 # ** ALPHABETICAL
-#
 #
   chartDebug:
     desc: debug chart
@@ -704,5 +703,4 @@ tasks:
 ###
 ##
 # ** CUSTOM
-#
 #
