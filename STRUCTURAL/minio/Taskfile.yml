@@ -44,11 +44,15 @@ vars:
   tenantName:               tenant
 
   mappingPort:              9000
-  #mappingServiceName:       "{{.tenantName}}-zone-0-0"
+ #mappingPort:              9433
   mappingServiceName:       "{{.tenantName}}-hl"
+ #mappingServiceName:       "{{.tenantName}}-console"
 
-  portforwardingPortSource: "{{.mappingPort}}"
-  portforwardingPortTarget: "{{.mappingPort}}"
+  portforwardingPortSourceBrowser: "{{.mappingPort}}"
+  portforwardingPortTargetBrowser: "{{.mappingPort}}"
+
+  portforwardingPortSourceConsole: "9090"
+  portforwardingPortTargetConsole: "9090"
 
   pvCount:                  4
   pvName:                   "{{.tenantName}}-zone-0-0"
@@ -291,11 +295,19 @@ tasks:
     silent: true
 
 
-  portforward:
-    desc: portforwarding for {{.name}}
+  portforwardBrowser:
+    desc: portforwarding for {{.name}}-browser
     cmds:
       - |
-        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -n {{.nameSpace}} -l v1.min.io/tenant={{.tenantName}} -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -n {{.nameSpace}} -l v1.min.io/tenant={{.tenantName}} -o name) {{.portforwardingPortSourceBrowser}}:{{.portforwardingPortTargetBrowser}}
+    silent: true
+
+
+  portforwardConsole:
+    desc: portforwarding for {{.name}}-console
+    cmds:
+      - |
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -n {{.nameSpace}} -l v1.min.io/console={{.tenantName}}-console -o jsonpath='{.items[0].metadata.name}') {{.portforwardingPortSourceConsole}}:{{.portforwardingPortTargetConsole}}
     silent: true
 
 
