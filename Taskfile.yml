@@ -67,7 +67,7 @@ tasks:
     cmds:
       - |
         for APIRESOURCES in `kubectl api-resources --verbs=list --namespaced -o name`; do
-        RES=$(kubectl get --show-kind --ignore-not-found ${APIRESOURCES})
+        RESOURCES=$(kubectl get --show-kind --ignore-not-found ${APIRESOURCES})
         [[ ! -z ${RESOURCES} ]] && echo -e "\x1b[33m${APIRESOURCES}\x1b[0m\n${RESOURCES}\n"; 
         done
     silent: true
@@ -118,6 +118,15 @@ tasks:
     cmds:
       - |
         kubectl krew install gopass
+    silent: true
+
+
+  installationKubectlPluginMinio:
+    ### cf. https://github.com/minio/operator/tree/master/kubectl-minio
+    desc: "kubectl: install minio-plugin"
+    cmds:
+      - |
+        kubectl krew install minio
     silent: true
 
 
