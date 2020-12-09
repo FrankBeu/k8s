@@ -79,6 +79,13 @@ tasks:
 
 
   4:
+    desc: ( nixRun )
+    cmds:
+      - task: nixRun
+    silent: true
+
+
+  5:
     desc: ( namespaceDelete )
     cmds:
       - task: namespaceDelete
@@ -132,5 +139,13 @@ tasks:
     desc: "run a archlinux-debug container"
     cmds:
       - |
-        kubectl run --namespace {{.nameSpace}} -i --tty --rm arch --image=archlinux --restart=Never -- sh
+        kubectl run --namespace {{.nameSpace}} -i --tty --rm arch --image=archlinux:base-devel --restart=Never -- sh
+    silent: true
+
+
+  nixRun:
+    desc: "run a nixos-debug container"
+    cmds:
+      - |
+        kubectl run --namespace {{.nameSpace}} -i --tty --rm nix --image=nixos/nix:2.3.6 --restart=Never -- sh
     silent: true
