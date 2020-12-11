@@ -23,4 +23,7 @@
 https://thenewstack.io/how-to-scan-docker-images-for-vulnerabilities-with-harbor/
 **** [#1] use API
      https://harbor.thesym.site/devcenter-api-2.0
+**** trust image
+     https://www.youtube.com/watch?v=pPklSTJZY2E
+     https://ruzickap.github.io/k8s-harbor/part-07/#signed-container-image
 ** TODO TODOS
