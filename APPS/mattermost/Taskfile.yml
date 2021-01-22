@@ -276,6 +276,35 @@ tasks:
     silent: true
 
 
+###  hostApply:
+###    desc: apply the host for {{.name}}
+###    cmds:
+###      - |
+###        cat <<EOF | kubectl apply -f -
+###        apiVersion: getambassador.io/v2
+###        kind: Host
+###        metadata:
+###          name: {{.name}}
+###          namespace: ambassador-hosts
+###        spec:
+###          hostname: {{.domainName}}
+###          acmeProvider:
+###            {{- if .hostCertStaging }}
+###            authority: https://acme-staging-v02.api.letsencrypt.org/directory
+###            {{- else}}
+###            authority: https://acme-v02.api.letsencrypt.org/directory
+###            {{- end}}
+###            email: {{.hostAcmeEmail}}
+###            privateKeySecret:
+###              name: {{.hostPrivateKeySecretName}}
+###          tlsSecret:
+###            name: {{.name}}
+###          requestPolicy:
+###            insecure:
+###              action: Redirect
+###        EOF
+###    silent: true
+
   hostApply:
     desc: apply the host for {{.name}}
     cmds:
@@ -296,15 +325,40 @@ tasks:
             {{- end}}
             email: {{.hostAcmeEmail}}
             privateKeySecret:
-              name: {{.hostPrivateKeySecretName}}
+              # name: {{.hostPrivateKeySecretName}}{{- if .hostCertStaging }}-staging{{- end}}
+              name: {{.domainName}}
           tlsSecret:
             name: {{.name}}
           requestPolicy:
             insecure:
               action: Redirect
+        {{- if .domainNameAlt }}
+        ---
+        apiVersion: getambassador.io/v2
+        kind: Host
+        metadata:
+          name: {{.name}}-alt
+          namespace: ambassador-hosts
+        spec:
+          hostname: {{.domainNameAlt}}
+          acmeProvider:
+            {{- if .hostCertStaging }}
+            authority: https://acme-staging-v02.api.letsencrypt.org/directory
+            {{- else}}
+            authority: https://acme-v02.api.letsencrypt.org/directory
+            {{- end}}
+            email: {{.hostAcmeEmail}}
+            privateKeySecret:
+              #name: {{.hostPrivateKeySecretName}}{{- if .hostCertStaging }}-staging{{- end}}
+              name: {{.domainName}}
+          tlsSecret:
+            name: {{.name}}-alt
+          requestPolicy:
+            insecure:
+              action: Redirect
+        {{- end }}
         EOF
     silent: true
-
 
   mappingApply:
     desc: apply the mapping for {{.name}}
