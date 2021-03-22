@@ -3,5 +3,5 @@
 *** SOURCES
 ** TODO TODOS
 *** TODO create a Gate for the Domain
-overview of all avaailable subdomains
+overview of all available subdomains
 in relation to authorization

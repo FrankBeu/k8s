@@ -1,35 +1,49 @@
 ###
 ##
 # * TASKFILE
-##  https://taskfile.dev
-###
+#   https://taskfile.dev
+#
 version: '3'
+
+
+includes:
+
+  # taskfileRepository: ../../Taskfile.yml
+  varsGlobal:         ../../TaskfileVariablesGlobal.yml
 
 vars:
 
-  name:                     gate
+  ###
+  ##
+  # global vars (imported as varsGlobal) will never be overwritten.
+  # However, they can only be used after setting an (ignored) value.
+  #
+  domainGlobal: GLOBAL
+
+
+  name:                     thesymsite
 
   nameSpace:                "{{.name}}"
 
-  domainName:               "thesym.site"
+  domainName:               "{{.domainGlobal}}"
 
   chartRepoUrl:             https://URL
   chartRepoName:            CHART_REPO_NAME
   chartName:                "{{.name}}"
+  image:                    "harbor.thesym.site/thesymsite/webserver:0.3"
 
-  # filter:     "basic-allow"                                                    ### NOT WORKING; NOT implemented yet
-  filter:     "basic-auth"
-  # filter:     "basic-deny"                                                     ###     WORKING; NOT implemented properly -> redirect to thesym.site
-  ### filter:     "ory"                                                          ### NOT WORKING; NOT implemented yet
+  filter:                   "basic-allow"                                      ### NOT WORKING; NOT implemented yet
+  # filter:                   "basic-auth"
+  # filter:                   "basic-deny"                                       ###     WORKING; NOT implemented properly -> redirect to thesym.site
+  ### filter:                 "ory"                                              ### NOT WORKING; NOT implemented yet
 
-  labelTier:                LABEL_TIER
+  labelTier:                app
 
-  # hostCertStaging:          ""                                                 ### letsencrypt
-  hostCertStaging:          true                                               ### letsencryptStaging
+  hostCertStaging:          ""                                                 ### letsencrypt
+  # hostCertStaging:          true                                               ### letsencryptStaging
   hostAcmeEmail:            "fbeutelschiess@gmail.com"
-  hostPrivateKeySecretName: "letsencrypt-fbeutelschiessgmail.com"
 
-  mappingPort:              80
+  mappingPort:              5000
   mappingServiceName:       "{{.name}}"
 
   portforwardingPortSource: ""
@@ -46,16 +60,19 @@ vars:
 
   templateDebugTarget:       "ingress"
 
-  # servicePort:               5432
+  servicePort:               5000
 
   message:                   Tasks for {{.name}}{{if .chartName}}-helm{{end}}
 
-  chartSecretsExist:         true
-  # chartSecretsExist:         false
+  # chartSecretsExist:         true
+  chartSecretsExist:         false
   # chartVariablesSet: |-
   #   --set hostnames="{"{{.domainName}}"}" \
   #   --set domain="{{.superDomainName}}" \
   #   --set initialAccout.username=mailadmin \
+
+
+  # helmchartRepoSrcPath:      "/home/frank/SRC/REPO-HOST/NAME"
 
 
 tasks:
@@ -83,104 +100,20 @@ tasks:
 ###
 ##
 # ** SEQUENCE
-##
-###
+#
+#
   # 1:
-  #   desc: (  )
+  #   desc: ( repoAdd )
   #   cmds:
-  #     - task:
+  #     - task: repoAdd
   #   silent: true
 
 
   # 2:
-  #   desc: (  )
+  #   desc: ( chartGet )
   #   cmds:
-  #     - task:
+  #     - task: chartGet
   #   silent: true
-
-
-  # 3:
-  #   desc: (  )
-  #   cmds:
-  #     - task:
-  #   silent: true
-
-
-  # 4:
-  #   desc: (  )
-  #   cmds:
-  #     - task:
-  #   silent: true
-
-
-  # 5:
-  #   desc: (  )
-  #   cmds:
-  #     - task:
-  #   silent: true
-
-
-  # 6:
-  #   desc: (  )
-  #   cmds:
-  #     - task:
-  #   silent: true
-
-
-  # 7:
-  #   desc: (  )
-  #   cmds:
-  #     - task:
-  #   silent: true
-
-
-  # 8:
-  #   desc: (  )
-  #   cmds:
-  #     - task:
-  #   silent: true
-
-
-  # 9:
-  #   desc: (  )
-  #   cmds:
-  #     - task:
-  #   silent: true
-
-
-  # 10:
-  #   desc: (  )
-  #   cmds:
-  #     - task:
-  #   silent: true
-
-
-  # 11:
-  #   desc: (  )
-  #   cmds:
-  #     - task:
-  #   silent: true
-
-
-  # 12:
-  #   desc: (  )
-  #   cmds:
-  #     - task:
-  #   silent: true
-
-
-  1:
-    desc: ( repoAdd )
-    cmds:
-      - task: repoAdd
-    silent: true
-
-
-  2:
-    desc: ( chartGet )
-    cmds:
-      - task: chartGet
-    silent: true
 
 
   3:
@@ -212,9 +145,10 @@ tasks:
 
 
   7:
-    desc: ( persistenceApply )
+    desc: ( deploymentApply + serviceApply )
     cmds:
-      - task: persistenceApply
+      - task: deploymentApply
+      - task: serviceApply
     silent: true
 
 
@@ -242,18 +176,24 @@ tasks:
 ###
 ##
 # ** ALPHABETICAL
-##
-###
+#
   chartDebug:
     desc: debug chart
     cmds:
       - |
-        helm install \
+        helm \
+        {{- if eq .chartSecretsExist "true"}}
+        secrets \
+        {{- end}}
+        install \
+        {{.name}} CHART/{{.chartName}} \
         --namespace {{.nameSpace}} \
         --dry-run \
         --debug \
-        {{.name}} CHART/{{.chartName}} \
         {{.chartVariablesSet}}
+        {{- if eq .chartSecretsExist "true"}}
+        -f sec.yaml
+        {{- end}}
     silent: true
 
 
@@ -360,26 +300,29 @@ tasks:
             spec:
               containers:
                 - name: {{.name}}
-                  image: postgres:10.4
+                  image: {{.image}}
+                  # image: harbor.thesym.site/thesymsite/webserver:0.1
                   imagePullPolicy: "IfNotPresent"
                   ports:
-                    - containerPort: 5432
-                  envFrom:
-                    - configMapRef:
-                        name: {{.name}}-config
-                  volumeMounts:
-                    - mountPath: /var/lib/postgresql/data
-                      name: {{.name}}db
-              volumes:
-                - name: {{.name}}db
-                  persistentVolumeClaim:
-                    claimName: {{.name}}
+                    - containerPort: 5000
+              imagePullSecrets:
+                - name: regcred
+                  # envFrom:
+                    # - configMapRef:
+                        # name: {{.name}}-config
+                  # volumeMounts:
+                    # - mountPath: /var/lib/postgresql/data
+                      # name: {{.name}}db
+              # volumes:
+                # - name: {{.name}}db
+                  # persistentVolumeClaim:
+                    # claimName: {{.name}}
         EOF
     silent: true
 
 
   filterPolicyApply:
-    desc: create the host for {{.name}}
+    desc: create the filterPolicy for {{.name}}
     cmds:
       - |
         cat <<EOF | kubectl apply -f -
@@ -424,12 +367,13 @@ tasks:
             {{- end}}
             email: {{.hostAcmeEmail}}
             privateKeySecret:
-              name: {{.hostPrivateKeySecretName}}
+              name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}Key
           tlsSecret:
-            name: {{.name}}
+            name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}
           requestPolicy:
             insecure:
-              action: Redirect
+              # action: Redirect
+              action: Route
         EOF
     silent: true
 
@@ -481,114 +425,17 @@ tasks:
     desc: portforwarding for {{.name}}
     cmds:
       - |
-        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
-        #kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -l app.kubernetes.io/name={{.name}} -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -n {{.nameSpace}} -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
+        #kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -n {{.nameSpace}} -l app.kubernetes.io/name={{.name}} -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
     silent: true
 
 
-  persistenceApply:
-    desc: apply persistence for {{.name}}
-    cmds:
-      ### database
-      - |
-        {{- if .pvName0 }}
-        cat <<EOF | kubectl apply -f -
-        apiVersion: v1
-        kind: PersistentVolume
-        metadata:
-          name: {{.pvName0}}
-          labels:
-            type: local
-        spec:
-          storageClassName: {{.pvStorageClass0}}
-          capacity:
-            storage: {{.pvStorageSize0}}
-          accessModes:
-            - ReadWriteOnce
-          hostPath:
-            path: "/PERSISTENCE/{{.pvRelativePath0}}"
-        ---
-        apiVersion: v1
-        kind: PersistentVolumeClaim
-        metadata:
-          name: {{.pvName0}}
-          namespace: {{.nameSpace}}
-        spec:
-          volumeName: {{.pvName0}}
-          storageClassName: {{.pvStorageClass0}}
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: {{.pvStorageSize0}}
-        EOF
-        {{- end }}
-
-        {{- if .pvName1 }}
-        cat <<EOF | kubectl apply -f -
-        apiVersion: v1
-        kind: PersistentVolume
-        metadata:
-          name: {{.pvName1}}
-          labels:
-            type: local
-        spec:
-          storageClassName: {{.pvStorageClass1}}
-          capacity:
-            storage: {{.pvStorageSize1}}
-          accessModes:
-            - ReadWriteOnce
-          hostPath:
-            path: "/PERSISTENCE/{{.pvRelativePath1}}"
-        ---
-        apiVersion: v1
-        kind: PersistentVolumeClaim
-        metadata:
-          name: {{.pvName1}}
-          namespace: {{.nameSpace}}
-        spec:
-          volumeName: {{.pvName1}}
-          storageClassName: {{.pvStorageClass1}}
-          accessModes:
-            - ReadWriteOnce
-          resources:
-            requests:
-              storage: {{.pvStorageSize1}}
-        EOF
-        {{- end }}
-    silent: true
-
-
-  persistentVolumeDelete:
-    desc: delete the pv(s) for {{.name}}
-    cmds:
-      - |
-        {{- if .pvName0 }}
-        kubectl delete pv {{.pvName0}}
-        {{- end }}
-        {{- if .pvName1 }}
-        kubectl delete pv {{.pvName1}}
-        {{- end }}
-    silent: true
-
-
-  repoAdd:
-    desc: add the repository
-    cmds:
-      - |
-        helm repo add \
-        {{.chartRepoName}} \
-        {{.chartRepoUrl}}
-      - |
-        helm repo update
-    silent: true
 
 
   resourcesRemove:
-    desc: (namespaceDelete + persistentVolumeDelete)
+    desc: (namespaceDelete)
     cmds:
       - task: namespaceDelete
-      - task: persistentVolumeDelete
     silent: true
 
 
@@ -630,5 +477,25 @@ tasks:
 ###
 ##
 # ** CUSTOM
-##
-###
+#
+## TODO: encrypt make global; NOTWORKING cannot import with crictr or ctr; docker pull works
+  dockerRegCred:
+    desc: "create pull-secret"
+    cmds:
+      - |
+        kubectl \
+            --namespace {{.nameSpace}} \
+            create secret generic regcred \
+            --from-file=.dockerconfigjson=./config.json \
+            --type=kubernetes.io/dockerconfigjson
+    silent: true
+
+
+## WORKAROUND
+  imageProvide:
+    desc: "pull image to host and load it into k3d"
+    cmds:
+      - |
+        docker pull {{.image}}
+        k3d image import -c k8s {{.image}}
+    silent: true
