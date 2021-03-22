@@ -42,7 +42,6 @@ vars:
   hostCertStaging:          ""                                                 ### letsencrypt
   # hostCertStaging:          true                                               ### letsencryptStaging
   hostAcmeEmail:            "fbeutelschiess@gmail.com"
-  hostPrivateKeySecretName: "letsencrypt-fbeutelschiessgmail.com"
 
   mappingPort:              80
   mappingServiceName:       "{{.name}}"
@@ -460,9 +459,9 @@ tasks:
             {{- end}}
             email: {{.hostAcmeEmail}}
             privateKeySecret:
-              name: {{.hostPrivateKeySecretName}}{{- if .hostCertStaging }}-staging{{- end}}
+              name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}Key
           tlsSecret:
-            name: {{.name}}
+            name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}
           requestPolicy:
             insecure:
               action: Redirect
@@ -483,9 +482,9 @@ tasks:
             {{- end}}
             email: {{.hostAcmeEmail}}
             privateKeySecret:
-              name: {{.hostPrivateKeySecretName}}{{- if .hostCertStaging }}-staging{{- end}}
+              name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}AltKey
           tlsSecret:
-            name: {{.name}}-alt
+            name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}Alt
           requestPolicy:
             insecure:
               action: Redirect
