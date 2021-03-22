@@ -1,0 +1,7 @@
+{
+	"auths": {
+		"harbor.thesym.site": {
+			"auth": "PASSWORD"
+		}
+	}
+}

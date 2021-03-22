@@ -479,16 +479,16 @@ tasks:
 # ** CUSTOM
 #
 ## TODO: encrypt make global; NOTWORKING cannot import with crictr or ctr; docker pull works
-  dockerRegCred:
-    desc: "create pull-secret"
-    cmds:
-      - |
-        kubectl \
-            --namespace {{.nameSpace}} \
-            create secret generic regcred \
-            --from-file=.dockerconfigjson=./config.json \
-            --type=kubernetes.io/dockerconfigjson
-    silent: true
+  # dockerRegCred:
+  #   desc: "create pull-secret"
+  #   cmds:
+  #     - |
+  #       kubectl \
+  #           --namespace {{.nameSpace}} \
+  #           create secret generic regcred \
+  #           --from-file=.dockerconfigjson=./config.json \
+  #           --type=kubernetes.io/dockerconfigjson
+  #   silent: true
 
 
 ## WORKAROUND
