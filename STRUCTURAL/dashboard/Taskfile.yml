@@ -27,7 +27,6 @@ vars:
   hostCertStaging:          ""                                                 ### letsencrypt
   # hostCertStaging:          true                                               ### letsencryptStaging
   hostAcmeEmail:            "fbeutelschiess@gmail.com"
-  hostPrivateKeySecretName: "letsencrypt-fbeutelschiessgmail.com"
 
   mappingPort:              443
   mappingServiceName:       "{{.name}}-kubernetes-dashboard"
@@ -265,7 +264,7 @@ tasks:
             {{- end}}
             email: {{.hostAcmeEmail}}
             privateKeySecret:
-              name: {{.hostPrivateKeySecretName}}
+              name: {{.name}}{{- if .hostCertStaging }}-staging{{- end}}Key
           tlsSecret: 
             name: {{.name}}
           requestPolicy:
