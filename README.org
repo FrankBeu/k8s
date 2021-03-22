@@ -7,5 +7,35 @@
     task repositoryGitHookLinkCreate
 ** TODO TODOS
 *** make path to PERSISTENCE/ relative
-    currently repo has to be called k3s 
+    currently repo has to be called k3s
     because of named volumes in ./CLUSTER/k3d/Taskfile.yml
+** TASKS
+*** update repo with local chart
+**** update helm repos
+     #+begin_src shell
+     helm repo update
+     #+end_src
+**** mv old chart out of the way
+**** get new chart
+     with task
+**** update chart
+     with task
+**** check installation
+**** remove old chart
+**** commit
+*** fix cert
+**** change to ns ambassador-hosts
+**** delete all related hosts and secrets
+     #+begin_example shell
+     krmsec HOSTNAME
+     krm host HOSTNAME
+     #+end_example
+**** create new host
+     with task
+** TASKS
+*** read certificate
+     #+begin_example shell
+     kns ambassador-hosts
+     kgsec dash    -oyaml | yq '.data."tls.crt"'  -r| base64 -d | openssl x509 --text --noout
+     kgsec dashKey -oyaml | yq '.data."user.key"' -r| base64 -d | openssl ec   --text --noout
+     #+end_example
