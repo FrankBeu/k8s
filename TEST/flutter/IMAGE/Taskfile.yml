@@ -1,0 +1,115 @@
+###
+##
+# * TASKFILE
+##  https://taskfile.dev
+###
+version: '3'
+
+vars:
+  IMG_NAME: webserver
+  IMG_VERSION: 0.3
+  REGISTRY_DOMAIN_NAME: harbor.thesym.site
+  REPO_NAME: flutter
+  MESSAGE: Create an image with flutter-web and a \ngo-WEBSERVER \nthen push it to {{.REGISTRY_DOMAIN_NAME}}
+
+
+
+###
+##
+# ** IMAGE
+##
+###
+tasks:
+
+  default:
+    desc: display info
+    cmds:
+      - |
+        echo -e \
+        "{{.MESSAGE}}"
+    silent: true
+
+  image:
+    desc: create a docker-image
+    cmds:
+      - |
+        docker build \
+        --rm \
+        --no-cache \
+        --tag {{.IMG_NAME}} \
+        .
+    silent: true
+
+  tag:
+    desc: tag the image for {{.REGISTRY_DOMAIN_NAME}}
+    cmds:
+      - |
+        docker tag \
+        {{.IMG_NAME}}:latest \
+        {{.REGISTRY_DOMAIN_NAME}}/{{.REPO_NAME}}/{{.IMG_NAME}}:{{.IMG_VERSION}}
+    silent: true
+
+  login:
+    desc: log into the registry {{.REGISTRY_DOMAIN_NAME}}
+    cmds:
+      - |
+        docker login \
+        {{.REGISTRY_DOMAIN_NAME}}
+    silent: true
+
+  push:
+    desc: push the created image to {{.REGISTRY_DOMAIN_NAME}}
+    cmds:
+      - |
+        docker push \
+        {{.REGISTRY_DOMAIN_NAME}}/{{.REPO_NAME}}/{{.IMG_NAME}}:{{.IMG_VERSION}}
+    silent: true
+
+  img2Reg:
+    desc: create an image, tag it, log into registry and push it (image + tag + login + push)
+    cmds:
+      - task: image
+      - task: tag
+      - task: login
+      - task: push
+    silent: true
+
+###
+##
+# ** CONTAINER
+##
+###
+  containerCreate:
+    desc: create container from image
+    cmds:
+      - |
+        docker create \
+        --name {{.IMG_NAME}} \
+        -P \
+        {{.REGISTRY_DOMAIN_NAME}}/{{.REPO_NAME}}/{{.IMG_NAME}}:{{.IMG_VERSION}}
+    silent: true
+
+  containerStart:
+    desc: start the created container
+    cmds:
+      - |
+        docker start \
+        {{.IMG_NAME}}
+    silent: true
+
+  run:
+    desc: create and start the container (containerCreate + containerStart)
+    cmds:
+      - task: containerCreate
+      - task: containerStart
+    silent: true
+
+  containerRemove:
+    desc: start the created container
+    cmds:
+      - |
+        docker container stop \
+        {{.IMG_NAME}} && \
+        docker container rm \
+        {{.IMG_NAME}}
+    silent: true
