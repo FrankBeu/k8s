@@ -364,7 +364,7 @@ tasks:
             {{- end}}
             email: {{.hostAcmeEmail}}
             privateKeySecret:
-              name: {{.hostPrivateKeySecretName}}
+              name: {{.domainName}}{{- if .hostCertStaging }}-staging{{- end}}
           tlsSecret: 
             name: {{.name}}
           requestPolicy:
@@ -389,7 +389,7 @@ tasks:
             {{- end}}
             email: {{.hostAcmeEmail}}
             privateKeySecret:
-              name: {{.hostPrivateKeySecretName}}
+              name: {{.domainName}}{{- if .hostCertStaging }}-staging{{- end}}
           tlsSecret: 
             name: {{.name}}-notary
           requestPolicy:
