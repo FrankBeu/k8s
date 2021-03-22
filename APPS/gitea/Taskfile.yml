@@ -26,7 +26,6 @@ vars:
   hostCertStaging:          ""                                                 ### letsencrypt
   # hostCertStaging:          true                                               ### letsencryptStaging
   hostAcmeEmail:            "fbeutelschiess@gmail.com"
-  hostPrivateKeySecretName: "letsencrypt-fbeutelschiessgmail.com"
 
   mappingPort:              3000
   mappingServiceName:       "{{.name}}-http"
@@ -291,7 +290,7 @@ tasks:
             {{- end}}
             email: {{.hostAcmeEmail}}
             privateKeySecret:
-              name: {{.hostPrivateKeySecretName}}
+              name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}Key
           tlsSecret: 
             name: {{.name}}
           requestPolicy:
