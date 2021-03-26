@@ -29,55 +29,46 @@ tasks:
         task -l
     silent: true
 
+###
+##
+# ** TASKS
+#
 
 ###
 ##
-# ** MISC
-##
-###
-  getImagesUsedClusterwideAll:
-    desc: "list all images which are available in the cluster"
+# *** SHORTCUTS
+#
+  qntl:
+    desc: "(queryGetNamespacesTierLabels)"
     cmds:
-      - |
-        kubectl get pods --all-namespaces -o jsonpath="{..image}" |\
-        tr -s '[[:space:]]' '\n' |\
-        sort |\
-        uniq -c
+      - task: queryGetNamespacesTierLabels
     silent: true
 
 
-  k8sUpgrade:
-    desc: "TODO upgrade the cluster"
+  qrn:
+    desc: "(queryGetResourcesNamespaced)"
     cmds:
-      - |
-        swapoff -a
-    silent: true
+      - task: queryGetResourcesNamespaced
 
-
-#  resourcesNamespacedGetwithXargs:
-#    desc: "get all resources from current namespace"
-#    cmds:
-#      - |
-#        kubectl api-resources --verbs=list --namespaced -o name \
-#        | xargs -n 1 kubectl get --show-kind --ignore-not-found
-
-
-  resourcesNamespacedGet:
-    desc: "get all resources from current namespace"
-    cmds:
-      - |
-        for APIRESOURCES in `kubectl api-resources --verbs=list --namespaced -o name`; do
-        RESOURCES=$(kubectl get --show-kind --ignore-not-found ${APIRESOURCES})
-        [[ ! -z ${RESOURCES} ]] && echo -e "\x1b[33m${APIRESOURCES}\x1b[0m\n${RESOURCES}\n"; 
-        done
     silent: true
 
 
 ###
 ##
-# ** INSTALLATION
-##
+# *** HELM
+#
+  helmRepoThesymSiteAdd:
+    desc: "add thesym.site as repo"
+    cmds:
+      - |
+        summon --up bash -c 'helm repo add --username=frank --password=${HARBOR_PASSWORD} thesym.site https://harbor.thesym.site/chartrepo'
+    silent: true
+
+
 ###
+##
+# *** INSTALLATION
+#
   installationHelmPluginPush:
     ### cf. https://github.com/chartmuseum/helm-push
     desc: "helm: install helm-push"
@@ -132,8 +123,53 @@ tasks:
 
 ###
 ##
-# ** REPOSITORY
+# *** MISC
 #
+  k8sUpgrade:
+    desc: "TODO upgrade the cluster"
+    cmds:
+      - |
+        swapoff -a
+    silent: true
+
+
+###
+##
+# *** QUERIES
+#
+  queryGetImagesUsedClusterwideAll:
+    desc: "list all images which are available in the cluster"
+    cmds:
+      - |
+        kubectl get pods --all-namespaces -o jsonpath="{..image}" |\
+        tr -s '[[:space:]]' '\n' |\
+        sort |\
+        uniq -c
+    silent: true
+
+
+  queryGetResourcesNamespaced:
+    desc: "get all resources from current namespace"
+    cmds:
+      - |
+        for APIRESOURCES in `kubectl api-resources --verbs=list --namespaced -o name`; do
+        RESOURCES=$(kubectl get --show-kind --ignore-not-found ${APIRESOURCES})
+        [[ ! -z ${RESOURCES} ]] && echo -e "\x1b[33m${APIRESOURCES}\x1b[0m\n${RESOURCES}\n";
+        done
+    silent: true
+
+
+  queryGetNamespacesTierLabels:
+    desc: "get all tier labels defined on namespaces"
+    cmds:
+      - |
+        kubectl get ns -o jsonpath='{range .items[*]}{..tier}{"\n"}{end}'|sort -u
+    silent: true
+
+
+###
+##
+# *** REPOSITORY
 #
   repositoryGitHookLinkCreate:
     desc: "create a symlink from GIT/hooks to .git/hooks"
@@ -141,17 +177,4 @@ tasks:
       - |
         rm -r ./.git/hooks
         ln -srf ./GIT/hooks/ ./.git/hooks
-    silent: true
-
-
-###
-##
-# ** MISC
-#
-#
-  helmRepoThesymSiteAdd:
-    desc: "add thesym.site as repo"
-    cmds:
-      - |
-        summon --up bash -c 'helm repo add --username=frank --password=${HARBOR_PASSWORD} thesym.site https://harbor.thesym.site/chartrepo'
     silent: true
