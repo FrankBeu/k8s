@@ -5,6 +5,21 @@
 *** after cloning the git-hooks must be updated.
     run:
     task repositoryGitHookLinkCreate
+*** sops
+**** usage
+***** encrypt
+#+begin_src elisp
+sops -e -i sec.yaml
+#+end_src
+***** decrypt
+#+begin_src elisp
+sops -d -i sec.yaml
+#+end_src
+***** helm
+#+begin_src elisp
+helm secret ....
+#+end_src
+cf. =./TEMPLATES/APP/Taskfile.yml=
 ** TODO TODOS
 *** make path to PERSISTENCE/ relative
     currently repo has to be called k3s
@@ -32,7 +47,6 @@
      #+end_example
 **** create new host
      with task
-** TASKS
 *** read certificate
      #+begin_example shell
      kns ambassador-hosts
