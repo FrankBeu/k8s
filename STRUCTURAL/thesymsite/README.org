@@ -5,3 +5,4 @@
 *** TODO create a Gate for the Domain
 overview of all available subdomains
 in relation to authorization
+*** TODO unused config.json was renamed to sec.yaml
