@@ -2,14 +2,23 @@
 
 This chart install the Fluent Bit application to ship logs to Loki. It defines daemonset on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
+## Get Repo Info
+
+```console
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo update
+```
+
+_See [helm repo](https://helm.sh/docs/helm/helm_repo/) for command documentation._
+
 ## Installing the Chart
 
 > If you don't have `Helm` installed locally, or `Tiller` installed in your Kubernetes cluster, read the [Using Helm](https://docs.helm.sh/using_helm/) documentation to get started.
 To install the chart with the release name `my-release` using our helm repository:
 
 ```bash
-helm repo add loki https://grafana.github.io/loki/charts
-helm upgrade --install my-release loki/fluent-bit \
+helm repo add grafana https://grafana.github.io/helm-charts
+helm upgrade --install my-release grafana/fluent-bit \
     --set loki.serviceName=loki.default.svc.cluster.local
 ```
 
@@ -20,7 +29,7 @@ The command deploys Fluent Bit on the Kubernetes cluster with the default config
 To configure the chart to send to [Grafana Cloud](https://grafana.com/products/cloud) use:
 
 ```bash
-helm upgrade --install my-release loki/fluent-bit \
+helm upgrade --install my-release grafana/fluent-bit \
     --set loki.serviceName=logs-us-west1.grafana.net,loki.servicePort=80,loki.serviceScheme=https \
     --set loki.user=2830,loki.password=1234
 ```
@@ -30,7 +39,7 @@ helm upgrade --install my-release loki/fluent-bit \
 To install a custom tag use the following command:
 
 ```bash
-helm upgrade --install my-release loki/fluent-bit \
+helm upgrade --install my-release grafana/fluent-bit \
     --set image.tag=<custom tag>
 ```
 
@@ -39,7 +48,7 @@ The full list of available tags on [docker hub](https://cloud.docker.com/u/grafa
 Alternatively you can install the full [Loki stack](../loki-stack) (Loki + Fluent Bit) using:
 
 ```bash
-helm upgrade --install my-release loki/loki-stack \
+helm upgrade --install my-release grafana/loki-stack \
     --set fluent-bit.enabled=true,promtail.enabled=false
 ```
 
@@ -83,6 +92,8 @@ For more details, read the [Fluent Bit documentation](../../../cmd/fluent-bit/RE
 | `config.loglevel`        | the Fluent Bit log level (debug,info,warn,error).                                                  | `warn`                           |
 | `config.lineFormat`      | The line format to use to send a record (json/key_value)                                           | `json`                           |
 | `config.k8sLoggingParser`| Allow Kubernetes Pods to suggest a pre-defined Parser. See [Official Fluent Bit documentation](https://docs.fluentbit.io/manual/filter/kubernetes#kubernetes-annotations).                                                                                      | `Off`                           |
+| `config.k8sLoggingExclude`| Allow Kubernetes Pods to exclude their logs from the log processor. See [Official Fluent Bit documentation](https://docs.fluentbit.io/manual/pipeline/filters/kubernetes)                                                                                             | `Off`
+| `config.memBufLimit`     | Override the default  Mem_Buf_Limit [Official Fluent Bit documentation](https://docs.fluentbit.io/manual/administration/backpressure#mem_buf_limit) | `5MB`
 | `config.removeKeys`      | The list of key to remove from each record                                                         | `[removeKeys,stream]`            |
 | `config.labels`          | A set of labels to send for every log                                                              | `'{job="fluent-bit"}'`           |
 | `config.autoKubernetesLabels` | If set to true, it will add all Kubernetes labels to Loki labels                                   | `false`                          |

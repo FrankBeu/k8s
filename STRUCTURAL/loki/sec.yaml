@@ -1,0 +1,28 @@
+grafana:
+    adminUser: ENC[AES256_GCM,data:/DYDGlo=,iv:NvFdpRZiE9ofuk6rufDU+sSwXA4V6VvqFThLV+FC0vg=,tag:/jWziR1CUQMHpJWCK9KgNg==,type:str]
+    adminPassword: ENC[AES256_GCM,data:kXoOx4kTaW9okyMAUcByRScp8sf18ldWj5BPz+lIUWHA/RIDhRjoeQ==,iv:PA2qQeGR1oOe+5DcsosRY+gk99xNxy1MhH4ras5kkVE=,tag:AamqvO2mc2zTDDkdJwP79A==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    lastmodified: '2021-03-26T14:50:18Z'
+    mac: ENC[AES256_GCM,data:4orHqFMYvgEtLs8C+efw/3gSPE+U9bJGzYfgqF6EjWUpv6kZS4iwHTz/ZFnEid5fQhZB2XnY0b0aNZ/M5IO96TsdB0wXtuzrKszkqiwPLQES1jXwbaWfDbh9EsWwIVGVMatZmS2caOMvFL7udAGAt7PE8guWsHSftyPKXLE+OQ0=,iv:++XbIpaf8fwqym0odGwvxUaWTov9xWCBdv8GHEDUVP0=,tag:ovpKbpPZ3pVT0KcrZGElnw==,type:str]
+    pgp:
+    -   created_at: '2021-03-26T14:45:05Z'
+        enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            wcBMA5g1mpiqebPrAQgAboY6Ll7n8XeEEFgNOxsGhZoicnD5NS9glV76alkYNtt9
+            02/KXf7tDdodzUd1eS/4Q00Hl4yypKvBwJBy5NwTt/Hti4ZffD59cuMKy9a4FE8Y
+            ugsgBT4EfzGC5yyx0ZF83tw4upMDNCE7OH5l92ANLtnd8seDyTIAIcPeV5zLq9rp
+            wjuFQAz6uVitWXgx9AN6yEEF6YSJuxogCYg8jm37ughJvyA4UETNjwZYFd5cekpm
+            U/yAJzdz9NtTUC0rGy2BHdaspEsJy0H8PDPC7bDSxr83TFwC4uFOJOjpQdEXHABU
+            o7jqcrAwfP3xKE7fhdVpn5hrNbJ8aiL2EPi595EJ69LgAeTkSFadolGAgUCindUf
+            5NjI4RWV4EjgD+HzuOCh4iZtrCrgHOUXZnnlvWTsAKLzBaARQLahqQFiECo/V2ZL
+            qeRtE4wgVeCe5IEyrbvjdjbOvpvoQ4ElJG/iMqOHXeGdGQA=
+            =479N
+            -----END PGP MESSAGE-----
+        fp: 1D84EE970AE7355C458D371CBA6C33BFC04ACC36
+    unencrypted_suffix: _unencrypted
+    version: 3.6.1
