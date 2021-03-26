@@ -58,7 +58,7 @@ vars:
   # pvStorageSize1:           8Gi
   # pvStorageClass1:          local-path
 
-  templateDebugTarget:       "ingress"
+  templateDebugTarget:       "templates/ingress.yaml"
 
   # servicePort:               5432
 
@@ -459,7 +459,7 @@ tasks:
             {{- end}}
             email: {{.hostAcmeEmail}}
             privateKeySecret:
-              name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}Key
+              name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}-key
           tlsSecret:
             name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}
           requestPolicy:
@@ -687,14 +687,14 @@ tasks:
 
 
   templateDebug:
-    desc: "debug template; USAGE: `task templateDebug templateDebugTarget=admin`; DEFAULT: ingress"
+    desc: "debug template; USAGE: `task templateDebug templateDebugTarget=PATH/TO/TEMPLATE.yaml`; DEFAULT: template/ingress.yaml"
     cmds:
       - |
         helm template \
         --namespace {{.nameSpace}} \
         ./CHART/{{.chartName}} \
         --debug \
-        -s templates/{{.templateDebugTarget}}.yaml \
+        -s {{.templateDebugTarget}} \
         {{.chartVariablesSet}}
     silent: true
 
