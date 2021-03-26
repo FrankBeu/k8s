@@ -1,0 +1,706 @@
+###
+##
+# * TASKFILE
+#   https://taskfile.dev
+#
+version: '3'
+
+
+includes:
+
+  # taskfileRepository: ../../Taskfile.yml
+  varsGlobal:         ../../TaskfileVariablesGlobal.yml
+
+vars:
+
+  ###
+  ##
+  # global vars (imported as varsGlobal) will never be overwritten.
+  # However, they can only be used after setting an (ignored) value.
+  #
+  domainGlobal: GLOBAL
+
+
+  name:                     grafana
+
+  nameSpace:                "{{.name}}"
+
+  domainName:               "{{.name}}.{{.domainGlobal}}"
+  # domainNameAlt:            "NAME_ALT.{{.domainGlobal}}"
+
+  chartRepoUrl:             https://URL
+  chartRepoName:            CHART_REPO_NAME
+  chartName:                "{{.name}}"
+
+  # filter:                   "basic-allow"                                      ### NOT WORKING; NOT implemented yet
+  filter:                   "basic-auth"
+  # filter:                   "basic-deny"                                       ###     WORKING; NOT implemented properly -> redirect to thesym.site
+  ### filter:                 "ory"                                              ### NOT WORKING; NOT implemented yet
+
+  labelTier:                monitoring
+
+  hostCertStaging:          ""                                                 ### letsencrypt
+  # hostCertStaging:          true                                               ### letsencryptStaging
+  hostAcmeEmail:            "fbeutelschiess@gmail.com"
+
+  mappingPort:              80
+  mappingServiceName:       "{{.name}}"
+
+  portforwardingPortSource: ""
+  portforwardingPortTarget: ""
+
+  # pvName0:                  "{{.name}}-data"
+  # pvRelativePath0:          "{{.name}}/data"
+  # pvStorageSize0:           10Gi
+  # pvStorageClass0:          local-path
+  # pvName1:                  "{{.name}}-db"
+  # pvRelativePath1:          "{{.name}}/db"
+  # pvStorageSize1:           8Gi
+  # pvStorageClass1:          local-path
+
+  templateDebugTarget:       "ingress"
+
+  # servicePort:               5432
+
+  message:                   Tasks for {{.name}}{{if .chartName}}-helm{{end}}
+
+  chartSecretsExist:         true
+  # chartSecretsExist:         false
+  # chartVariablesSet: |-
+  #   --set hostnames="{"{{.domainName}}"}" \
+  #   --set domain="{{.superDomainName}}" \
+  #   --set initialAccout.username=mailadmin \
+
+
+  # helmchartRepoSrcPath:      "/home/frank/SRC/REPO-HOST/NAME"
+
+
+tasks:
+
+  taskDebug:
+    desc: show all variables in Taskfile
+    cmds:
+      - |
+        echo -e \
+        "\n{{range $key, $value := .}} {{$key }}:  \e[92m{{$value}}\e[0m\n {{end}}\n"
+    silent: true
+
+
+  default:
+    desc: display info
+    cmds:
+      - |
+        echo -e \
+        "\n{{.message}}\n"
+      - |
+        task -l
+    silent: true
+
+
+###
+##
+# ** SEQUENCE
+#
+#
+  # 1:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
+
+  # 2:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
+
+  # 3:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
+
+  # 4:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
+
+  # 5:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
+
+  # 6:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
+
+  # 7:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
+
+  # 8:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
+
+  # 9:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
+
+  # 10:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
+
+  # 11:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
+
+  # 12:
+  #   desc: (  )
+  #   cmds:
+  #     - task: 
+  #   silent: true
+
+
+  1:
+    desc: ( repoAdd )
+    cmds:
+      - task: repoAdd
+    silent: true
+
+
+  2:
+    desc: ( chartGet )
+    cmds:
+      - task: chartGet
+    silent: true
+
+
+  3:
+    desc: ( namespaceApply )
+    cmds:
+      - task: namespaceApply
+    silent: true
+
+
+  4:
+    desc: ( filterPolicyApply )
+    cmds:
+      - task: filterPolicyApply
+    silent: true
+
+
+  5:
+    desc: ( mappingApply )
+    cmds:
+      - task: mappingApply
+    silent: true
+
+
+  6:
+    desc: ( hostApply )
+    cmds:
+      - task: hostApply
+    silent: true
+
+
+  7:
+    desc: ( persistenceApply )
+    cmds:
+      - task: persistenceApply
+    silent: true
+
+
+  8:
+    desc: ( chartInstall )
+    cmds:
+      - task: chartInstall
+    silent: true
+
+
+  9:
+    desc: ( chartUpdate )
+    cmds:
+      - task: chartUpdate
+    silent: true
+
+
+  10:
+    desc: ( resourcesRemove )
+    cmds:
+      - task: resourcesRemove
+    silent: true
+
+
+###
+##
+# ** ALPHABETICAL
+#
+  chartDebug:
+    desc: debug chart
+    cmds:
+      - |
+        helm \
+        {{- if eq .chartSecretsExist "true"}}
+        secrets \
+        {{- end}}
+        install \
+        {{.name}} CHART/{{.chartName}} \
+        --namespace {{.nameSpace}} \
+        --dry-run \
+        --debug \
+        {{.chartVariablesSet}}
+        {{- if eq .chartSecretsExist "true"}}
+        -f sec.yaml
+        {{- end}}
+    silent: true
+
+
+  chartGet:
+    desc: download the chart
+    cmds:
+      - |
+        helm pull \
+        {{.chartRepoName}}/{{.chartName}} \
+        -d CHART \
+        --untar
+    silent: true
+
+
+  chartInstall:
+    desc: install chart
+    cmds:
+      - |
+        helm \
+        {{- if eq .chartSecretsExist "true"}}
+        secrets \
+        {{- end}}
+        install \
+        {{.name}} CHART/{{.chartName}} \
+        --namespace {{.nameSpace}} \
+        {{.chartVariablesSet}}
+        {{- if eq .chartSecretsExist "true"}}
+        -f sec.yaml
+        {{- end}}
+    silent: true
+
+
+  chartUpdate:
+    desc: update chart
+    cmds:
+      - |
+        helm \
+        {{- if eq .chartSecretsExist "true"}}
+        secrets \
+        {{- end}}
+        upgrade \
+        --namespace {{.nameSpace}} \
+        {{.name}} CHART/{{.chartName}} \
+        {{.chartVariablesSet}}
+        {{- if eq .chartSecretsExist "true"}}
+        -f sec.yaml
+        {{- end}}
+    silent: true
+
+
+  chartRemove:
+    desc: (chartUninstall + namespaceDelete + persistentVolumeDelete)
+    cmds:
+      - task: chartUninstall
+      - task: namespaceDelete
+      - task: persistentVolumeDelete
+    silent: true
+
+
+  chartUninstall:
+    desc: uninstall the {{.name}}-chart
+    cmds:
+      - |
+        helm --namespace {{.nameSpace}} uninstall {{.name}}
+    silent: true
+
+
+  configMapApply:
+    desc: apply the configMap for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: {{.name}}-config
+          namespace: {{.nameSpace}}
+          labels:
+            app: {{.name}}
+        data: {{ .configMapData | nindent 2}}
+        EOF
+    silent: true
+
+
+  deploymentApply:
+    desc: apply the deployment for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: {{.name}}
+          namespace: {{.nameSpace}}
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: {{.name}}
+          template:
+            metadata:
+              labels:
+                app: {{.name}}
+            spec:
+              containers:
+                - name: {{.name}}
+                  image: postgres:10.4
+                  imagePullPolicy: "IfNotPresent"
+                  ports:
+                    - containerPort: 5432
+                  envFrom:
+                    - configMapRef:
+                        name: {{.name}}-config
+                  volumeMounts:
+                    - mountPath: /var/lib/postgresql/data
+                      name: {{.name}}db
+              volumes:
+                - name: {{.name}}db
+                  persistentVolumeClaim:
+                    claimName: {{.name}}
+        EOF
+    silent: true
+
+
+  filterPolicyApply:
+    desc: create the filterPolicy for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: FilterPolicy
+        metadata:
+          name: {{.name}}
+          namespace: {{.nameSpace}}
+        spec:
+          rules:
+          - host: {{.domainName}}
+            path: "*"
+            filters:
+            #- name: {{.filter}}
+            - name: {{if eq .filter "basic-allow"}}"basic-auth"{{else}}{{.filter}}{{end}}
+              namespace: "ambassador"
+              {{- if eq .filter "basic-allow"}}
+              onDeny:  "continue"
+              onAllow: "continue"
+              {{- end}}
+          {{- if .domainNameAlt }}
+          - host: {{.domainNameAlt}}
+            path: "*"
+            filters:
+            #- name: {{.filter}}
+            - name: {{if eq .filter "basic-allow"}}"basic-auth"{{else}}{{.filter}}{{end}}
+              namespace: "ambassador"
+              {{- if eq .filter "basic-allow"}}
+              onDeny:  "continue"
+              onAllow: "continue"
+              {{- end}}
+          {{- end}}
+        EOF
+    silent: true
+
+
+  hostApply:
+    desc: apply the host for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: Host
+        metadata:
+          name: {{.name}}
+          namespace: ambassador-hosts
+        spec:
+          hostname: {{.domainName}}
+          acmeProvider:
+            {{- if .hostCertStaging }}
+            authority: https://acme-staging-v02.api.letsencrypt.org/directory
+            {{- else}}
+            authority: https://acme-v02.api.letsencrypt.org/directory
+            {{- end}}
+            email: {{.hostAcmeEmail}}
+            privateKeySecret:
+              name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}Key
+          tlsSecret:
+            name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}
+          requestPolicy:
+            insecure:
+              action: Redirect
+        {{- if .domainNameAlt }}
+        ---
+        apiVersion: getambassador.io/v2
+        kind: Host
+        metadata:
+          name: {{.name}}-alt
+          namespace: ambassador-hosts
+        spec:
+          hostname: {{.domainNameAlt}}
+          acmeProvider:
+            {{- if .hostCertStaging }}
+            authority: https://acme-staging-v02.api.letsencrypt.org/directory
+            {{- else}}
+            authority: https://acme-v02.api.letsencrypt.org/directory
+            {{- end}}
+            email: {{.hostAcmeEmail}}
+            privateKeySecret:
+              name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}AltKey
+          tlsSecret:
+            name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}Alt
+          requestPolicy:
+            insecure:
+              action: Redirect
+        {{- end }}
+        EOF
+    silent: true
+
+
+  mappingApply:
+    desc: apply the mapping for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: getambassador.io/v2
+        kind: Mapping
+        metadata:
+          name: {{.name}}
+          namespace: {{.nameSpace}}
+        spec:
+          prefix: /
+          #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
+          service: {{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPort}}
+          host: {{.domainName}}
+        {{- if .domainNameAlt }}
+        ---
+        apiVersion: getambassador.io/v2
+        kind: Mapping
+        metadata:
+          name: {{.name}}-alt
+          namespace: {{.nameSpace}}
+        spec:
+          prefix: /
+          #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
+          service: {{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPort}}
+          host: {{.domainNameAlt}}
+        {{- end }}
+        EOF
+    silent: true
+
+
+  namespaceApply:
+    desc: apply the namespace {{.nameSpace}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: {{.nameSpace}}
+          labels:
+            name: {{.nameSpace}}
+            tier: {{.labelTier}}
+        EOF
+    silent: true
+
+
+
+  namespaceDelete:
+    desc: delete the namespace {{.nameSpace}}
+    cmds:
+      - |
+        kubectl delete namespace {{.nameSpace}}
+    silent: true
+
+
+  portforward:
+    desc: portforwarding for {{.name}}
+    cmds:
+      - |
+        kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -n {{.nameSpace}} -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
+        #kubectl port-forward --namespace {{.nameSpace}} $(kubectl get pod -n {{.nameSpace}} -l app.kubernetes.io/name={{.name}} -o name) {{.portforwardingPortSource}}:{{.portforwardingPortTarget}}
+    silent: true
+
+
+  persistenceApply:
+    desc: apply persistence for {{.name}}
+    cmds:
+      ### database
+      - |
+        {{- if .pvName0 }}
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: PersistentVolume
+        metadata:
+          name: {{.pvName0}}
+          labels:
+            type: local
+        spec:
+          storageClassName: {{.pvStorageClass0}}
+          capacity:
+            storage: {{.pvStorageSize0}}
+          accessModes:
+            - ReadWriteOnce
+          hostPath:
+            path: "/PERSISTENCE/{{.pvRelativePath0}}"
+        ---
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          name: {{.pvName0}}
+          namespace: {{.nameSpace}}
+        spec:
+          volumeName: {{.pvName0}}
+          storageClassName: {{.pvStorageClass0}}
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: {{.pvStorageSize0}}
+        EOF
+        {{- end }}
+
+        {{- if .pvName1 }}
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: PersistentVolume
+        metadata:
+          name: {{.pvName1}}
+          labels:
+            type: local
+        spec:
+          storageClassName: {{.pvStorageClass1}}
+          capacity:
+            storage: {{.pvStorageSize1}}
+          accessModes:
+            - ReadWriteOnce
+          hostPath:
+            path: "/PERSISTENCE/{{.pvRelativePath1}}"
+        ---
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          name: {{.pvName1}}
+          namespace: {{.nameSpace}}
+        spec:
+          volumeName: {{.pvName1}}
+          storageClassName: {{.pvStorageClass1}}
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: {{.pvStorageSize1}}
+        EOF
+        {{- end }}
+    silent: true
+
+
+  persistentVolumeDelete:
+    desc: delete the pv(s) for {{.name}}
+    cmds:
+      - |
+        {{- if .pvName0 }}
+        kubectl delete pv {{.pvName0}}
+        {{- end }}
+        {{- if .pvName1 }}
+        kubectl delete pv {{.pvName1}}
+        {{- end }}
+    silent: true
+
+
+  repoAdd:
+    desc: add the repository
+    cmds:
+      - |
+        helm repo add \
+        {{.chartRepoName}} \
+        {{.chartRepoUrl}}
+      - |
+        helm repo update
+    silent: true
+
+
+  resourcesRemove:
+    desc: (namespaceDelete + persistentVolumeDelete)
+    cmds:
+      - task: namespaceDelete
+      - task: persistentVolumeDelete
+    silent: true
+
+
+  serviceApply:
+    desc: apply the service for {{.name}}
+    cmds:
+      - |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: {{.name}}
+          namespace: {{.nameSpace}}
+          labels:
+            app: {{.name}}
+        spec:
+          type: NodePort
+          ports:
+           - port: {{.servicePort}}
+          selector:
+            app: {{.name}}
+        EOF
+    silent: true
+
+
+  templateDebug:
+    desc: "debug template; USAGE: `task templateDebug templateDebugTarget=admin`; DEFAULT: ingress"
+    cmds:
+      - |
+        helm template \
+        --namespace {{.nameSpace}} \
+        ./CHART/{{.chartName}} \
+        --debug \
+        -s templates/{{.templateDebugTarget}}.yaml \
+        {{.chartVariablesSet}}
+    silent: true
+
+
+###
+##
+# ** CUSTOM
+#

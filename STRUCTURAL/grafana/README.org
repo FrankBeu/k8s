@@ -1,0 +1,3 @@
+* Grafana
+** not in use
+** loki has currently deployed it's own instance
