@@ -291,7 +291,7 @@ tasks:
             email: {{.hostAcmeEmail}}
             privateKeySecret:
               name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}Key
-          tlsSecret: 
+          tlsSecret:
             name: {{.name}}
           requestPolicy:
             insecure:
@@ -491,4 +491,38 @@ tasks:
             #host: "{{.domainName}}"
           service: "{{.name}}-ssh.{{.nameSpace}}:22"
         EOF
+    silent: true
+
+
+  giteaBackup:
+    desc: "create backup of gitea NOTworking"
+    cmds:
+      - |
+        echo "
+          # Execute the following commands:
+
+          kex -n gitea gitea-0 -- sh
+
+          chmod 777 /data/ssh/*
+
+          cd app/gitea
+          su git
+          gitea dump -c /data/gitea/conf/app.ini
+          exit
+
+          chmod 600 /data/ssh/*
+          exit
+
+          kubectl -n gitea cp gitea-0:app/gitea/gitea-dump-1618488953.zip /home/frank/k3s/BAK/gitea-dump-1618488953.zip
+          exit
+
+          # 20h++
+          scp nuc:/home/frank/k3s/BAK/gitea-dump-1618488953.zip /home/frank/BAK/gitea/
+          (unzip gitea-dump-1618488953.zip)
+
+          # result: (>11G)
+
+          # INFO: https://docs.gitea.io/en-us/backup-and-restore/
+
+           "
     silent: true
