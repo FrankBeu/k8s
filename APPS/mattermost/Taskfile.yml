@@ -325,10 +325,9 @@ tasks:
             {{- end}}
             email: {{.hostAcmeEmail}}
             privateKeySecret:
-              # name: {{.hostPrivateKeySecretName}}{{- if .hostCertStaging }}-staging{{- end}}
-              name: {{.domainName}}
+              name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}-key
           tlsSecret:
-            name: {{.name}}
+            name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}
           requestPolicy:
             insecure:
               action: Redirect
@@ -349,10 +348,9 @@ tasks:
             {{- end}}
             email: {{.hostAcmeEmail}}
             privateKeySecret:
-              #name: {{.hostPrivateKeySecretName}}{{- if .hostCertStaging }}-staging{{- end}}
-              name: {{.domainName}}
+              name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}AltKey
           tlsSecret:
-            name: {{.name}}-alt
+            name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}Alt
           requestPolicy:
             insecure:
               action: Redirect

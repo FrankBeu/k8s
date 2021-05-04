@@ -35,3 +35,5 @@
      ???? nothing found in the changelog (perhaps the message itself is deprecated)
 *** update schema
     according to used pdns-version (in relation to update-image-todo)
+*** currently no host available
+*** update chart to new secret
