@@ -290,12 +290,36 @@ tasks:
             {{- end}}
             email: {{.hostAcmeEmail}}
             privateKeySecret:
-              name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}Key
+              name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}-key
           tlsSecret:
-            name: {{.name}}
+            name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}
           requestPolicy:
             insecure:
               action: Redirect
+        {{- if .domainNameAlt }}
+        ---
+        apiVersion: getambassador.io/v2
+        kind: Host
+        metadata:
+          name: {{.name}}-alt
+          namespace: ambassador-hosts
+        spec:
+          hostname: {{.domainNameAlt}}
+          acmeProvider:
+            {{- if .hostCertStaging }}
+            authority: https://acme-staging-v02.api.letsencrypt.org/directory
+            {{- else}}
+            authority: https://acme-v02.api.letsencrypt.org/directory
+            {{- end}}
+            email: {{.hostAcmeEmail}}
+            privateKeySecret:
+              name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}AltKey
+          tlsSecret:
+            name: {{.name}}{{- if .hostCertStaging }}Staging{{- end}}Alt
+          requestPolicy:
+            insecure:
+              action: Redirect
+        {{- end }}
         EOF
     silent: true
 
@@ -315,6 +339,7 @@ tasks:
           #service: {{.name}}-service.{{.nameSpace}}:{{.mappingPort}}
           service: {{.mappingServiceName}}.{{.nameSpace}}:{{.mappingPort}}
           host: {{.domainName}}
+          timeout_ms: 60000
         EOF
     silent: true
 
