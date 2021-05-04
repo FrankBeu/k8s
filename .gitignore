@@ -1,3 +1,4 @@
 ### do not commit decrypted files
 *.dec
+
 PERSISTENCE/*

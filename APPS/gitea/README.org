@@ -92,3 +92,13 @@ kind: Secret
 **** update OR remove pod gitea-0
 **** remove duplicated initial user
 **** re-rename the original user
+*** customize
+**** add custom files
+=../../PERSISTENCE/gitea/data/gitea/options/=
+***** example
+=../../PERSISTENCE/gitea/data/gitea/options/readme/README.org=
+***** restart gitea
+***** put under versionControl
+#+begin_src shell :results drawer
+git add -f FILE
+#+end_src
