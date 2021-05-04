@@ -2,7 +2,7 @@
 {Description}
 ** INFO
 *** SRC
-{CloneURL.SSH}
+{CloneURL.SSH} \\
 {CloneURL.HTTPS}
 ** TASKS
 ** TODO TODOS
